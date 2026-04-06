@@ -102,6 +102,9 @@ function mainDashboardContent(role: string): string {
         <h3 class="font-bold text-fju-blue text-sm">
           <i class="fas fa-map-marked-alt mr-2 text-fju-yellow"></i>輔仁大學無障礙校園互動地圖
         </h3>
+        <a href="/campus-map?role=${role}" class="text-[10px] px-3 py-1 rounded-full bg-fju-yellow text-fju-blue font-bold hover:bg-fju-yellow-light transition-all">
+          <i class="fas fa-expand mr-1"></i>GeoJSON 分區地圖
+        </a>
         <div class="flex gap-2">
           <button onclick="toggleLayer('teaching')" class="layer-btn active text-[11px] px-3 py-1 rounded-full bg-fju-blue text-white transition-all" data-layer="teaching">
             <i class="fas fa-building mr-1"></i>教學行政區

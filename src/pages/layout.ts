@@ -289,6 +289,7 @@ export function getSidebarMenus(role: string, activePage: string = 'dashboard'):
       title: '主要功能',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt', href: `/dashboard?role=${role}` },
+        { id: 'campus-map', label: '校園分區地圖', icon: 'fas fa-map-marked-alt', href: `/campus-map?role=${role}` },
         { id: 'venue-booking', label: '場地預約', icon: 'fas fa-map-marker-alt', href: `/module/venue-booking?role=${role}` },
         { id: 'equipment', label: '設備借用', icon: 'fas fa-boxes-stacked', href: `/module/equipment?role=${role}` },
         { id: 'calendar', label: '行事曆', icon: 'fas fa-calendar-alt', href: `/module/calendar?role=${role}` },

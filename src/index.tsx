@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import { landing } from './pages/landing'
 import { login } from './pages/login'
 import { dashboard } from './pages/dashboard'
+import { campusMapPage } from './pages/campus-map'
 import { modulePages } from './pages/modules'
 import { apiRoutes } from './routes/api'
 
@@ -30,6 +31,7 @@ app.get('/favicon.ico', (c) => c.redirect('/favicon.svg'))
 app.get('/', (c) => c.html(landing()))
 app.get('/login', (c) => c.html(login()))
 app.get('/dashboard', (c) => c.html(dashboard(c.req.query('role') || 'student')))
+app.get('/campus-map', (c) => c.html(campusMapPage(c.req.query('role') || 'student')))
 app.get('/module/:name', (c) => {
   const name = c.req.param('name')
   const role = c.req.query('role') || 'student'
