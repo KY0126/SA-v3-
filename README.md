@@ -3,95 +3,107 @@
 ## Project Overview
 - **Name**: FJU Smart Hub
 - **Goal**: 整合 AI 智慧預審、資源調度、數位證書、活動管理的一站式校園解決方案
-- **Tech Stack**: Hono + TypeScript + Tailwind CSS + Leaflet.js + evo-calendar.js + Chart.js + GSAP
+- **Version**: 2.1.0
+- **適用學年度**: 114 學年度
 
-## Design Specifications
-- **Colors**: Deep Blue `#002B5B` (header/footer/title), Dark Gray `#333333` (sidebar), Background `#F4F6F8`, Accent Yellow `#FFB800` (buttons/popups/labels)
-- **Font**: 微軟正黑體 (Microsoft JhengHei)
-- **Border Radius**: 12-15px
-- **Layout**: Double-layer header + sticky left sidebar + main content + footer
+## URLs
+- **Demo**: https://3000-ines7d5od0umg4mb1ae8b-b9b802c4.sandbox.novita.ai
+- **GitHub**: https://github.com/KY0126/SA-v3-
 
-## Features
+## Tech Stack
+- **Backend**: Hono Framework (TypeScript) on Cloudflare Workers
+- **Frontend**: Vue 3 concepts + Tailwind CSS (CDN) + Vanilla JS
+- **Map**: Leaflet.js (GeoJSON campus map + LayerGroups)
+- **Calendar**: evo-calendar.js (Royal Navy theme)
+- **Charts**: Chart.js (line, doughnut, bar, radar)
+- **Animation**: GSAP + ScrollTrigger
+- **Database**: Cloudflare D1 (SQLite)
+- **AI**: Dify + GPT-4 + Pinecone (simulated)
+- **Build**: Vite + @hono/vite-cloudflare-pages
+- **Deploy**: Cloudflare Pages
 
-### Double-Layer Header
-- **Top (White)**: Logo + "天主教輔仁大學" + green subtitle "學務處 課外活動指導組" | Home, 輔仁大學, ENGLISH, 網站地圖
-- **Bottom (Deep Blue)**: 認識課指組, 學會．社團, 場地/器材借用, 重要訊息, 表單下載, 常見問題
+## Features (已完成)
 
-### Sidebar (Dark Gray #333333)
-- **主要功能**: Dashboard, 場地預約, 設備借用, 行事曆
-- **社群與社團**: 社團資訊, 活動牆
-- **AI 核心專區**: AI 資訊概覽, AI 導覽助理, 法規查詢 (RAG)
-- **管理與報表**: 報修管理, 申訴記錄, 統計報表
+### Core Modules (17 Pages)
+1. **Landing Page** (`/`) - Hero section, features, modules, testimonials
+2. **Login** (`/login`) - Google OAuth, Turnstile, 5-role quick demo
+3. **Dashboard** (`/dashboard`) - Role-specific charts, carousel, campus map
+4. **Campus Map** (`/campus-map`) - GeoJSON polygon map with college colors
+5. **場地預約** (`/module/venue-booking`) - 3-stage scheduling, booking modal
+6. **設備借用** (`/module/equipment`) - Borrow/return flow, LINE reminders
+7. **行事曆** (`/module/calendar`) - evo-calendar with API events
+8. **社團資訊** (`/module/club-info`) - 117 clubs/associations, search/filter
+9. **活動牆** (`/module/activity-wall`) - Activity browse/register
+10. **AI 資訊概覽** (`/module/ai-overview`) - AI engine overview
+11. **AI 導覽助理** (`/module/ai-guide`) - AI proposal generator
+12. **法規查詢** (`/module/rag-search`) - RAG regulation query
+13. **報修管理** (`/module/repair`) - Repair request submission
+14. **申訴記錄** (`/module/appeal`) - Appeal with AI summary
+15. **統計報表** (`/module/reports`) - SDG radar, charts
+16. **E-Portfolio** (`/module/e-portfolio`) - Competency radar
+17. **幹部證書** (`/module/certificate`) - Digital certificate generation
 
-### Interactive Campus Map (Leaflet.js)
-- Centered on 淨心堂 with scroll-zoom and L.control.zoom
-- 4 LayerGroups with toggle buttons:
-  1. **教學行政區**: All campus buildings (17 markers) with college info
-  2. **無障礙**: Ramps, elevators, accessible restrooms (9 markers)
-  3. **生活**: Cafeterias (輔園/理園/心園), dormitories (宜聖/立言/格物)
-  4. **交通**: MRT station, YouBike, parking, entrance gates
-- Custom popups: 12px rounded, deep-blue header, building name + college + 黃色 "我要預約" button
+### API Endpoints (36+)
+- CRUD: users, clubs, venues, activities, equipment, reservations
+- AI: pre-review, proposal-generator, appeal-summary
+- System: credits, notifications, calendar, certificates, conflicts, repairs, appeals
+- i18n: 5 language packs (zh-TW, zh-CN, EN, JA, KO)
+- Health: /api/health
 
-### Calendar (evo-calendar.js)
-- Requires login verification (pre-process check)
-- Shows campus events with color-coded categories
-- Royal Navy theme customized to FJU colors
+### Data
+- **114學年度社團**: 71 個 (學藝/康樂/體育/藝文/服務/宗教/自治)
+- **114學年度學會**: 46 個 (12 學院系學會)
+- **總計**: 117 個社團/學會組織, 4,482+ 社員
+- **場地**: 10 個可借用場地
+- **設備**: 8 件可借用設備
 
-### AI Chatbot (Fixed Bottom-Right)
-- Shiba-Inu (柴犬) avatar "輔寶"
-- Prompt: "今天想要問輔寶甚麼事呢?"
-- Auto-reply with context-aware responses
-- Yellow FAB button with pulse animation
+### Design Specs
+- Colors: #002B5B (deep blue), #333333 (dark gray), #F4F6F8 (bg), #FFB800 (accent yellow)
+- Font: Microsoft JhengHei (微軟正黑體)
+- Rounded corners: 12-15px
+- Double-layer header, sticky sidebar, AI chatbot FAB
 
-### Footer (Deep Blue #002B5B)
-- Left: 校址 (24205 新北市新莊區中正路510號)
-- Center: 粉專連結 (Facebook, Instagram, LINE)
-- Right: 櫃台資訊 / 維護信箱
-- Copyright: "天主教輔仁大學 © 2014-2024 版權所有"
+### Interactive Features
+- All forms submit to real API endpoints
+- Equipment borrow modal with return date
+- Venue booking with conflict detection
+- Activity registration with capacity tracking
+- AI proposal generator with budget breakdown
+- RAG query with suggested questions
+- Repair submission with tracking codes
+- Appeal AI summary with sentiment analysis
+- Credit score state machine (< 60 = force logout)
 
-### Main Content Area
-- **Carousel**: Recent activities with yellow "了解更多" button
-- **Function Cards**: 場地預約 and 設備借用 with "了解更多" links
-- **Quick Stats**: 待審核, 本月活動, 場地使用率, AI通過率
-- **Charts**: 社團參與趨勢 (line) + 活動類型分布 (doughnut)
+## SA Specification Document
+- **File**: `FJU_Smart_Hub_SA_Specification.docx`
+- **Content**: 11 chapters with auto-TOC
+  1. 專案概述 (背景/目標/範圍/名詞)
+  2. 系統架構 (技術棧/部署)
+  3. 功能需求規格 (角色/模組/三階段調度)
+  4. 資料庫設計 (18 tables, ER diagram)
+  5. API 介面規格 (36+ endpoints)
+  6. UI/UX 設計 (色彩/佈局/地圖)
+  7. 核心流程圖 (5 Mermaid diagrams)
+  8. 社團與學會資料
+  9. 安全設計 (OAuth/JWT/2FA/WAF)
+  10. 測試計畫
+  11. 附錄 (頁面一覽/變更紀錄)
 
-## All Routes
-| Route | Page |
-|---|---|
-| `/` | Landing page with GSAP animations |
-| `/login` | Login with Google OAuth + 2FA |
-| `/dashboard?role=X` | Dashboard (admin/officer/professor/student/it) |
-| `/module/venue-booking` | 場地預約 (3-stage scheduling) |
-| `/module/equipment` | 設備借用 |
-| `/module/calendar` | 行事曆 (evo-calendar) |
-| `/module/club-info` | 社團資訊 |
-| `/module/activity-wall` | 活動牆 |
-| `/module/ai-overview` | AI 資訊概覽 |
-| `/module/ai-guide` | AI 導覽助理 |
-| `/module/rag-search` | 法規查詢 (RAG) |
-| `/module/repair` | 報修管理 |
-| `/module/appeal` | 申訴記錄 |
-| `/module/reports` | 統計報表 |
+## Database Schema (18 tables)
+users, clubs, club_members, venues, activities, activity_registrations, equipment, equipment_borrowings, reservations, conflicts, credit_logs, notification_logs, certificates, portfolio_entries, competency_scores, ai_review_logs, appeals, time_capsules
 
-## API Endpoints
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/health` | Health check |
-| GET/POST | `/api/users` | User CRUD |
-| GET/POST | `/api/clubs` | Club management |
-| GET/POST | `/api/venues` | Venue management |
-| GET/POST | `/api/activities` | Activity management |
-| GET/POST | `/api/equipment` | Equipment tracking |
-| GET/POST | `/api/reservations` | 3-stage reservation system |
-| POST | `/api/ai/pre-review` | AI RAG pre-review |
-| POST | `/api/ai/generate-proposal` | AI proposal generation |
-| GET/POST | `/api/credits/:userId` | Credit system |
-| GET | `/api/notifications/:userId` | Notifications |
-| POST | `/api/certificates/generate` | Certificate generation |
-| GET | `/api/dashboard/stats/:role` | Dashboard statistics |
-| GET/POST | `/api/conflicts` | Conflict negotiation |
+## Quick Start
+```bash
+npm install
+npm run build
+npx wrangler pages dev dist --ip 0.0.0.0 --port 3000
+```
 
 ## Deployment
-- **Platform**: Cloudflare Pages
-- **Status**: ✅ Active (Development)
-- **Last Updated**: 2026-04-05
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name fju-smart-hub
+```
+
+---
+天主教輔仁大學 © 2014-2024 版權所有 | Powered by Hono + Vue 3 + Dify AI
