@@ -134,10 +134,10 @@ const modules: Record<string, (role: string) => string> = {
       // Charts
       document.addEventListener('DOMContentLoaded', () => {
         if(document.getElementById('venue-heatmap')){
-          new Chart(document.getElementById('venue-heatmap'), {type:'bar',data:{labels:['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'],datasets:[{label:'使用數',data:[8,25,38,42,15,35,45,40,30,22,12,5],backgroundColor:function(ctx){const v=ctx.raw;return v>35?'#FF0000':v>20?'#FFB800':'#008000';}}]},options:{responsive:true,plugins:{legend:{display:false}}}});
+          new Chart(document.getElementById('venue-heatmap'), {type:'bar',data:{labels:['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'],datasets:[{label:'使用數',data:[8,25,38,42,15,35,45,40,30,22,12,5],backgroundColor:function(ctx){const v=ctx.raw;return v>35?'#FF0000':v>20?'#DAA520':'#008000';}}]},options:{responsive:true,plugins:{legend:{display:false}}}});
         }
         if(document.getElementById('venue-ranking')){
-          new Chart(document.getElementById('venue-ranking'), {type:'bar',data:{labels:['中美堂','活動中心','SF 134','體育館','百鍊廳','焯炤館'],datasets:[{label:'本月使用次數',data:[45,38,35,28,22,18],backgroundColor:'#002B5B'}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}}}});
+          new Chart(document.getElementById('venue-ranking'), {type:'bar',data:{labels:['中美堂','活動中心','SF 134','體育館','百鍊廳','焯炤館'],datasets:[{label:'本月使用次數',data:[45,38,35,28,22,18],backgroundColor:'#003153'}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}}}});
         }
       });
     })();
@@ -786,10 +786,10 @@ const modules: Record<string, (role: string) => string> = {
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-      new Chart(document.getElementById('report-trend'), {type:'line',data:{labels:['9月','10月','11月','12月','1月','2月','3月'],datasets:[{label:'參與人數',data:[1200,1350,1500,1420,1380,1550,1680],borderColor:'#002B5B',backgroundColor:'rgba(0,43,91,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#FFB800'}]},options:{responsive:true,plugins:{legend:{display:false}}}});
-      new Chart(document.getElementById('report-pie'), {type:'doughnut',data:{labels:['學術','服務','康樂','體育','藝文','綜合'],datasets:[{data:[25,18,22,15,12,8],backgroundColor:['#002B5B','#FFB800','#008000','#003A75','#9B59B6','#666']}]},options:{responsive:true}});
-      new Chart(document.getElementById('report-venue'), {type:'bar',data:{labels:['中美堂','活動中心','SF 134','體育館','百鍊廳','焯炤館'],datasets:[{label:'使用次數',data:[45,38,35,28,22,18],backgroundColor:'#002B5B'}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}}}});
-      new Chart(document.getElementById('report-sdg'), {type:'radar',data:{labels:['SDG4','SDG5','SDG10','SDG11','SDG16','SDG17'],datasets:[{label:'貢獻度',data:[85,60,75,90,55,70],borderColor:'#002B5B',backgroundColor:'rgba(0,43,91,0.15)',pointBackgroundColor:'#FFB800'}]},options:{responsive:true,scales:{r:{min:0,max:100}}}});
+      new Chart(document.getElementById('report-trend'), {type:'line',data:{labels:['9月','10月','11月','12月','1月','2月','3月'],datasets:[{label:'參與人數',data:[1200,1350,1500,1420,1380,1550,1680],borderColor:'#003153',backgroundColor:'rgba(0,49,83,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#DAA520'}]},options:{responsive:true,plugins:{legend:{display:false}}}});
+      new Chart(document.getElementById('report-pie'), {type:'doughnut',data:{labels:['學術','服務','康樂','體育','藝文','綜合'],datasets:[{data:[25,18,22,15,12,8],backgroundColor:['#003153','#DAA520','#008000','#004070','#9B59B6','#666']}]},options:{responsive:true}});
+      new Chart(document.getElementById('report-venue'), {type:'bar',data:{labels:['中美堂','活動中心','SF 134','體育館','百鍊廳','焯炤館'],datasets:[{label:'使用次數',data:[45,38,35,28,22,18],backgroundColor:'#003153'}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}}}});
+      new Chart(document.getElementById('report-sdg'), {type:'radar',data:{labels:['SDG4','SDG5','SDG10','SDG11','SDG16','SDG17'],datasets:[{label:'貢獻度',data:[85,60,75,90,55,70],borderColor:'#003153',backgroundColor:'rgba(0,49,83,0.15)',pointBackgroundColor:'#DAA520'}]},options:{responsive:true,scales:{r:{min:0,max:100}}}});
     });
     </script>
   `),
@@ -809,8 +809,72 @@ const modules: Record<string, (role: string) => string> = {
     </div>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-      new Chart(document.getElementById('competency-radar'), {type:'radar',data:{labels:['領導力','創意思維','團隊合作','溝通能力','數位能力'],datasets:[{label:'職能分數',data:[80,70,85,75,90],borderColor:'#002B5B',backgroundColor:'rgba(0,43,91,0.15)',pointBackgroundColor:'#FFB800'}]},options:{responsive:true,scales:{r:{min:0,max:100}}}});
+      new Chart(document.getElementById('competency-radar'), {type:'radar',data:{labels:['領導力','創意思維','團隊合作','溝通能力','數位能力'],datasets:[{label:'職能分數',data:[80,70,85,75,90],borderColor:'#003153',backgroundColor:'rgba(0,49,83,0.15)',pointBackgroundColor:'#DAA520'}]},options:{responsive:true,scales:{r:{min:0,max:100}}}});
     });
+    </script>
+  `),
+
+  // ===== 租借流程 RAG (Rental Process RAG) =====
+  'rag-rental': (role) => appShell(role, 'rag-rental', '租借流程 RAG', `
+    <div class="space-y-6">
+      <div class="bg-gradient-to-r from-fju-blue to-fju-blue-light rounded-fju-lg p-6 text-white">
+        <h2 class="text-xl font-bold mb-2"><i class="fas fa-file-contract mr-2 text-fju-yellow"></i>租借流程 RAG 查詢</h2>
+        <p class="text-white/60 text-sm">AI 解析場地/器材租借流程、規定、表單及注意事項</p>
+      </div>
+      <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
+        <div class="flex gap-3">
+          <input type="text" id="rental-rag-query" placeholder="例如：借用中美堂需要什麼手續？" class="flex-1 px-4 py-3 rounded-fju border border-gray-200 text-sm focus:border-fju-blue outline-none" onkeypress="if(event.key==='Enter')queryRentalRAG()">
+          <button onclick="queryRentalRAG()" class="btn-yellow px-6 py-3 text-sm"><i class="fas fa-search mr-2"></i>AI 查詢</button>
+        </div>
+        <div class="flex gap-2 mt-3 flex-wrap">
+          ${'借中美堂需要什麼手續？,器材逾期歸還會怎樣？,如何申請場地優先權？,借用器材的流程是什麼？'.split(',').map(q =>
+            `<button onclick="document.getElementById('rental-rag-query').value='${q}';queryRentalRAG()" class="text-xs px-3 py-1 rounded-full bg-fju-blue/5 text-fju-blue hover:bg-fju-blue/10 transition-colors">${q}</button>`
+          ).join('')}
+        </div>
+      </div>
+      <div id="rental-rag-result" class="hidden bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
+        <h3 class="font-bold text-fju-blue mb-3"><i class="fas fa-robot mr-2 text-fju-yellow"></i>AI 回覆</h3>
+        <div id="rental-rag-answer" class="p-4 rounded-fju bg-fju-bg text-sm text-gray-600 leading-relaxed"></div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
+          <h3 class="font-bold text-fju-blue mb-3 text-sm"><i class="fas fa-clipboard-list mr-2 text-fju-yellow"></i>場地借用流程</h3>
+          <div class="space-y-3">
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-fju-blue text-white text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">1</div><div><div class="text-sm font-medium text-fju-blue">線上提交申請</div><div class="text-xs text-gray-400">填寫場地借用申請表，含活動名稱、時間、人數</div></div></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-fju-yellow text-fju-blue text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">2</div><div><div class="text-sm font-medium text-fju-blue">AI 預審 (RAG)</div><div class="text-xs text-gray-400">系統自動比對法規，檢查合規性</div></div></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-fju-blue text-white text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">3</div><div><div class="text-sm font-medium text-fju-blue">三階段資源調度</div><div class="text-xs text-gray-400">志願序配對 → 自主協商 → 官方核准</div></div></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-fju-green text-white text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">4</div><div><div class="text-sm font-medium text-fju-blue">核准 & 使用</div><div class="text-xs text-gray-400">產出 PDF + TOTP QR 驗證碼</div></div></div>
+          </div>
+        </div>
+        <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
+          <h3 class="font-bold text-fju-blue mb-3 text-sm"><i class="fas fa-boxes-stacked mr-2 text-fju-yellow"></i>器材借用流程</h3>
+          <div class="space-y-3">
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-fju-blue text-white text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">1</div><div><div class="text-sm font-medium text-fju-blue">線上申請借用</div><div class="text-xs text-gray-400">選擇器材、填寫用途與預計歸還日</div></div></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-fju-yellow text-fju-blue text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">2</div><div><div class="text-sm font-medium text-fju-blue">審核 & 領取</div><div class="text-xs text-gray-400">課指組審核後至櫃台領取</div></div></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-fju-blue text-white text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">3</div><div><div class="text-sm font-medium text-fju-blue">LINE 到期提醒</div><div class="text-xs text-gray-400">歸還前 1 天系統自動推送 LINE 通知</div></div></div>
+            <div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-fju-green text-white text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">4</div><div><div class="text-sm font-medium text-fju-blue">歸還 & 積分</div><div class="text-xs text-gray-400">準時歸還 +5 分，逾期每天 -2 分</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    function queryRentalRAG() {
+      const query = document.getElementById('rental-rag-query').value.trim();
+      if(!query) return;
+      document.getElementById('rental-rag-result').classList.remove('hidden');
+      document.getElementById('rental-rag-answer').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI 查詢中...';
+      setTimeout(() => {
+        const answers = {
+          '中美堂': '<p class="mb-2">根據《場地使用管理規則》第3條：</p><p class="mb-2 pl-4 border-l-3 border-fju-yellow">借用中美堂需提前 <strong>5 個工作日</strong> 提出申請（因容量 500 人屬大型場地）。</p><p class="mb-2">需備齊：1) 活動企劃書 2) 安全計畫書 3) 保險證明</p><p class="text-xs text-gray-400">三階段流程：志願序配對 → 若衝突則 AI 協商 → 課指組最終核准</p>',
+          '逾期': '<p class="mb-2">根據《器材借用辦法》第4條：</p><p class="mb-2 pl-4 border-l-3 border-fju-yellow">逾期歸還每日扣除信用積分 <strong>2 分</strong>，超過 7 天未還扣 <strong>20 分</strong> 並停權。</p><p class="mb-2">低於 60 分將被 <strong>強制登出</strong>（JWT 自動失效）。</p>',
+          '優先': '<p class="mb-2">根據《場地使用管理規則》第2條（三階段資源調度）：</p><p class="mb-2 pl-4 border-l-3 border-fju-yellow">Level 1：校方/處室（最高優先）<br>Level 2：社團幹部/自治組織<br>Level 3：一般社團/小組</p>',
+          '器材': '<p class="mb-2">根據《器材借用辦法》：</p><p class="mb-2">1. 線上填寫申請表（含用途、歸還日）</p><p class="mb-2">2. 課指組審核（通常 1 個工作日）</p><p class="mb-2">3. 至課指組櫃台領取並簽名</p><p class="mb-2">4. 歸還前 1 天收到 LINE Notify 提醒</p>',
+        };
+        const key = Object.keys(answers).find(k => query.includes(k)) || '器材';
+        document.getElementById('rental-rag-answer').innerHTML = answers[key] +
+          '<div class="mt-3 p-3 rounded-fju bg-fju-blue/5 text-xs text-fju-blue"><strong>參考法規：</strong> 場地使用管理規則 v3.0 / 器材借用辦法 v2.0 | Dify RAG Engine</div>';
+      }, 800);
+    }
     </script>
   `),
 

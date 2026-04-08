@@ -12,7 +12,7 @@ function mainDashboardContent(role: string): string {
     <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden mb-6">
       <div class="relative" id="carousel-container" style="height: 260px;">
         <!-- Slides -->
-        <div class="carousel-slide absolute inset-0 transition-opacity duration-700 opacity-100" style="background: linear-gradient(135deg, rgba(0,43,91,0.85), rgba(0,43,91,0.6)), url('https://images.unsplash.com/photo-1523050854058-8df90110c476?w=1200&q=80') center/cover;">
+        <div class="carousel-slide absolute inset-0 transition-opacity duration-700 opacity-100" style="background: linear-gradient(135deg, rgba(0,49,83,0.85), rgba(0,49,83,0.6)), url('https://images.unsplash.com/photo-1523050854058-8df90110c476?w=1200&q=80') center/cover;">
           <div class="flex items-center h-full px-8">
             <div class="text-white">
               <span class="inline-block px-3 py-1 rounded-full bg-fju-yellow text-fju-blue text-xs font-bold mb-3">最新活動</span>
@@ -22,7 +22,7 @@ function mainDashboardContent(role: string): string {
             </div>
           </div>
         </div>
-        <div class="carousel-slide absolute inset-0 transition-opacity duration-700 opacity-0" style="background: linear-gradient(135deg, rgba(0,43,91,0.85), rgba(255,184,0,0.2)), url('https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1200&q=80') center/cover;">
+        <div class="carousel-slide absolute inset-0 transition-opacity duration-700 opacity-0" style="background: linear-gradient(135deg, rgba(0,49,83,0.85), rgba(218,165,32,0.2)), url('https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1200&q=80') center/cover;">
           <div class="flex items-center h-full px-8">
             <div class="text-white">
               <span class="inline-block px-3 py-1 rounded-full bg-fju-yellow text-fju-blue text-xs font-bold mb-3">即將舉辦</span>
@@ -32,7 +32,7 @@ function mainDashboardContent(role: string): string {
             </div>
           </div>
         </div>
-        <div class="carousel-slide absolute inset-0 transition-opacity duration-700 opacity-0" style="background: linear-gradient(135deg, rgba(0,43,91,0.85), rgba(0,128,0,0.2)), url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80') center/cover;">
+        <div class="carousel-slide absolute inset-0 transition-opacity duration-700 opacity-0" style="background: linear-gradient(135deg, rgba(0,49,83,0.85), rgba(0,128,0,0.2)), url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80') center/cover;">
           <div class="flex items-center h-full px-8">
             <div class="text-white">
               <span class="inline-block px-3 py-1 rounded-full bg-fju-yellow text-fju-blue text-xs font-bold mb-3">報名中</span>
@@ -210,23 +210,23 @@ function mainDashboardContent(role: string): string {
       // ===== LAYER GROUP 1: 教學行政區 (All Buildings) =====
       const teachingLayer = L.layerGroup();
       const buildings = [
-        { name: '淨心堂', pos: [25.0363, 121.4318], college: '校園中心', icon: '⛪', color: '#002B5B' },
-        { name: 'LF 文友樓', pos: [25.0370, 121.4305], college: '傳播學院', icon: '🏢', color: '#002B5B' },
-        { name: '羅耀拉大樓', pos: [25.0358, 121.4330], college: '管理學院', icon: '🏢', color: '#002B5B' },
-        { name: '利瑪竇大樓', pos: [25.0372, 121.4325], college: '文學院', icon: '🏢', color: '#002B5B' },
-        { name: '聖言樓', pos: [25.0355, 121.4310], college: '外語學院', icon: '🏢', color: '#002B5B' },
-        { name: '伯達樓', pos: [25.0368, 121.4335], college: '理工學院', icon: '🏢', color: '#002B5B' },
-        { name: '濟時樓', pos: [25.0350, 121.4325], college: '法律學院', icon: '🏢', color: '#002B5B' },
-        { name: '國璽樓', pos: [25.0345, 121.4315], college: '民生學院', icon: '🏢', color: '#002B5B' },
-        { name: '醫學大樓', pos: [25.0375, 121.4340], college: '醫學院', icon: '🏥', color: '#002B5B' },
-        { name: '理工綜合教室', pos: [25.0360, 121.4340], college: '理工學院', icon: '🏫', color: '#002B5B' },
-        { name: '中美堂', pos: [25.0356, 121.4300], college: '學務處', icon: '🏟️', color: '#FFB800', capacity: 500 },
-        { name: '活動中心', pos: [25.0348, 121.4305], college: '學務處', icon: '🏢', color: '#FFB800', capacity: 200 },
-        { name: '體育館', pos: [25.0340, 121.4320], college: '體育室', icon: '🏋️', color: '#FFB800', capacity: 800 },
-        { name: 'SF 134 教室', pos: [25.0365, 121.4345], college: '理工學院', icon: '📚', color: '#002B5B', capacity: 80 },
-        { name: '野聲樓', pos: [25.0378, 121.4310], college: '教育學院', icon: '🏢', color: '#002B5B' },
-        { name: '舒德樓', pos: [25.0380, 121.4320], college: '社會科學院', icon: '🏢', color: '#002B5B' },
-        { name: '焯炤館 (圖書館)', pos: [25.0352, 121.4335], college: '圖書資訊', icon: '📖', color: '#002B5B' },
+        { name: '淨心堂', pos: [25.0363, 121.4318], college: '校園中心', icon: '⛪', color: '#003153' },
+        { name: 'LF 文友樓', pos: [25.0370, 121.4305], college: '傳播學院', icon: '🏢', color: '#003153' },
+        { name: '羅耀拉大樓', pos: [25.0358, 121.4330], college: '管理學院', icon: '🏢', color: '#003153' },
+        { name: '利瑪竇大樓', pos: [25.0372, 121.4325], college: '文學院', icon: '🏢', color: '#003153' },
+        { name: '聖言樓', pos: [25.0355, 121.4310], college: '外語學院', icon: '🏢', color: '#003153' },
+        { name: '伯達樓', pos: [25.0368, 121.4335], college: '理工學院', icon: '🏢', color: '#003153' },
+        { name: '濟時樓', pos: [25.0350, 121.4325], college: '法律學院', icon: '🏢', color: '#003153' },
+        { name: '國璽樓', pos: [25.0345, 121.4315], college: '民生學院', icon: '🏢', color: '#003153' },
+        { name: '醫學大樓', pos: [25.0375, 121.4340], college: '醫學院', icon: '🏥', color: '#003153' },
+        { name: '理工綜合教室', pos: [25.0360, 121.4340], college: '理工學院', icon: '🏫', color: '#003153' },
+        { name: '中美堂', pos: [25.0356, 121.4300], college: '學務處', icon: '🏟️', color: '#DAA520', capacity: 500 },
+        { name: '活動中心', pos: [25.0348, 121.4305], college: '學務處', icon: '🏢', color: '#DAA520', capacity: 200 },
+        { name: '體育館', pos: [25.0340, 121.4320], college: '體育室', icon: '🏋️', color: '#DAA520', capacity: 800 },
+        { name: 'SF 134 教室', pos: [25.0365, 121.4345], college: '理工學院', icon: '📚', color: '#003153', capacity: 80 },
+        { name: '野聲樓', pos: [25.0378, 121.4310], college: '教育學院', icon: '🏢', color: '#003153' },
+        { name: '舒德樓', pos: [25.0380, 121.4320], college: '社會科學院', icon: '🏢', color: '#003153' },
+        { name: '焯炤館 (圖書館)', pos: [25.0352, 121.4335], college: '圖書資訊', icon: '📖', color: '#003153' },
       ];
 
       buildings.forEach(b => {
@@ -391,14 +391,14 @@ function mainDashboardContent(role: string): string {
         new Chart(document.getElementById('chart-trend'), {
           type: 'line',
           data: { labels: ['9月','10月','11月','12月','1月','2月','3月'],
-            datasets: [{ label: '社團參與人數', data: [1200,1350,1500,1420,1380,1550,1680], borderColor: '#002B5B', backgroundColor: 'rgba(0,43,91,0.1)', fill: true, tension: 0.4, pointBackgroundColor: '#FFB800' }]
+            datasets: [{ label: '社團參與人數', data: [1200,1350,1500,1420,1380,1550,1680], borderColor: '#003153', backgroundColor: 'rgba(0,49,83,0.1)', fill: true, tension: 0.4, pointBackgroundColor: '#DAA520' }]
           }, options: { responsive: true, plugins: { legend: { display: false }}}
         });
       }
       if (document.getElementById('chart-type')) {
         new Chart(document.getElementById('chart-type'), {
           type: 'doughnut',
-          data: { labels: ['學術','服務','康樂','體育','藝文','綜合'], datasets: [{ data: [25,18,22,15,12,8], backgroundColor: ['#002B5B','#FFB800','#008000','#003A75','#FFC933','#666'] }]},
+          data: { labels: ['學術','服務','康樂','體育','藝文','綜合'], datasets: [{ data: [25,18,22,15,12,8], backgroundColor: ['#003153','#DAA520','#008000','#004070','#FDB913','#666'] }]},
           options: { responsive: true }
         });
       }

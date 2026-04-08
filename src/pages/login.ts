@@ -4,7 +4,7 @@ export function login(): string {
   const body = `
   <!-- Background -->
   <div class="min-h-screen relative flex items-center justify-center overflow-hidden"
-       style="background: linear-gradient(135deg, rgba(0,43,91,0.9), rgba(0,43,91,0.7)), 
+       style="background: linear-gradient(135deg, rgba(0,49,83,0.9), rgba(0,49,83,0.7)), 
               url('https://images.unsplash.com/photo-1562774053-701939374585?w=1920&q=80') center/cover;">
     
     <!-- Animated Background -->

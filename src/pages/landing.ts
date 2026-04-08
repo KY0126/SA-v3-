@@ -28,13 +28,13 @@ export function landing(): string {
   <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
     <div id="hero-bg" class="absolute inset-0">
       <div class="hero-slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000" 
-           style="background-image: linear-gradient(135deg, rgba(0,43,91,0.85), rgba(0,43,91,0.65)), 
+           style="background-image: linear-gradient(135deg, rgba(0,49,83,0.85), rgba(0,49,83,0.65)), 
            url('https://images.unsplash.com/photo-1562774053-701939374585?w=1920&q=80'); opacity: 1;"></div>
       <div class="hero-slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000" 
-           style="background-image: linear-gradient(135deg, rgba(0,43,91,0.8), rgba(255,184,0,0.2)), 
+           style="background-image: linear-gradient(135deg, rgba(0,49,83,0.8), rgba(218,165,32,0.2)), 
            url('https://images.unsplash.com/photo-1523050854058-8df90110c476?w=1920&q=80'); opacity: 0;"></div>
       <div class="hero-slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000" 
-           style="background-image: linear-gradient(135deg, rgba(0,43,91,0.85), rgba(0,43,91,0.6)), 
+           style="background-image: linear-gradient(135deg, rgba(0,49,83,0.85), rgba(0,49,83,0.6)), 
            url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1920&q=80'); opacity: 0;"></div>
     </div>
     <div class="relative z-10 text-center max-w-5xl mx-auto px-6">

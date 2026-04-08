@@ -24,8 +24,8 @@ const COLLEGE_COLORS: Record<string, { fill: string; name: string; icon: string 
   '織品學院':   { fill: '#9B59B6', name: '織品學院 (College of Textiles)', icon: 'fas fa-tshirt' },
   '宿舍':       { fill: '#7F8C8D', name: '宿舍區 (Dormitories)', icon: 'fas fa-home' },
   '餐飲':       { fill: '#FF6B35', name: '餐飲區 (Food Courts)', icon: 'fas fa-utensils' },
-  '行政':       { fill: '#002B5B', name: '行政區 (Administration)', icon: 'fas fa-building' },
-  '宗教':       { fill: '#FFB800', name: '宗教建築 (Religious)', icon: 'fas fa-church' },
+  '行政':       { fill: '#003153', name: '行政區 (Administration)', icon: 'fas fa-building' },
+  '宗教':       { fill: '#DAA520', name: '宗教建築 (Religious)', icon: 'fas fa-church' },
   '交通':       { fill: '#6C5CE7', name: '交通設施 (Transportation)', icon: 'fas fa-bus' },
   '體育':       { fill: '#00B894', name: '體育場館 (Sports)', icon: 'fas fa-running' },
   '其他':       { fill: '#95A5A6', name: '其他設施 (Others)', icon: 'fas fa-building' },
@@ -124,6 +124,37 @@ function campusMapContent(role: string): string {
           </div>
         </div>
 
+        <!-- LayerGroup Controls (per spec: 教學行政/無障礙/生活/交通) -->
+        <div class="p-3 border-b border-white/10">
+          <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 px-1">圖層群組 (LayerGroups)</div>
+          <div class="space-y-1">
+            <label class="flex items-center gap-2 px-2 py-1.5 rounded-fju cursor-pointer hover:bg-white/10 transition-all">
+              <input type="checkbox" checked class="layer-group-cb accent-[#003153] w-3.5 h-3.5" data-layergroup="teaching" />
+              <i class="fas fa-university text-xs" style="color:#003153;width:16px;text-align:center"></i>
+              <span class="text-xs text-gray-300">教學行政區</span>
+              <span class="text-[9px] text-gray-500 ml-auto" id="lg-teaching-count">17</span>
+            </label>
+            <label class="flex items-center gap-2 px-2 py-1.5 rounded-fju cursor-pointer hover:bg-white/10 transition-all">
+              <input type="checkbox" checked class="layer-group-cb accent-[#008000] w-3.5 h-3.5" data-layergroup="accessibility" />
+              <i class="fas fa-wheelchair text-xs" style="color:#008000;width:16px;text-align:center"></i>
+              <span class="text-xs text-gray-300">無障礙設施</span>
+              <span class="text-[9px] text-gray-500 ml-auto" id="lg-accessibility-count">9</span>
+            </label>
+            <label class="flex items-center gap-2 px-2 py-1.5 rounded-fju cursor-pointer hover:bg-white/10 transition-all">
+              <input type="checkbox" checked class="layer-group-cb accent-[#FF6B35] w-3.5 h-3.5" data-layergroup="life" />
+              <i class="fas fa-utensils text-xs" style="color:#FF6B35;width:16px;text-align:center"></i>
+              <span class="text-xs text-gray-300">生活機能</span>
+              <span class="text-[9px] text-gray-500 ml-auto" id="lg-life-count">6</span>
+            </label>
+            <label class="flex items-center gap-2 px-2 py-1.5 rounded-fju cursor-pointer hover:bg-white/10 transition-all">
+              <input type="checkbox" checked class="layer-group-cb accent-[#6C5CE7] w-3.5 h-3.5" data-layergroup="transport" />
+              <i class="fas fa-bus text-xs" style="color:#6C5CE7;width:16px;text-align:center"></i>
+              <span class="text-xs text-gray-300">交通設施</span>
+              <span class="text-[9px] text-gray-500 ml-auto" id="lg-transport-count">7</span>
+            </label>
+          </div>
+        </div>
+
         <!-- Building Type Filters -->
         <div class="p-3 border-b border-white/10">
           <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 px-1">建築類型篩選</div>
@@ -170,41 +201,74 @@ function campusMapContent(role: string): string {
         </div>
       </aside>
 
-      <!-- ===== RIGHT: MAP CONTAINER ===== -->
-      <div class="flex-1 flex flex-col">
+      <!-- ===== RIGHT: MAP + CALENDAR ===== -->
+      <div class="flex-1 flex flex-col relative">
         <!-- Map Toolbar -->
         <div class="bg-white rounded-t-fju-lg border border-gray-100 border-b-0 px-4 py-2 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <h3 class="font-bold text-fju-blue text-sm">
-              <i class="fas fa-map-marked-alt mr-2 text-fju-yellow"></i>輔仁大學互動分區校園地圖
+              <i class="fas fa-map-marked-alt mr-2 text-fju-yellow"></i>輔大無障礙校園地圖
             </h3>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-fju-green/10 text-fju-green font-medium">
-              <i class="fas fa-database mr-1"></i>GeoJSON v2
+              <i class="fas fa-wheelchair mr-1"></i>4 LayerGroups
             </span>
           </div>
           <div class="flex items-center gap-2">
-            <!-- Layer toggle buttons -->
             <button onclick="toggleGeoLayer('polygons')" class="geo-layer-btn active text-[10px] px-3 py-1 rounded-full bg-fju-blue text-white transition-all" data-layer="polygons">
               <i class="fas fa-draw-polygon mr-1"></i>建築分區
             </button>
             <button onclick="toggleGeoLayer('markers')" class="geo-layer-btn active text-[10px] px-3 py-1 rounded-full bg-fju-yellow text-fju-blue transition-all" data-layer="markers">
               <i class="fas fa-map-pin mr-1"></i>標記點
             </button>
-            <button onclick="toggleGeoLayer('labels')" class="geo-layer-btn active text-[10px] px-3 py-1 rounded-full bg-fju-green text-white transition-all" data-layer="labels">
-              <i class="fas fa-font mr-1"></i>名稱
+            <button onclick="toggleGeoLayer('accessibilityLayer')" class="geo-layer-btn active text-[10px] px-3 py-1 rounded-full bg-fju-green text-white transition-all" data-layer="accessibilityLayer">
+              <i class="fas fa-wheelchair mr-1"></i>無障礙
             </button>
             <span class="w-px h-5 bg-gray-200 mx-1"></span>
             <button onclick="resetMapView()" class="text-[10px] px-3 py-1 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-all">
-              <i class="fas fa-expand mr-1"></i>重置視圖
+              <i class="fas fa-expand mr-1"></i>重置
             </button>
             <button onclick="flyToBuilding('淨心堂')" class="text-[10px] px-3 py-1 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-all">
               <i class="fas fa-crosshairs mr-1"></i>淨心堂
+            </button>
+            <button onclick="toggleCalendarPanel()" class="text-[10px] px-3 py-1 rounded-full bg-fju-blue/10 text-fju-blue hover:bg-fju-blue/20 transition-all">
+              <i class="fas fa-calendar-alt mr-1"></i>行事曆
             </button>
           </div>
         </div>
 
         <!-- Map -->
         <div id="geo-campus-map" class="flex-1 rounded-b-fju-lg border border-gray-100 overflow-hidden" style="min-height: 500px; background: #e8ecf1;"></div>
+
+        <!-- Smart Calendar Panel (Glassmorphism overlay, 40% width, right side) -->
+        <div id="calendar-overlay" class="absolute top-12 right-0 w-[40%] h-[calc(100%-48px)] z-[1000] hidden" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,0.3);border-radius:0 0 15px 15px;box-shadow:-4px 0 30px rgba(0,0,0,0.1);">
+          <div class="flex flex-col h-full">
+            <div class="px-4 py-3 border-b border-gray-200/50 flex items-center justify-between">
+              <h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-calendar-alt mr-2 text-fju-yellow"></i>智慧行事曆</h3>
+              <button onclick="toggleCalendarPanel()" class="text-gray-400 hover:text-gray-600 transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4">
+              <div id="map-evo-calendar"></div>
+              <div class="mt-4">
+                <h4 class="font-bold text-fju-blue text-xs mb-2"><i class="fas fa-clock mr-1 text-fju-yellow"></i>近期場地預約</h4>
+                <div class="space-y-2" id="cal-bookings">
+                  <div class="p-2.5 rounded-fju bg-white/80 border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer">
+                    <div class="flex items-center justify-between"><span class="text-xs font-medium text-fju-blue">中美堂</span><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-fju-green/10 text-fju-green">可預約</span></div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">04/15 14:00-17:00 · 吉他社</div>
+                    <button onclick="window.location.href='/module/venue-booking?role=${role}'" class="mt-1 text-[10px] px-2 py-0.5 rounded-full bg-fju-yellow text-fju-blue font-bold hover:bg-fju-yellow-light transition-colors">協商</button>
+                  </div>
+                  <div class="p-2.5 rounded-fju bg-white/80 border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer">
+                    <div class="flex items-center justify-between"><span class="text-xs font-medium text-fju-blue">SF 134</span><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-fju-yellow/20 text-fju-yellow">審核中</span></div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">04/25 13:00-17:00 · 資訊社</div>
+                  </div>
+                  <div class="p-2.5 rounded-fju bg-white/80 border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer">
+                    <div class="flex items-center justify-between"><span class="text-xs font-medium text-fju-blue">百鍊廳</span><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-fju-green/10 text-fju-green">已確認</span></div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">04/18 18:00-21:00 · 熱舞社</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -220,7 +284,7 @@ function campusMapContent(role: string): string {
       
       /* Custom tooltip */
       .building-tooltip {
-        background: rgba(0,43,91,0.95) !important;
+        background: rgba(0,49,83,0.95) !important;
         color: white !important;
         border: none !important;
         border-radius: 8px !important;
@@ -231,10 +295,10 @@ function campusMapContent(role: string): string {
         font-family: 'Microsoft JhengHei', sans-serif !important;
       }
       .building-tooltip::before {
-        border-top-color: rgba(0,43,91,0.95) !important;
+        border-top-color: rgba(0,49,83,0.95) !important;
       }
       .leaflet-tooltip-top:before {
-        border-top-color: rgba(0,43,91,0.95) !important;
+        border-top-color: rgba(0,49,83,0.95) !important;
       }
       
       /* Building label markers */
@@ -245,7 +309,7 @@ function campusMapContent(role: string): string {
         font-family: 'Microsoft JhengHei', sans-serif !important;
         font-size: 10px !important;
         font-weight: 700;
-        color: #002B5B;
+        color: #003153;
         text-shadow: 
           -1px -1px 0 #fff,
           1px -1px 0 #fff,
@@ -273,7 +337,7 @@ function campusMapContent(role: string): string {
         max-width: 320px;
       }
       .geo-popup .leaflet-popup-tip {
-        background: #002B5B;
+        background: #003153;
       }
       .geo-popup-header {
         padding: 12px 16px;
@@ -294,7 +358,7 @@ function campusMapContent(role: string): string {
         margin-bottom: 6px;
       }
       .geo-popup-row i {
-        color: #FFB800;
+        color: #DAA520;
         width: 16px;
         text-align: center;
         font-size: 11px;
@@ -317,11 +381,11 @@ function campusMapContent(role: string): string {
         transition: all 0.2s;
       }
       .building-list-item:hover {
-        background: rgba(255,184,0,0.15) !important;
+        background: rgba(218,165,32,0.15) !important;
       }
       .building-list-item.highlight {
-        background: rgba(255,184,0,0.2) !important;
-        border-left: 3px solid #FFB800;
+        background: rgba(218,165,32,0.2) !important;
+        border-left: 3px solid #DAA520;
       }
       
       /* Pulse anchor markers */
@@ -462,20 +526,84 @@ function campusMapContent(role: string): string {
       const markerLayer  = L.layerGroup().addTo(map);
       const labelLayer   = L.layerGroup().addTo(map);
 
+      /* ========================================
+         ACCESSIBILITY LAYERGROUP (無障礙設施)
+         Per spec: ramps, elevators, accessible toilets
+         ======================================== */
+      const accessibilityLayer = L.layerGroup().addTo(map);
+      const transportLayer     = L.layerGroup().addTo(map);
+      const lifeLayer          = L.layerGroup().addTo(map);
+
+      // Accessibility markers - ramps, elevators, accessible toilets
+      const accessibilityData = [
+        { name: '醫學大樓無障礙坡道', type: 'ramp', icon: '♿', lat: 25.0375, lng: 121.4340, desc: '醫學大樓側門坡道，寬度 1.5m' },
+        { name: '理工綜合教室電梯', type: 'elevator', icon: '🛗', lat: 25.0361, lng: 121.4342, desc: '理工綜合教室 1F-7F 無障礙電梯' },
+        { name: '淨心堂無障礙入口', type: 'ramp', icon: '♿', lat: 25.0361, lng: 121.4320, desc: '淨心堂正門左側無障礙坡道' },
+        { name: '焯炤館無障礙廁所', type: 'toilet', icon: '🚻', lat: 25.0353, lng: 121.4336, desc: '焯炤館 B1 無障礙廁所' },
+        { name: '羅耀拉大樓電梯', type: 'elevator', icon: '🛗', lat: 25.0359, lng: 121.4331, desc: '羅耀拉大樓 1F-10F 無障礙電梯' },
+        { name: '國璽樓無障礙坡道', type: 'ramp', icon: '♿', lat: 25.0346, lng: 121.4316, desc: '國璽樓正門無障礙坡道' },
+        { name: '活動中心無障礙廁所', type: 'toilet', icon: '🚻', lat: 25.0349, lng: 121.4306, desc: '活動中心 1F 無障礙廁所' },
+        { name: '伯達樓電梯', type: 'elevator', icon: '🛗', lat: 25.0369, lng: 121.4336, desc: '伯達樓 1F-5F 無障礙電梯' },
+        { name: '德芳外語大樓無障礙入口', type: 'ramp', icon: '♿', lat: 25.0365, lng: 121.4310, desc: '德芳外語大樓南側坡道' },
+      ];
+      accessibilityData.forEach(a => {
+        const typeColor = a.type === 'ramp' ? '#008000' : a.type === 'elevator' ? '#003153' : '#6C5CE7';
+        const typeLabel = a.type === 'ramp' ? '坡道' : a.type === 'elevator' ? '電梯' : '無障礙廁所';
+        const marker = L.marker([a.lat, a.lng], {
+          icon: L.divIcon({ className: '', html: '<div style="background:'+typeColor+';color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">'+a.icon+'</div>', iconSize: [24, 24], iconAnchor: [12, 12] })
+        });
+        marker.bindPopup('<div class="geo-popup-header" style="background:'+typeColor+'"><i class="fas fa-wheelchair text-lg"></i><div><div class="font-bold text-sm">'+a.name+'</div><div class="text-white/60 text-[10px]">'+typeLabel+'</div></div></div><div class="geo-popup-body"><div class="geo-popup-row"><i class="fas fa-info-circle"></i><span>'+a.desc+'</span></div><div style="margin-top:8px"><a href="/module/venue-booking?role=${role}" class="popup-btn" style="display:inline-block;background:#DAA520;color:#003153;padding:6px 16px;border-radius:12px;font-weight:700;font-size:11px;text-decoration:none;"><i class="fas fa-calendar-plus mr-1"></i>我要預約</a></div></div>', { className: 'geo-popup fju-popup', maxWidth: 300 });
+        marker.addTo(accessibilityLayer);
+      });
+
+      // Transport markers (交通設施)
+      const transportData = [
+        { name: '輔大站 (捷運中和新蘆線)', icon: '🚇', lat: 25.0332, lng: 121.4345, desc: '捷運輔大站 1 號出口步行約 5 分鐘' },
+        { name: '正門 YouBike 站', icon: '🚲', lat: 25.0343, lng: 121.4290, desc: 'YouBike 2.0 站點，30 車位' },
+        { name: '後門 YouBike 站', icon: '🚲', lat: 25.0385, lng: 121.4335, desc: 'YouBike 2.0 站點，20 車位' },
+        { name: '正門停車場', icon: '🅿️', lat: 25.0340, lng: 121.4295, desc: '汽車停車場 (教職員)' },
+        { name: '校內機車停車場', icon: '🏍️', lat: 25.0370, lng: 121.4290, desc: '機車停放區' },
+        { name: '校園巡迴接駁車站', icon: '🚌', lat: 25.0358, lng: 121.4302, desc: '校園巡迴接駁車 (每 15 分一班)' },
+        { name: '輔大站通風口', icon: '🔲', lat: 25.0337, lng: 121.4340, desc: '捷運通風設施' },
+      ];
+      transportData.forEach(t => {
+        const marker = L.marker([t.lat, t.lng], {
+          icon: L.divIcon({ className: '', html: '<div style="background:#6C5CE7;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">'+t.icon+'</div>', iconSize: [24, 24], iconAnchor: [12, 12] })
+        });
+        marker.bindPopup('<div class="geo-popup-header" style="background:#6C5CE7"><i class="fas fa-bus text-lg"></i><div><div class="font-bold text-sm">'+t.name+'</div><div class="text-white/60 text-[10px]">交通設施</div></div></div><div class="geo-popup-body"><div class="geo-popup-row"><i class="fas fa-info-circle"></i><span>'+t.desc+'</span></div></div>', { className: 'geo-popup fju-popup', maxWidth: 300 });
+        marker.addTo(transportLayer);
+      });
+
+      // Life facilities (生活機能)
+      const lifeData = [
+        { name: '輔園餐廳', icon: '🍽️', lat: 25.0357, lng: 121.4312, desc: '學生餐廳，營業 07:00-20:00' },
+        { name: '仁園餐廳', icon: '🍽️', lat: 25.0353, lng: 121.4308, desc: '教職員餐廳，營業 11:00-14:00' },
+        { name: '法園餐廳', icon: '🍽️', lat: 25.0365, lng: 121.4315, desc: '法學院學生餐廳' },
+        { name: '7-Eleven 便利商店', icon: '🏪', lat: 25.0350, lng: 121.4298, desc: '24小時便利商店' },
+        { name: '校內郵局', icon: '📮', lat: 25.0355, lng: 121.4305, desc: '郵局服務窗口，營業 09:00-17:00' },
+        { name: '學生宿舍區', icon: '🏠', lat: 25.0380, lng: 121.4325, desc: '含文舍、文德、宜美、格物等學苑' },
+      ];
+      lifeData.forEach(l => {
+        const marker = L.marker([l.lat, l.lng], {
+          icon: L.divIcon({ className: '', html: '<div style="background:#FF6B35;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">'+l.icon+'</div>', iconSize: [24, 24], iconAnchor: [12, 12] })
+        });
+        marker.bindPopup('<div class="geo-popup-header" style="background:#FF6B35"><i class="fas fa-utensils text-lg"></i><div><div class="font-bold text-sm">'+l.name+'</div><div class="text-white/60 text-[10px]">生活設施</div></div></div><div class="geo-popup-body"><div class="geo-popup-row"><i class="fas fa-info-circle"></i><span>'+l.desc+'</span></div></div>', { className: 'geo-popup fju-popup', maxWidth: 300 });
+        marker.addTo(lifeLayer);
+      });
+
+      // LayerGroup checkbox controls
+      document.querySelectorAll('.layer-group-cb').forEach(cb => {
+        cb.addEventListener('change', function() {
+          const lgName = this.dataset.layergroup;
+          const layers = { teaching: polygonLayer, accessibility: accessibilityLayer, life: lifeLayer, transport: transportLayer };
+          const layer = layers[lgName];
+          if (!layer) return;
+          if (this.checked) { map.addLayer(layer); } else { map.removeLayer(layer); }
+        });
+      });
+
       // Store references for filtering
-      const buildingData = []; // { name, nameEn, ref, college, color, building, polygon, marker, label, feature }
-      
-      // Anchor markers
-      const anchorA_icon = L.divIcon({ className: 'anchor-marker', iconSize: [14, 14], iconAnchor: [7, 7] });
-      const anchorB_icon = L.divIcon({ className: 'anchor-marker', iconSize: [14, 14], iconAnchor: [7, 7] });
-      
-      L.marker([ANCHOR_A.lat, ANCHOR_A.lng], { icon: anchorA_icon })
-        .bindTooltip('錨點A: ' + ANCHOR_A.name, { className: 'building-tooltip', direction: 'top', offset: [0, -10] })
-        .addTo(markerLayer);
-      
-      L.marker([ANCHOR_B.lat, ANCHOR_B.lng], { icon: anchorB_icon })
-        .bindTooltip('錨點B: ' + ANCHOR_B.name, { className: 'building-tooltip', direction: 'top', offset: [0, -10] })
-        .addTo(markerLayer);
+      const buildingData = [];
 
       /* ========================================
          LOAD & RENDER GEOJSON
@@ -517,7 +645,7 @@ function campusMapContent(role: string): string {
                   this.setStyle({
                     fillOpacity: 0.7,
                     weight: 3,
-                    color: '#FFB800'
+                    color: '#DAA520'
                   });
                   this.bringToFront();
                   // Update filter sidebar highlight
@@ -558,10 +686,10 @@ function campusMapContent(role: string): string {
                       <span>狀態：可使用</span>
                     </div>
                     <div style="margin-top:10px; display:flex; gap:6px;">
-                      <a href="/module/venue-booking?role=${role}" class="popup-btn" style="flex:1;text-align:center;display:inline-block;background:#FFB800;color:#002B5B;padding:6px 12px;border-radius:12px;font-weight:700;font-size:11px;text-decoration:none;">
+                      <a href="/module/venue-booking?role=${role}" class="popup-btn" style="flex:1;text-align:center;display:inline-block;background:#DAA520;color:#003153;padding:6px 12px;border-radius:12px;font-weight:700;font-size:11px;text-decoration:none;">
                         <i class="fas fa-calendar-plus mr-1"></i>我要預約
                       </a>
-                      <button onclick="flyToBuilding('\${displayName}')" class="popup-btn" style="flex:1;text-align:center;background:#002B5B;color:white;padding:6px 12px;border-radius:12px;font-weight:700;font-size:11px;border:none;cursor:pointer;">
+                      <button onclick="flyToBuilding('\${displayName}')" class="popup-btn" style="flex:1;text-align:center;background:#003153;color:white;padding:6px 12px;border-radius:12px;font-weight:700;font-size:11px;border:none;cursor:pointer;">
                         <i class="fas fa-crosshairs mr-1"></i>定位
                       </button>
                     </div>
@@ -763,7 +891,7 @@ function campusMapContent(role: string): string {
          LAYER TOGGLE
          ======================================== */
       window.toggleGeoLayer = function(layerName) {
-        const layers = { polygons: polygonLayer, markers: markerLayer, labels: labelLayer };
+        const layers = { polygons: polygonLayer, markers: markerLayer, labels: labelLayer, accessibilityLayer: accessibilityLayer, transport: transportLayer, life: lifeLayer };
         const layer = layers[layerName];
         const btn = document.querySelector('.geo-layer-btn[data-layer="' + layerName + '"]');
         if (!layer || !btn) return;
@@ -780,7 +908,8 @@ function campusMapContent(role: string): string {
           const colors = {
             polygons: ['bg-fju-blue', 'text-white'],
             markers: ['bg-fju-yellow', 'text-fju-blue'],
-            labels: ['bg-fju-green', 'text-white']
+            labels: ['bg-fju-green', 'text-white'],
+            accessibilityLayer: ['bg-fju-green', 'text-white']
           };
           (colors[layerName] || []).forEach(c => btn.classList.add(c));
         }
@@ -800,7 +929,7 @@ function campusMapContent(role: string): string {
           // Flash effect
           building.polygon.eachLayer(layer => {
             if (layer.setStyle) {
-              layer.setStyle({ fillOpacity: 0.8, weight: 4, color: '#FFB800' });
+              layer.setStyle({ fillOpacity: 0.8, weight: 4, color: '#DAA520' });
               setTimeout(() => {
                 layer.setStyle({ fillOpacity: 0.35, weight: 2, color: '#FFFFFF' });
               }, 1500);
@@ -821,21 +950,65 @@ function campusMapContent(role: string): string {
         }
       };
 
-      // Store references globally for dashboard integration
+      // Store references globally
       window._geoMap = map;
       window._geoBuildingData = buildingData;
+      window.transformCoords = transformCoords;
 
       /* ========================================
-         TRANSFORM COORDS DEMO (exposed globally)
-         For verifying the affine transform with
-         actual pixel coordinates.
+         IMAGE OVERLAY centered on 淨心堂
+         Adds a subtle SVG campus overview overlay
          ======================================== */
-      window.transformCoords = transformCoords;
-      
-      // Log anchor verification
-      console.log('Anchor A (中美堂) → pixel:', transformCoords(ANCHOR_A.lat, ANCHOR_A.lng));
-      console.log('Anchor B (第二個圓環) → pixel:', transformCoords(ANCHOR_B.lat, ANCHOR_B.lng));
-      console.log('淨心堂 → pixel:', transformCoords(25.0359381, 121.4323090));
+      // 淨心堂 coordinates: 25.0359381, 121.4323090
+      // Create a subtle circular highlight on 淨心堂
+      L.circle([25.0359381, 121.4323090], {
+        radius: 50,
+        color: '#DAA520',
+        fillColor: '#DAA520',
+        fillOpacity: 0.08,
+        weight: 2,
+        dashArray: '6 3',
+        className: 'anchor-circle'
+      }).bindTooltip('淨心堂 (校園中心)', { className: 'building-tooltip', direction: 'top', permanent: false })
+        .addTo(map);
+
+      /* ========================================
+         CALENDAR PANEL TOGGLE (GSAP slide)
+         ======================================== */
+      window.toggleCalendarPanel = function() {
+        const panel = document.getElementById('calendar-overlay');
+        if (panel.classList.contains('hidden')) {
+          panel.classList.remove('hidden');
+          if (typeof gsap !== 'undefined') {
+            gsap.fromTo(panel, { x: '100%', opacity: 0 }, { x: '0%', opacity: 1, duration: 0.4, ease: 'power2.out' });
+          }
+          // Init evo-calendar once
+          if (!panel.dataset.init) {
+            panel.dataset.init = '1';
+            try {
+              $('#map-evo-calendar').evoCalendar({
+                theme: 'Royal Navy', language: 'zh', format: 'yyyy-mm-dd',
+                titleFormat: 'yyyy MM',
+                calendarEvents: [
+                  { id: 1, name: '社團評鑑會議', date: '2026-04-05', type: 'event', color: '#003153' },
+                  { id: 2, name: '金乐獎初審', date: '2026-04-08', type: 'event', color: '#DAA520' },
+                  { id: 3, name: '吉他社成果展', date: '2026-04-15', type: 'event', color: '#003153' },
+                  { id: 4, name: '熱舞社展演', date: '2026-04-18', type: 'event', color: '#FF0000' },
+                  { id: 5, name: '攝影社外拍', date: '2026-04-20', type: 'event', color: '#DAA520' },
+                  { id: 6, name: '程式工作坊', date: '2026-04-25', type: 'event', color: '#008000' },
+                  { id: 7, name: '環保社淨灘', date: '2026-05-01', type: 'event', color: '#008000' },
+                ]
+              });
+            } catch(e) { console.warn('evo-calendar init failed:', e); }
+          }
+        } else {
+          if (typeof gsap !== 'undefined') {
+            gsap.to(panel, { x: '100%', opacity: 0, duration: 0.3, ease: 'power2.in', onComplete: () => panel.classList.add('hidden') });
+          } else {
+            panel.classList.add('hidden');
+          }
+        }
+      };
 
     })();
     </script>

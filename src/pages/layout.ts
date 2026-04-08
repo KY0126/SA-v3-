@@ -1,7 +1,7 @@
 // ============================================================
 // FJU Smart Hub - Layout System
 // Design specs: rounded 12-15px, 微軟正黑體
-// Colors: deep blue #002B5B, dark gray #333333, bg #F4F6F8, accent yellow #FFB800
+// Colors: 60-30-10 rule → Main #FFFFFF, Secondary #003153 (Virgin Mary Blue), Accent #DAA520/#FDB913 (Vatican Gold)
 // ============================================================
 
 export function layout(title: string, body: string, extraHead: string = ''): string {
@@ -18,12 +18,12 @@ export function layout(title: string, body: string, extraHead: string = ''): str
       theme: {
         extend: {
           colors: {
-            'fju-blue': '#002B5B',
-            'fju-blue-light': '#003A75',
+            'fju-blue': '#003153',
+            'fju-blue-light': '#004070',
             'fju-dark': '#333333',
             'fju-bg': '#F4F6F8',
-            'fju-yellow': '#FFB800',
-            'fju-yellow-light': '#FFC933',
+            'fju-yellow': '#DAA520',
+            'fju-yellow-light': '#FDB913',
             'fju-green': '#008000',
             'fju-red': '#FF0000',
             'fju-gold': '#DAA520',
@@ -70,8 +70,8 @@ export function layout(title: string, body: string, extraHead: string = ''): str
     
     /* ===== BUTTONS ===== */
     .btn-yellow {
-      background: #FFB800;
-      color: #002B5B;
+      background: #DAA520;
+      color: #003153;
       font-weight: 700;
       border-radius: 12px;
       transition: all 0.3s;
@@ -79,12 +79,12 @@ export function layout(title: string, body: string, extraHead: string = ''): str
       cursor: pointer;
     }
     .btn-yellow:hover {
-      background: #FFC933;
+      background: #FDB913;
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(255,184,0,0.4);
+      box-shadow: 0 8px 25px rgba(218,165,32,0.4);
     }
     .btn-blue {
-      background: #002B5B;
+      background: #003153;
       color: #FFFFFF;
       font-weight: 700;
       border-radius: 12px;
@@ -93,9 +93,9 @@ export function layout(title: string, body: string, extraHead: string = ''): str
       cursor: pointer;
     }
     .btn-blue:hover {
-      background: #003A75;
+      background: #004070;
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0,43,91,0.4);
+      box-shadow: 0 8px 25px rgba(0,49,83,0.4);
     }
     
     /* ===== CARD HOVER ===== */
@@ -104,7 +104,7 @@ export function layout(title: string, body: string, extraHead: string = ''): str
     }
     .card-hover:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0,43,91,0.12);
+      box-shadow: 0 12px 40px rgba(0,49,83,0.12);
     }
     
     /* ===== SCROLLBAR ===== */
@@ -125,8 +125,8 @@ export function layout(title: string, body: string, extraHead: string = ''): str
       animation: pulseYellow 2s ease-in-out infinite;
     }
     @keyframes pulseYellow {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255,184,0,0.4); }
-      50% { box-shadow: 0 0 0 15px rgba(255,184,0,0); }
+      0%, 100% { box-shadow: 0 0 0 0 rgba(218,165,32,0.4); }
+      50% { box-shadow: 0 0 0 15px rgba(218,165,32,0); }
     }
     
     /* ===== LEAFLET POPUP CUSTOM ===== */
@@ -141,10 +141,10 @@ export function layout(title: string, body: string, extraHead: string = ''): str
       min-width: 220px;
     }
     .fju-popup .leaflet-popup-tip {
-      background: #002B5B;
+      background: #003153;
     }
     .popup-header {
-      background: #002B5B;
+      background: #003153;
       color: white;
       padding: 10px 14px;
       font-weight: 700;
@@ -162,15 +162,15 @@ export function layout(title: string, body: string, extraHead: string = ''): str
       margin-bottom: 6px;
     }
     .popup-body .popup-row i {
-      color: #FFB800;
+      color: #DAA520;
       width: 16px;
       text-align: center;
     }
     .popup-btn {
       display: inline-block;
       margin-top: 8px;
-      background: #FFB800;
-      color: #002B5B;
+      background: #DAA520;
+      color: #003153;
       padding: 6px 16px;
       border-radius: 12px;
       font-weight: 700;
@@ -180,7 +180,7 @@ export function layout(title: string, body: string, extraHead: string = ''): str
       text-decoration: none;
     }
     .popup-btn:hover {
-      background: #FFC933;
+      background: #FDB913;
     }
 
     /* ===== EVO CALENDAR OVERRIDES ===== */
@@ -190,13 +190,13 @@ export function layout(title: string, body: string, extraHead: string = ''): str
       box-shadow: none !important;
       border: 1px solid #e5e7eb !important;
     }
-    .calendar-sidebar { background: #002B5B !important; }
-    .calendar-sidebar > .month-list > li.active-month { background: #FFB800 !important; color: #002B5B !important; }
-    .calendar-sidebar > span#sidebarToggler { background: #002B5B !important; }
-    .calendar-day > .day.calendar-today { background: #FFB800 !important; color: #002B5B !important; }
-    .calendar-day > .day.calendar-active { border-color: #002B5B !important; }
-    .event-indicator > .type-bullet > div { background: #FFB800 !important; }
-    th[colspan] { background: #002B5B !important; color: white !important; }
+    .calendar-sidebar { background: #003153 !important; }
+    .calendar-sidebar > .month-list > li.active-month { background: #DAA520 !important; color: #003153 !important; }
+    .calendar-sidebar > span#sidebarToggler { background: #003153 !important; }
+    .calendar-day > .day.calendar-today { background: #DAA520 !important; color: #003153 !important; }
+    .calendar-day > .day.calendar-active { border-color: #003153 !important; }
+    .event-indicator > .type-bullet > div { background: #DAA520 !important; }
+    th[colspan] { background: #003153 !important; color: white !important; }
     
     /* ===== CHATBOT ===== */
     .chatbot-fab {
@@ -206,13 +206,13 @@ export function layout(title: string, body: string, extraHead: string = ''): str
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: #FFB800;
+      background: #DAA520;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 28px;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(255,184,0,0.4);
+      box-shadow: 0 4px 20px rgba(218,165,32,0.4);
       z-index: 9999;
       transition: transform 0.3s;
       border: 3px solid white;
@@ -235,7 +235,7 @@ export function layout(title: string, body: string, extraHead: string = ''): str
     }
     .chatbot-panel.active { display: flex; }
     .chatbot-header {
-      background: #002B5B;
+      background: #003153;
       color: white;
       padding: 14px 16px;
       display: flex;
