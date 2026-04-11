@@ -303,7 +303,7 @@ return new class extends Migration
             $table->string('code', 20)->unique();
             $table->string('target', 200);
             $table->text('description');
-            $table->enum('status', ['pending', 'processing', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'processing', 'in_progress', 'completed', 'cancelled'])->default('pending');
             $table->string('assignee', 100)->nullable();
             $table->unsignedBigInteger('submitted_by')->nullable();
             $table->timestamps();
