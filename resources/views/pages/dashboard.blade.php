@@ -21,6 +21,32 @@ $_title = 'Dashboard - ' . ($_roles[$role] ?? '一般學生');
 {{-- Role-specific dashboard content --}}
 <div id="role-dashboard"><div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入 {{ $_roles[$role] ?? '一般學生' }} 儀表板...</div></div>
 
+{{-- FULL CAMPUS MAP (integrated from campus-map page) --}}
+<div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden mb-6 mt-6">
+  <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between flex-wrap gap-2">
+    <h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-map-marked-alt mr-2 text-fju-yellow"></i>輔仁大學校園互動地圖</h3>
+    <div class="flex gap-2 flex-wrap">
+      <button onclick="toggleLayer('teaching')" class="layer-btn active text-[11px] px-3 py-1 rounded-full bg-fju-blue text-white" data-layer="teaching"><i class="fas fa-building mr-1"></i>教學行政</button>
+      <button onclick="toggleLayer('accessible')" class="layer-btn active text-[11px] px-3 py-1 rounded-full bg-fju-yellow text-fju-blue" data-layer="accessible"><i class="fas fa-wheelchair mr-1"></i>無障礙</button>
+      <button onclick="toggleLayer('life')" class="layer-btn active text-[11px] px-3 py-1 rounded-full bg-fju-green text-white" data-layer="life"><i class="fas fa-utensils mr-1"></i>生活</button>
+      <button onclick="toggleLayer('transport')" class="layer-btn text-[11px] px-3 py-1 rounded-full bg-gray-200 text-gray-600" data-layer="transport"><i class="fas fa-bus mr-1"></i>交通</button>
+    </div>
+  </div>
+  <div class="flex" style="min-height: 480px;">
+    <div class="w-48 shrink-0 border-r border-gray-100 p-2 overflow-y-auto bg-white" style="max-height: 480px;">
+      <div class="relative mb-2"><i class="fas fa-search absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[9px]"></i><input id="map-search" type="text" placeholder="搜尋..." class="w-full pl-6 pr-2 py-1 rounded-fju border border-gray-200 text-[10px] focus:border-fju-blue outline-none" oninput="filterMapBuildings()"></div>
+      <div class="flex flex-wrap gap-0.5 mb-2">
+        <button onclick="filterMapType('all')" class="map-type-btn px-1.5 py-0.5 rounded text-[9px] bg-fju-blue text-white" data-type="all">全部</button>
+        <button onclick="filterMapType('教學')" class="map-type-btn px-1.5 py-0.5 rounded text-[9px] bg-gray-100 text-gray-500" data-type="教學">教學</button>
+        <button onclick="filterMapType('體育')" class="map-type-btn px-1.5 py-0.5 rounded text-[9px] bg-gray-100 text-gray-500" data-type="體育">體育</button>
+        <button onclick="filterMapType('餐飲')" class="map-type-btn px-1.5 py-0.5 rounded text-[9px] bg-gray-100 text-gray-500" data-type="餐飲">餐飲</button>
+      </div>
+      <div id="map-building-list" class="space-y-0.5"></div>
+    </div>
+    <div class="flex-1"><div id="campus-map" style="height: 480px; background: #e8ecf1;"></div></div>
+  </div>
+</div>
+
 <script>
 let currentSlideIdx=0;const slides=document.querySelectorAll('.carousel-slide'),dots=document.querySelectorAll('.carousel-dot');
 function goToSlide(i){slides[currentSlideIdx].style.opacity='0';dots[currentSlideIdx].classList.replace('bg-white','bg-white/40');currentSlideIdx=i;slides[currentSlideIdx].style.opacity='1';dots[currentSlideIdx].classList.replace('bg-white/40','bg-white')}
@@ -163,5 +189,47 @@ function renderITDashboard(el,d){
     new Chart('c-r2',{type:'doughnut',data:{labels:Object.keys(r2),datasets:[{data:Object.values(r2),backgroundColor:['#003153','#DAA520','#008000','#666']}]},options:{responsive:true}});
   },50);
 }
+</script>
+
+{{-- Campus Map Script --}}
+<script>
+(function(){
+const map=L.map('campus-map',{center:[25.036,121.432],zoom:17,zoomControl:true});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20}).addTo(map);
+const allBuildings=[
+  {name:'淨心堂',pos:[25.0363,121.4318],college:'宗教',type:'教學',c:'#DAA520'},
+  {name:'中美堂',pos:[25.0356,121.43],college:'學務處',type:'體育',c:'#00B894',cap:500},
+  {name:'活動中心',pos:[25.0348,121.4305],college:'學務處',type:'行政',c:'#DAA520',cap:200},
+  {name:'羅耀拉大樓',pos:[25.0358,121.433],college:'管理學院',type:'教學',c:'#8E44AD'},
+  {name:'利瑪竇大樓',pos:[25.0372,121.4325],college:'文學院',type:'教學',c:'#E67E22'},
+  {name:'聖言樓',pos:[25.0355,121.431],college:'外語學院',type:'教學',c:'#2980B9'},
+  {name:'伯達樓',pos:[25.0368,121.4335],college:'理工學院',type:'教學',c:'#27AE60'},
+  {name:'濟時樓',pos:[25.035,121.4325],college:'法律學院',type:'行政',c:'#C0392B'},
+  {name:'國璽樓',pos:[25.0345,121.4315],college:'醫學院',type:'教學',c:'#E74C3C'},
+  {name:'醫學大樓',pos:[25.0375,121.434],college:'醫學院',type:'教學',c:'#E74C3C'},
+  {name:'體育館',pos:[25.034,121.432],college:'體育室',type:'體育',c:'#00B894',cap:800},
+  {name:'SF 134',pos:[25.0365,121.4345],college:'理工學院',type:'教學',c:'#27AE60',cap:80},
+  {name:'焯炤館',pos:[25.0352,121.4335],college:'圖書資訊',type:'行政',c:'#003153'},
+  {name:'輔園餐廳',pos:[25.0347,121.4328],college:'餐飲',type:'餐飲',c:'#FF6B35'},
+  {name:'理園餐廳',pos:[25.0362,121.4348],college:'餐飲',type:'餐飲',c:'#FF6B35'},
+  {name:'宜聖宿舍',pos:[25.038,121.4345],college:'宿舍',type:'宿舍',c:'#7F8C8D'},
+  {name:'立言宿舍',pos:[25.0382,121.4335],college:'宿舍',type:'宿舍',c:'#7F8C8D'}
+];
+const teachingLayer=L.layerGroup();window._mapBData=[];
+allBuildings.forEach(b=>{const m=L.circleMarker(b.pos,{radius:9,fillColor:b.c,color:'#fff',weight:2,fillOpacity:0.85});const cap=b.cap?'<br>容量：'+b.cap+'人':'';m.bindPopup('<div class="popup-header" style="background:'+b.c+'">'+b.name+'</div><div class="popup-body"><div class="popup-row"><i class="fas fa-school"></i><span>'+b.college+cap+'</span></div><a href="/module/venue-booking?role={{ $role }}" class="popup-btn"><i class="fas fa-calendar-plus mr-1"></i>預約</a></div>',{className:'fju-popup'});m.addTo(teachingLayer);window._mapBData.push({...b,marker:m})});
+teachingLayer.addTo(map);
+const accessibleLayer=L.layerGroup();
+[{name:'醫學大樓-無障礙廁所',pos:[25.0376,121.4342],c:'#0066CC'},{name:'淨心堂-坡道',pos:[25.0362,121.4316],c:'#FF6600'},{name:'羅耀拉-電梯',pos:[25.0357,121.4328],c:'#009933'},{name:'圖書館-坡道',pos:[25.0351,121.4333],c:'#FF6600'}].forEach(a=>{const m=L.circleMarker(a.pos,{radius:5,fillColor:a.c,color:'#fff',weight:2,fillOpacity:0.9});m.bindPopup(a.name,{className:'fju-popup'});m.addTo(accessibleLayer)});accessibleLayer.addTo(map);
+const lifeLayer=L.layerGroup();
+[{name:'輔園餐廳',pos:[25.0347,121.4328],c:'#FF6B35'},{name:'心園餐廳',pos:[25.037,121.4315],c:'#FF6B35'},{name:'宜聖宿舍',pos:[25.038,121.4345],c:'#8B5CF6'}].forEach(l=>{const m=L.circleMarker(l.pos,{radius:6,fillColor:l.c,color:'#fff',weight:2,fillOpacity:0.9});m.bindPopup(l.name);m.addTo(lifeLayer)});lifeLayer.addTo(map);
+const transportLayer=L.layerGroup();
+[{name:'輔大捷運站',pos:[25.0333,121.4348],c:'#0052D4'},{name:'YouBike',pos:[25.0338,121.431],c:'#00B894'}].forEach(t=>{const m=L.circleMarker(t.pos,{radius:6,fillColor:t.c,color:'#fff',weight:2,fillOpacity:0.9});m.bindPopup(t.name);m.addTo(transportLayer)});
+window._mapLayers={teaching:teachingLayer,accessible:accessibleLayer,life:lifeLayer,transport:transportLayer};window._dashMap=map;
+function renderMapList(data){document.getElementById('map-building-list').innerHTML=data.map(b=>'<div class="flex items-center gap-1.5 p-1 rounded hover:bg-fju-bg cursor-pointer text-[10px]" onclick="window._dashMap.flyTo(['+b.pos+'],19);window._mapBData.find(x=>x.name===\''+b.name.replace(/'/g,"\\'")+'\').marker.openPopup()"><div class="w-2 h-2 rounded-full shrink-0" style="background:'+b.c+'"></div><span class="text-fju-blue font-medium truncate">'+b.name+'</span></div>').join('')}
+renderMapList(allBuildings);
+window.filterMapBuildings=function(){const s=document.getElementById('map-search').value.toLowerCase();const f=window._mapBData.filter(b=>b.name.toLowerCase().includes(s)||b.college.toLowerCase().includes(s));renderMapList(f);window._mapBData.forEach(b=>{if(f.includes(b))map.addLayer(b.marker);else map.removeLayer(b.marker)})};
+window.filterMapType=function(t){document.querySelectorAll('.map-type-btn').forEach(b=>{b.classList.remove('bg-fju-blue','text-white');b.classList.add('bg-gray-100','text-gray-500')});document.querySelector('.map-type-btn[data-type="'+t+'"]')?.classList.add('bg-fju-blue','text-white');document.querySelector('.map-type-btn[data-type="'+t+'"]')?.classList.remove('bg-gray-100','text-gray-500');const f=t==='all'?window._mapBData:window._mapBData.filter(b=>b.type===t);renderMapList(f);window._mapBData.forEach(b=>{if(f.includes(b))map.addLayer(b.marker);else map.removeLayer(b.marker)})};
+})();
+function toggleLayer(n){const l=window._mapLayers[n],b=document.querySelector('.layer-btn[data-layer="'+n+'"]');if(!l||!b)return;const m=window._dashMap;if(m.hasLayer(l)){m.removeLayer(l);b.classList.add('bg-gray-200','text-gray-600');b.classList.remove('bg-fju-blue','text-white','bg-fju-yellow','text-fju-blue','bg-fju-green','active')}else{m.addLayer(l);b.classList.remove('bg-gray-200','text-gray-600');b.classList.add('active');({teaching:['bg-fju-blue','text-white'],accessible:['bg-fju-yellow','text-fju-blue'],life:['bg-fju-green','text-white'],transport:['bg-fju-blue','text-white']}[n]||[]).forEach(x=>b.classList.add(x))}}
 </script>
 @endsection
