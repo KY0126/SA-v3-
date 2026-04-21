@@ -6,7 +6,12 @@
   {{-- Header --}}
   <div class="flex items-center justify-between flex-wrap gap-2">
     <h2 class="font-bold text-fju-blue text-lg"><i class="fas fa-handshake mr-2 text-fju-yellow"></i>衝突協調中心</h2>
-    <div class="flex gap-2">
+    <div class="flex gap-2 flex-wrap">
+      <select id="cf-sort" onchange="renderConflicts()" class="px-3 py-1 rounded-fju border border-gray-200 text-xs">
+        <option value="newest">最新優先</option>
+        <option value="oldest">最舊優先</option>
+        <option value="venue">依場地</option>
+      </select>
       <button onclick="filterConflicts('all')" class="cf-f px-3 py-1 rounded-fju bg-fju-blue text-white text-xs" data-f="all">全部</button>
       <button onclick="filterConflicts('pending')" class="cf-f px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-f="pending">待處理</button>
       <button onclick="filterConflicts('negotiating')" class="cf-f px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-f="negotiating">協商中</button>
@@ -99,7 +104,42 @@
 </div>
 
 <script>
-let allConflicts=[], currentConflictId=null, currentFilter='all';
+let allConflicts=[], currentConflictId=null, currentFilter='all', timerInterval=null, timerSeconds=0;
+
+// CSS for red flash deduction animation
+const style=document.createElement('style');
+style.textContent=`
+@keyframes redFlash { 0%{background:rgba(255,0,0,0.3)} 50%{background:rgba(255,0,0,0)} 100%{background:rgba(255,0,0,0.3)} }
+.red-flash-anim { animation: redFlash 0.5s ease-in-out 3; }
+@keyframes scoreDown { 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(40px);opacity:0} }
+.score-down-anim { animation: scoreDown 1.5s ease-out forwards; color:#FF0000; font-weight:bold; position:absolute; }
+`;
+document.head.appendChild(style);
+
+function startTimer(){
+  clearInterval(timerInterval);
+  timerSeconds=0;
+  timerInterval=setInterval(()=>{
+    timerSeconds++;
+    const min=Math.floor(timerSeconds/60), sec=timerSeconds%60;
+    const el=document.getElementById('cd-timer');
+    if(el){
+      el.textContent=`⏱ ${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')} / 06:00`;
+      if(timerSeconds>=360){
+        el.className='text-xs text-fju-red font-bold animate-pulse';
+        el.textContent='⚠️ 06:00 超時！強制關閉 -10分';
+        clearInterval(timerInterval);
+        document.body.classList.add('red-flash-anim');
+        setTimeout(()=>document.body.classList.remove('red-flash-anim'),1500);
+      } else if(timerSeconds>=180){
+        el.className='text-xs text-fju-yellow font-bold';
+        if(timerSeconds===180) loadAISuggestions();
+      } else {
+        el.className='text-[10px] text-gray-400';
+      }
+    }
+  },1000);
+}
 
 function loadConflicts(){
   fetch('/api/conflicts').then(r=>r.json()).then(res=>{
@@ -121,7 +161,11 @@ function renderStats(){
 }
 
 function renderConflicts(){
-  const data = currentFilter==='all' ? allConflicts : allConflicts.filter(c=>c.status===currentFilter);
+  let data = currentFilter==='all' ? [...allConflicts] : allConflicts.filter(c=>c.status===currentFilter);
+  const sort=document.getElementById('cf-sort')?.value||'newest';
+  if(sort==='newest') data.sort((a,b)=>b.id-a.id);
+  else if(sort==='oldest') data.sort((a,b)=>a.id-b.id);
+  else if(sort==='venue') data.sort((a,b)=>(a.venue_name||'').localeCompare(b.venue_name||''));
   if(data.length===0){document.getElementById('conflict-list').innerHTML='<div class="p-8 text-center text-gray-400"><i class="fas fa-check-circle mr-2 text-fju-green"></i>目前無衝突事件</div>';return}
   const sc={'pending':'bg-fju-red/10 text-fju-red','negotiating':'bg-fju-yellow/20 text-fju-yellow','resolved':'bg-fju-green/10 text-fju-green','escalated':'bg-purple-100 text-purple-600'};
   const sl={'pending':'待處理','negotiating':'協商中','resolved':'已解決','escalated':'已升級'};
@@ -172,6 +216,7 @@ function openDetail(id){
     // AI suggestions
     loadAISuggestions();
     document.getElementById('conflict-detail-modal').classList.remove('hidden');
+    if(c.status!=='resolved') startTimer();
   });
 }
 
@@ -227,10 +272,11 @@ function confirmResolution(party){
     alert(res.message);
     updateConfirmBtn(party, true, res.both_confirmed);
     if(res.both_confirmed){
+      clearInterval(timerInterval);
       document.getElementById('cd-resolution-status').classList.remove('hidden');
-      document.getElementById('cd-resolution-msg').textContent='🎉 衝突已解決！雙方均已確認，預約已自動更新。';
+      document.getElementById('cd-resolution-msg').innerHTML='🎉 衝突已解決！雙方均已確認，預約已自動更新。<br><a href="/module/calendar?role={{ $role ?? "student" }}" class="inline-flex items-center gap-1 mt-3 btn-yellow px-6 py-2 text-sm"><i class="fas fa-calendar-alt"></i>前往行事曆管理頁面</a>';
       document.getElementById('cd-status').textContent='已解決';
-      loadConflicts(); // refresh list
+      loadConflicts();
     }
   });
 }
@@ -244,7 +290,7 @@ function loadAISuggestions(){
   ].map((s,i)=>`<div class="flex items-center gap-3 p-2 rounded-fju ${i===0?'bg-fju-green/10 border border-fju-green/20':'bg-white border border-gray-100'}"><span class="w-6 h-6 rounded-full ${i===0?'bg-fju-green text-white':'bg-gray-200 text-gray-500'} flex items-center justify-center text-xs font-bold">${i+1}</span><span class="flex-1 text-sm text-gray-700">${s.desc}</span><span class="text-xs px-2 py-0.5 rounded-full ${s.confidence>0.8?'bg-fju-green/10 text-fju-green':'bg-fju-yellow/20 text-fju-yellow'}">${(s.confidence*100).toFixed(0)}%</span></div>`).join('');
 }
 
-function closeDetailModal(){document.getElementById('conflict-detail-modal').classList.add('hidden')}
+function closeDetailModal(){document.getElementById('conflict-detail-modal').classList.add('hidden');clearInterval(timerInterval)}
 
 loadConflicts();
 </script>

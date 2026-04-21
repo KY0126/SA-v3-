@@ -80,3 +80,6 @@ Route::get('i18n/{lang}', [CrudController::class, 'i18n']);
 
 // Health
 Route::get('health', [CrudController::class, 'health']);
+
+// Gatekeeping
+Route::post('gatekeeping/check', [CrudController::class, 'gatekeepingCheck']);

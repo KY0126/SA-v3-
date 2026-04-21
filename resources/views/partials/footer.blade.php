@@ -6,5 +6,5 @@
       <div class="text-sm text-right"><div class="font-bold mb-1"><i class="fas fa-phone mr-2 text-fju-yellow"></i>櫃台資訊</div><div class="text-white/60 text-xs leading-relaxed">電話：(02) 2905-2237<br>維護信箱：activity@mail.fju.edu.tw</div></div>
     </div>
   </div>
-  <div class="border-t border-white/10 px-6 py-3 text-center text-white/40 text-xs">天主教輔仁大學 &copy; 2014-2024 版權所有 | Powered by Vue 3 + Laravel + Dify AI</div>
+  <div class="border-t border-white/10 px-6 py-3 text-center text-white/40 text-xs">天主教輔仁大學 &copy; 2014-2026 版權所有 | Powered by PHP 8.2 + Laravel 12 + MySQL 8.0 + Vue 3 + Dify AI | v3.0.0</div>
 </footer>

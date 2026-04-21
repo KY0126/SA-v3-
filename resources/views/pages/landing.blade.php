@@ -30,12 +30,26 @@
 </section>
 <section id="features" class="py-24 bg-white">
   <div class="max-w-7xl mx-auto px-6">
-    <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full bg-fju-blue/10 text-fju-blue text-sm font-bold mb-4">解決方案</span><h2 class="text-4xl font-black text-fju-blue mb-4">FJU Smart Hub 的優勢</h2><p class="text-gray-500 text-lg max-w-2xl mx-auto">透過 AI 與數位化轉型，全面提升校園活動管理效率</p></div>
+    <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full bg-fju-blue/10 text-fju-blue text-sm font-bold mb-4">痛點 → 解方</span><h2 class="text-4xl font-black text-fju-blue mb-4">使用者痛點 & FJU Smart Hub 解方</h2><p class="text-gray-500 text-lg max-w-2xl mx-auto">透過 AI 與數位化轉型，全面提升校園活動管理效率</p></div>
     <div class="grid md:grid-cols-3 gap-8">
-      @foreach([['fas fa-robot','AI 智慧預審','RAG 引擎自動比對校內法規，即時標記合規風險。'],['fas fa-chess','三階段資源調度','志願序演算法 + AI 協商 + 官方審核。'],['fas fa-map-marked-alt','無障礙校園地圖','Leaflet.js 互動地圖，標示所有無障礙設施。'],['fas fa-certificate','數位證書自動化','幹部證書自動產生、數位簽章驗證。'],['fas fa-shield-alt','全方位安全防護','Cloudflare WAF + 2FA + 信用積分制度。'],['fas fa-language','五國語言支援','繁中、簡中、英、日、韓全系統翻譯。']] as $idx => $f)
-      <div class="feature-card bg-white rounded-[15px] p-8 shadow-lg border border-gray-100 card-hover opacity-0">
-        <div class="w-14 h-14 rounded-[12px] {{ $idx % 2 === 0 ? 'bg-fju-yellow' : 'bg-fju-blue' }} flex items-center justify-center mb-6 shadow-lg"><i class="{{ $f[0] }} {{ $idx % 2 === 0 ? 'text-fju-blue' : 'text-white' }} text-xl"></i></div>
-        <h3 class="text-lg font-bold text-fju-blue mb-2">{{ $f[1] }}</h3><p class="text-gray-500 text-sm">{{ $f[2] }}</p>
+      @foreach([
+        ['fas fa-times-circle','#FF0000','場地預約跑三趟','以前借場地要跑教務處、課指組、總務處...','fas fa-robot','#008000','AI 三階段一鍵搞定','志願序演算法 + AI 協商 + 官方審核，線上完成全流程。'],
+        ['fas fa-clock','#FF0000','申請等半個月','紙本文件層層簽核，等待時間無法預估','fas fa-bolt','#008000','AI 預審即時回覆','RAG 引擎自動比對法規，即時標記合規風險，審核速度提升 10 倍。'],
+        ['fas fa-file-alt','#FF0000','表單填不完','每次活動都要填十幾份不同的表單','fas fa-wand-magic-sparkles','#008000','AI 一鍵生成企劃書','輸入基本資訊，AI 自動生成完整企劃書、預算表、風險評估。'],
+        ['fas fa-language','#FF0000','外籍生看不懂','系統介面只有中文，外籍生無法使用','fas fa-globe','#008000','五國語言即時切換','繁中、簡中、英、日、韓全系統翻譯，點一下全部切換。'],
+        ['fas fa-wheelchair','#FF0000','找不到無障礙設施','校園太大，不知道哪裡有坡道和電梯','fas fa-map-marked-alt','#008000','互動式無障礙地圖','Leaflet.js 互動地圖，一鍵顯示所有無障礙設施位置。'],
+        ['fas fa-shield-alt','#FF0000','場地衝突沒人管','兩個社團搶同一個場地，互相推諉','fas fa-handshake','#008000','AI 衝突協調中心','即時對話 + 郵件通知 + AI 建議方案 + 雙方確認按鈕。']
+      ] as $idx => $f)
+      <div class="feature-card bg-white rounded-[15px] p-6 shadow-lg border border-gray-100 card-hover opacity-0">
+        <div class="flex items-start gap-3 mb-4">
+          <div class="w-10 h-10 rounded-[12px] bg-red-50 flex items-center justify-center shrink-0"><i class="{{ $f[0] }}" style="color:{{ $f[1] }}"></i></div>
+          <div><div class="font-bold text-fju-red text-sm line-through decoration-2">{{ $f[2] }}</div><p class="text-gray-400 text-xs mt-1">{{ $f[3] }}</p></div>
+        </div>
+        <div class="flex items-center gap-2 mb-3"><i class="fas fa-arrow-down text-fju-yellow"></i><span class="text-[10px] text-fju-yellow font-bold">Smart Hub 解方</span></div>
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-[12px] bg-green-50 flex items-center justify-center shrink-0"><i class="{{ $f[4] }}" style="color:{{ $f[5] }}"></i></div>
+          <div><div class="font-bold text-fju-green text-sm">{{ $f[6] }}</div><p class="text-gray-500 text-xs mt-1">{{ $f[7] }}</p></div>
+        </div>
       </div>
       @endforeach
     </div>
@@ -75,7 +89,7 @@
 <footer class="py-16 bg-fju-blue text-white">
   <div class="max-w-7xl mx-auto px-6">
     <div class="grid md:grid-cols-3 gap-12 mb-12"><div><div class="font-bold mb-2"><i class="fas fa-map-marker-alt mr-2 text-fju-yellow"></i>校址</div><p class="text-white/50 text-sm">24205 新北市新莊區中正路510號</p></div><div class="text-center"><div class="font-bold mb-2"><i class="fab fa-facebook mr-2 text-fju-yellow"></i>粉專連結</div><div class="flex gap-3 justify-center mt-2"><a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-fju-yellow/20 transition-colors"><i class="fab fa-facebook-f"></i></a><a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-fju-yellow/20 transition-colors"><i class="fab fa-instagram"></i></a><a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-fju-yellow/20 transition-colors"><i class="fab fa-line"></i></a></div></div><div class="text-right"><div class="font-bold mb-2"><i class="fas fa-phone mr-2 text-fju-yellow"></i>櫃台資訊</div><p class="text-white/50 text-sm">(02) 2905-2237<br>activity@mail.fju.edu.tw</p></div></div>
-    <div class="border-t border-white/10 pt-8 text-center text-white/40 text-sm"><p>天主教輔仁大學 &copy; 2014-2024 版權所有</p></div>
+    <div class="border-t border-white/10 pt-8 text-center text-white/40 text-sm"><p>天主教輔仁大學 &copy; 2014-2026 版權所有 | FJU Smart Hub v3.0</p></div>
   </div>
 </footer>
 <script>

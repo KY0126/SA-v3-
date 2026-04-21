@@ -345,4 +345,34 @@ class CrudController extends Controller
             'stats' => ['total_clubs' => Club::count(), 'total_users' => User::count()]
         ]);
     }
+
+    // ====== Gatekeeping: Dependency Check ======
+    public function gatekeepingCheck(Request $r) {
+        $userId = $r->user_id ?? 1;
+        $targetAction = $r->target_action ?? 'venue_booking'; // venue_booking, equipment_borrow
+        $steps = [
+            ['step' => 'activity_approval', 'label' => '活動核備', 'required' => true, 'completed' => true, 'code' => 'FJU-ACT-2026-0042'],
+            ['step' => 'venue_booking', 'label' => '場地預約', 'required' => $targetAction !== 'activity_approval', 'completed' => $targetAction === 'equipment_borrow'],
+            ['step' => 'equipment_borrow', 'label' => '器材借用', 'required' => $targetAction === 'equipment_borrow', 'completed' => false],
+        ];
+        $blocked = false;
+        $blockedReason = null;
+        foreach ($steps as $step) {
+            if ($step['step'] === $targetAction) break;
+            if ($step['required'] && !$step['completed']) {
+                $blocked = true;
+                $blockedReason = "依據《場地設備借用管理辦法》第3條，您需先完成「{$step['label']}」才能進行目前操作。";
+                break;
+            }
+        }
+        return response()->json([
+            'allow' => !$blocked,
+            'steps' => $steps,
+            'blocked_reason' => $blockedReason,
+            'ai_guidance' => $blocked
+                ? "AI 引導提示：請先至「{$steps[0]['label']}」頁面取得核備編號，再進行場地預約。"
+                : null,
+            'law_reference' => 'FJU-ACT-001 第3條: 場地借用須先取得活動核備編號',
+        ]);
+    }
 }
