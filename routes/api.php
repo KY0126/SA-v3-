@@ -29,10 +29,14 @@ Route::post('reservations/{id}/negotiate', [ReservationController::class, 'negot
 Route::post('reservations/{id}/accept-suggestion', [ReservationController::class, 'acceptSuggestion']);
 Route::apiResource('reservations', ReservationController::class)->except(['show']);
 
-// Conflicts
+// Conflicts (Enhanced Coordination)
 Route::get('conflicts', [CrudController::class, 'conflictIndex']);
+Route::get('conflicts/{id}', [CrudController::class, 'conflictShow']);
 Route::post('conflicts', [CrudController::class, 'conflictStore']);
 Route::post('conflicts/negotiate', [CrudController::class, 'conflictNegotiate']);
+Route::post('conflicts/{id}/chat', [CrudController::class, 'conflictChat']);
+Route::post('conflicts/{id}/send-email', [CrudController::class, 'conflictSendEmail']);
+Route::post('conflicts/{id}/confirm', [CrudController::class, 'conflictConfirm']);
 
 // Credits
 Route::get('credits/{userId}', [CrudController::class, 'creditShow']);

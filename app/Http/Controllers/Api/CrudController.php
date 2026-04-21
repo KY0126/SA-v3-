@@ -1,19 +1,46 @@
 <?php
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
-use App\Models\{Conflict, CreditLog, NotificationLog, Certificate, Appeal, Repair, CalendarEvent, User, Club};
+use App\Models\{Conflict, CreditLog, NotificationLog, Certificate, Appeal, Repair, CalendarEvent, User, Club, Reservation};
 use Illuminate\Http\Request;
 
 class CrudController extends Controller
 {
-    // ====== Conflicts ======
-    public function conflictIndex() {
-        return response()->json(['data' => Conflict::orderBy('created_at', 'desc')->get()]);
+    // ====== Conflicts (Enhanced Coordination) ======
+    public function conflictIndex(Request $r) {
+        $q = Conflict::orderBy('created_at', 'desc');
+        if ($r->status) $q->where('status', $r->status);
+        $data = $q->get()->map(function($c) {
+            $c->chat_messages = json_decode($c->chat_messages, true) ?? [];
+            return $c;
+        });
+        return response()->json(['data' => $data]);
     }
+
+    public function conflictShow($id) {
+        $c = Conflict::findOrFail($id);
+        $c->chat_messages = json_decode($c->chat_messages, true) ?? [];
+        // Get related reservations
+        $resA = $c->reservation_a_id ? Reservation::find($c->reservation_a_id) : null;
+        $resB = $c->reservation_b_id ? Reservation::find($c->reservation_b_id) : null;
+        return response()->json([
+            'data' => $c,
+            'reservation_a' => $resA,
+            'reservation_b' => $resB,
+        ]);
+    }
+
     public function conflictStore(Request $r) {
-        $c = Conflict::create($r->all());
+        $c = Conflict::create($r->all() + [
+            'chat_messages' => '[]',
+            'party_a_confirmed' => false,
+            'party_b_confirmed' => false,
+        ]);
+        // Auto-create notifications for both parties
+        $this->_sendConflictNotification($c, 'new');
         return response()->json(['success' => true, 'data' => $c], 201);
     }
+
     public function conflictNegotiate(Request $r) {
         $elapsed = $r->elapsed_minutes ?? 0;
         $resp = [
@@ -33,6 +60,94 @@ class CrudController extends Controller
             $resp['ai_intervention'] = true;
         }
         return response()->json($resp);
+    }
+
+    // -- Chat in conflict --
+    public function conflictChat(Request $r, $id) {
+        $conflict = Conflict::findOrFail($id);
+        $msgs = json_decode($conflict->chat_messages, true) ?? [];
+        $msgs[] = [
+            'sender' => $r->sender ?? '匿名',
+            'party' => $r->party ?? 'a',
+            'message' => $r->message,
+            'timestamp' => now()->toIso8601String(),
+        ];
+        $conflict->update([
+            'chat_messages' => json_encode($msgs, JSON_UNESCAPED_UNICODE),
+            'status' => 'negotiating',
+        ]);
+        return response()->json(['success' => true, 'messages' => $msgs]);
+    }
+
+    // -- Send email notification (simulated) --
+    public function conflictSendEmail(Request $r, $id) {
+        $conflict = Conflict::findOrFail($id);
+        $party = $r->party ?? 'a'; // a or b
+        $update = $party === 'a' ? ['email_sent_a' => true] : ['email_sent_b' => true];
+        $conflict->update($update);
+        // Create notification log
+        NotificationLog::create([
+            'user_id' => 1,
+            'title' => '場地衝突協商通知 - 電子郵件',
+            'message' => "已對{$conflict->{'party_'.$party}}發送協商通知郵件，衝突編號：#{$conflict->id}",
+            'channel' => 'email',
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => "已發送電子郵件通知給".($party === 'a' ? $conflict->party_a : $conflict->party_b),
+            'email_status' => $party === 'a' ? 'sent_to_a' : 'sent_to_b',
+        ]);
+    }
+
+    // -- Confirm resolution --
+    public function conflictConfirm(Request $r, $id) {
+        $conflict = Conflict::findOrFail($id);
+        $party = $r->party ?? 'a';
+        $update = [];
+        if ($party === 'a') {
+            $update = ['party_a_confirmed' => true, 'party_a_confirmed_at' => now()];
+        } else {
+            $update = ['party_b_confirmed' => true, 'party_b_confirmed_at' => now()];
+        }
+        $conflict->update($update);
+        $conflict->refresh();
+
+        // Check if both parties confirmed
+        $bothConfirmed = $conflict->party_a_confirmed && $conflict->party_b_confirmed;
+        if ($bothConfirmed) {
+            $conflict->update([
+                'status' => 'resolved',
+                'resolution_type' => $r->resolution_type ?? 'mutual_agreement',
+                'resolution' => $r->resolution ?? '雙方已確認協商結果',
+            ]);
+            // Update related reservations
+            if ($conflict->reservation_a_id) {
+                Reservation::where('id', $conflict->reservation_a_id)->update(['stage' => 'approval', 'status' => 'confirmed']);
+            }
+            if ($conflict->reservation_b_id) {
+                Reservation::where('id', $conflict->reservation_b_id)->update(['stage' => 'approval', 'status' => 'confirmed']);
+            }
+            // Notify coordinator
+            $this->_sendConflictNotification($conflict, 'resolved');
+        }
+
+        return response()->json([
+            'success' => true,
+            'party_confirmed' => $party,
+            'both_confirmed' => $bothConfirmed,
+            'conflict_status' => $conflict->status,
+            'message' => $bothConfirmed
+                ? '雙方均已確認！衝突已解決，已自動更新預約狀態。'
+                : ($party === 'a' ? $conflict->party_a : $conflict->party_b) . ' 已確認，等待對方確認。',
+        ]);
+    }
+
+    private function _sendConflictNotification(Conflict $c, $type) {
+        $title = $type === 'new' ? '⚠️ 新場地衝突通知' : '✅ 場地衝突已解決';
+        $msg = $type === 'new'
+            ? "場地 {$c->venue_name} 於 {$c->conflict_date} {$c->time_slot} 時段發生衝突（{$c->party_a} vs {$c->party_b}），請儘速協商。"
+            : "衝突 #{$c->id}（{$c->venue_name}）已由雙方確認解決。";
+        NotificationLog::create(['user_id' => 1, 'title' => $title, 'message' => $msg, 'channel' => 'system']);
     }
 
     // ====== Credit System ======
@@ -212,11 +327,11 @@ class CrudController extends Controller
     // ====== i18n ======
     public function i18n($lang) {
         $packs = [
-            'zh-TW' => ['dashboard' => 'Dashboard', 'venue_booking' => '場地預約', 'equipment' => '設備借用', 'calendar' => '行事曆', 'club_info' => '社團資訊', 'activity_wall' => '活動牆', 'ai_overview' => 'AI 資訊概覽', 'ai_guide' => 'AI 導覽助理', 'rag_search' => '法規查詢', 'repair' => '報修管理', 'appeal' => '申訴記錄', 'reports' => '統計報表', 'login' => '登入', 'logout' => '登出', 'search' => '搜尋', 'hello' => '你好', 'credit_score' => '信用積分', 'notification' => '通知'],
-            'en' => ['dashboard' => 'Dashboard', 'venue_booking' => 'Venue Booking', 'equipment' => 'Equipment', 'calendar' => 'Calendar', 'club_info' => 'Club Info', 'activity_wall' => 'Activity Wall', 'ai_overview' => 'AI Overview', 'ai_guide' => 'AI Guide', 'rag_search' => 'RAG Search', 'repair' => 'Repair', 'appeal' => 'Appeal', 'reports' => 'Reports', 'login' => 'Login', 'logout' => 'Logout', 'search' => 'Search', 'hello' => 'Hello', 'credit_score' => 'Credit Score', 'notification' => 'Notifications'],
-            'ja' => ['dashboard' => 'ダッシュボード', 'venue_booking' => '会場予約', 'equipment' => '機器貸出', 'calendar' => 'カレンダー', 'club_info' => 'サークル情報', 'activity_wall' => 'アクティビティウォール', 'ai_overview' => 'AI 概要', 'ai_guide' => 'AI ガイド', 'rag_search' => '規則検索', 'repair' => '修理管理', 'appeal' => '申立記録', 'reports' => '統計レポート', 'login' => 'ログイン', 'logout' => 'ログアウト', 'search' => '検索', 'hello' => 'こんにちは', 'credit_score' => 'クレジットスコア', 'notification' => '通知'],
-            'ko' => ['dashboard' => '대시보드', 'venue_booking' => '장소 예약', 'equipment' => '장비 대여', 'calendar' => '캘린더', 'club_info' => '동아리 정보', 'activity_wall' => '활동 게시판', 'ai_overview' => 'AI 개요', 'ai_guide' => 'AI 가이드', 'rag_search' => '규정 검색', 'repair' => '수리 관리', 'appeal' => '이의 제기', 'reports' => '통계 보고서', 'login' => '로그인', 'logout' => '로그아웃', 'search' => '검색', 'hello' => '안녕하세요', 'credit_score' => '신용 점수', 'notification' => '알림'],
-            'zh-CN' => ['dashboard' => '仪表板', 'venue_booking' => '场地预约', 'equipment' => '设备借用', 'calendar' => '日历', 'club_info' => '社团信息', 'activity_wall' => '活动墙', 'ai_overview' => 'AI 信息概览', 'ai_guide' => 'AI 导览助手', 'rag_search' => '法规查询', 'repair' => '报修管理', 'appeal' => '申诉记录', 'reports' => '统计报表', 'login' => '登录', 'logout' => '退出', 'search' => '搜索', 'hello' => '你好', 'credit_score' => '信用积分', 'notification' => '通知'],
+            'zh-TW' => ['dashboard' => 'Dashboard', 'venue_booking' => '場地預約', 'equipment' => '設備借用', 'calendar' => '行事曆', 'club_info' => '社團資訊', 'activity_wall' => '活動牆', 'ai_overview' => 'AI 資訊概覽', 'ai_guide' => 'AI 導覽助理', 'rag_search' => '法規查詢', 'repair' => '報修管理', 'appeal' => '申訴記錄', 'reports' => '統計報表', 'login' => '登入', 'logout' => '登出', 'search' => '搜尋', 'hello' => '你好', 'credit_score' => '信用積分', 'notification' => '通知', 'conflict' => '衝突協調'],
+            'en' => ['dashboard' => 'Dashboard', 'venue_booking' => 'Venue Booking', 'equipment' => 'Equipment', 'calendar' => 'Calendar', 'club_info' => 'Club Info', 'activity_wall' => 'Activity Wall', 'ai_overview' => 'AI Overview', 'ai_guide' => 'AI Guide', 'rag_search' => 'RAG Search', 'repair' => 'Repair', 'appeal' => 'Appeal', 'reports' => 'Reports', 'login' => 'Login', 'logout' => 'Logout', 'search' => 'Search', 'hello' => 'Hello', 'credit_score' => 'Credit Score', 'notification' => 'Notifications', 'conflict' => 'Conflict Resolution'],
+            'ja' => ['dashboard' => 'ダッシュボード', 'venue_booking' => '会場予約', 'equipment' => '機器貸出', 'calendar' => 'カレンダー', 'club_info' => 'サークル情報', 'activity_wall' => 'アクティビティウォール', 'ai_overview' => 'AI 概要', 'ai_guide' => 'AI ガイド', 'rag_search' => '規則検索', 'repair' => '修理管理', 'appeal' => '申立記録', 'reports' => '統計レポート', 'login' => 'ログイン', 'logout' => 'ログアウト', 'search' => '検索', 'hello' => 'こんにちは', 'credit_score' => 'クレジットスコア', 'notification' => '通知', 'conflict' => '紛争解決'],
+            'ko' => ['dashboard' => '대시보드', 'venue_booking' => '장소 예약', 'equipment' => '장비 대여', 'calendar' => '캘린더', 'club_info' => '동아리 정보', 'activity_wall' => '활동 게시판', 'ai_overview' => 'AI 개요', 'ai_guide' => 'AI 가이드', 'rag_search' => '규정 검색', 'repair' => '수리 관리', 'appeal' => '이의 제기', 'reports' => '통계 보고서', 'login' => '로그인', 'logout' => '로그아웃', 'search' => '검색', 'hello' => '안녕하세요', 'credit_score' => '신용 점수', 'notification' => '알림', 'conflict' => '갈등 해결'],
+            'zh-CN' => ['dashboard' => '仪表板', 'venue_booking' => '场地预约', 'equipment' => '设备借用', 'calendar' => '日历', 'club_info' => '社团信息', 'activity_wall' => '活动墙', 'ai_overview' => 'AI 信息概览', 'ai_guide' => 'AI 导览助手', 'rag_search' => '法规查询', 'repair' => '报修管理', 'appeal' => '申诉记录', 'reports' => '统计报表', 'login' => '登录', 'logout' => '退出', 'search' => '搜索', 'hello' => '你好', 'credit_score' => '信用积分', 'notification' => '通知', 'conflict' => '冲突协调'],
         ];
         return response()->json($packs[$lang] ?? $packs['zh-TW']);
     }

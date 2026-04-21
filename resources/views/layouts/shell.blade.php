@@ -24,6 +24,7 @@ $sidebarSections = [
         ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
     ]],
     ['title'=>'管理與報表','items'=>[
+        ['id'=>'conflict-coordination','label'=>'衝突協調','icon'=>'fas fa-handshake','href'=>"/module/conflict-coordination?role={$role}"],
         ['id'=>'repair','label'=>'報修管理','icon'=>'fas fa-wrench','href'=>"/module/repair?role={$role}"],
         ['id'=>'appeal','label'=>'申訴記錄','icon'=>'fas fa-comments','href'=>"/module/appeal?role={$role}"],
         ['id'=>'reports','label'=>'統計報表','icon'=>'fas fa-chart-bar','href'=>"/module/reports?role={$role}"],

@@ -153,6 +153,7 @@ PAGES=(
     "/module/certificate|證書|幹部證書"
     "/module/time-capsule|膠囊|時光膠囊"
     "/module/2fa|2FA|雙因子驗證"
+    "/module/conflict-coordination|衝突協調|衝突協調中心"
 )
 PAGE_COUNT=0
 for entry in "${PAGES[@]}"; do
@@ -857,6 +858,60 @@ RESP=$(curl -s "$BASE/api/venues/1/schedule?date=2026-01-01")
 assert_json_exists "venue_id" "$RESP" "['venue_id']"
 assert_json_exists "date" "$RESP" "['date']"
 assert_json_exists "slots" "$RESP" "['slots']"
+
+# ═══════════════════════════════════════════════════════════════════
+# US-22  衝突協調中心完整流程（新增功能）
+# ═══════════════════════════════════════════════════════════════════
+log_header "US-22  衝突協調中心（Chat + Email + Confirm）"
+
+log_story "作為衝突雙方，我需要透過對話、郵件和確認按鈕解決衝突"
+
+log_step "T-22-01: 查詢衝突列表"
+RESP=$(curl -s "$BASE/api/conflicts")
+assert_json_exists "conflicts data" "$RESP" "['data']"
+
+log_step "T-22-02: 查詢衝突詳情"
+RESP=$(curl -s "$BASE/api/conflicts/1")
+assert_json_exists "data" "$RESP" "['data']"
+# reservation_a is nullable (depends on seeded data)
+RESP_HAS_KEY=$(echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print('EXISTS' if 'reservation_a' in d else 'MISSING')" 2>/dev/null || echo "MISSING")
+if [ "$RESP_HAS_KEY" == "EXISTS" ]; then
+    echo -e "    ${C_GREEN}✅ PASS${C_RESET} field reservation_a key exists (nullable) | reservation_a"
+    ((PASS++))
+else
+    echo -e "    ${C_RED}❌ FAIL${C_RESET} field reservation_a key missing | reservation_a"
+    ((FAIL++))
+    ERRORS+=("FAIL|reservation_a key missing|conflicts/1|missing key")
+fi
+
+log_step "T-22-03: 發送即時對話訊息"
+RESP=$(curl -s -X POST "$BASE/api/conflicts/1/chat" \
+    -H "Content-Type: application/json" \
+    -d '{"sender":"E2E測試","party":"a","message":"E2E test message"}')
+assert_json_field "發送成功" "$RESP" "['success']" "True"
+assert_json_exists "messages" "$RESP" "['messages']"
+
+log_step "T-22-04: 發送郵件通知甲方"
+RESP=$(curl -s -X POST "$BASE/api/conflicts/1/send-email" \
+    -H "Content-Type: application/json" \
+    -d '{"party":"a"}')
+assert_json_field "郵件發送成功" "$RESP" "['success']" "True"
+assert_json_contains "已發送" "$RESP" "已發送"
+
+log_step "T-22-05: 甲方確認協商結果"
+RESP=$(curl -s -X POST "$BASE/api/conflicts/1/confirm" \
+    -H "Content-Type: application/json" \
+    -d '{"party":"a"}')
+assert_json_field "甲方確認成功" "$RESP" "['success']" "True"
+assert_json_field "party_confirmed = a" "$RESP" "['party_confirmed']" "a"
+
+log_step "T-22-06: 乙方確認協商結果 → 衝突解決"
+RESP=$(curl -s -X POST "$BASE/api/conflicts/1/confirm" \
+    -H "Content-Type: application/json" \
+    -d '{"party":"b"}')
+assert_json_field "乙方確認成功" "$RESP" "['success']" "True"
+assert_json_field "雙方均確認" "$RESP" "['both_confirmed']" "True"
+assert_json_field "衝突已解決" "$RESP" "['conflict_status']" "resolved"
 
 # ═══════════════════════════════════════════════════════════════════
 #  FINAL REPORT

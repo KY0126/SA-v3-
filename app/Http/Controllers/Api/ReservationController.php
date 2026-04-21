@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
-use App\Models\Reservation;
+use App\Models\{Reservation, Conflict, NotificationLog};
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
@@ -13,21 +13,49 @@ class ReservationController extends Controller
         $data = $q->orderBy('reservation_date', 'desc')->get();
         return response()->json(['data' => $data, 'total' => $data->count()]);
     }
+
     public function store(Request $r) {
         $priority = $r->priority_level ?? 3;
+
         // Conflict check
-        $conflict = Reservation::where('venue_id', $r->venue_id)
+        $conflicting = Reservation::where('venue_id', $r->venue_id)
             ->where('reservation_date', $r->reservation_date)
             ->where(fn($q) => $q->where('start_time', '<', $r->end_time)->where('end_time', '>', $r->start_time))
-            ->whereNotIn('status', ['cancelled', 'rejected'])->exists();
+            ->whereNotIn('status', ['cancelled', 'rejected'])->first();
 
-        if ($conflict) {
+        if ($conflicting) {
+            // Create a conflict record in DB
+            $conflict = Conflict::create([
+                'reservation_a_id' => $conflicting->id,
+                'venue_id' => $r->venue_id,
+                'party_a' => $conflicting->club_name ?? $conflicting->user_name ?? '預約方A',
+                'party_b' => $r->club_name ?? $r->user_name ?? '預約方B',
+                'venue_name' => $r->venue_name ?? $conflicting->venue_name ?? '場地',
+                'conflict_date' => $r->reservation_date,
+                'time_slot' => "{$r->start_time} - {$r->end_time}",
+                'status' => 'pending',
+                'stage' => 'initial',
+                'chat_messages' => '[]',
+            ]);
+
+            // Create notification for both parties
+            NotificationLog::create([
+                'user_id' => $conflicting->user_id ?? 1,
+                'title' => '⚠️ 場地預約衝突',
+                'message' => "您在 {$r->venue_name} 的預約與 {$r->club_name} 產生衝突，請至衝突協調頁面處理。",
+                'channel' => 'system',
+            ]);
+
             return response()->json([
                 'success' => false, 'stage' => 'negotiation',
+                'conflict_id' => $conflict->id,
                 'message' => '偵測到時段衝突，進入第二階段協商',
                 'conflict' => [
-                    'conflicting_party' => '吉他社', 'time_slot' => "{$r->start_time} - {$r->end_time}",
-                    'venue' => $r->venue_name ?? '中美堂', 'negotiation_timer' => 180
+                    'conflicting_party' => $conflicting->club_name ?? '其他社團',
+                    'time_slot' => "{$r->start_time} - {$r->end_time}",
+                    'venue' => $r->venue_name ?? '中美堂',
+                    'negotiation_timer' => 180,
+                    'conflict_id' => $conflict->id,
                 ]
             ]);
         }
@@ -41,6 +69,7 @@ class ReservationController extends Controller
             'priority_level' => $priority, 'estimated_approval' => '2-3 個工作天'
         ], 201);
     }
+
     public function update(Request $r, $id) {
         $res = Reservation::findOrFail($id);
         $res->update($r->only(['status','stage','purpose']));
