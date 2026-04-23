@@ -3,8 +3,8 @@
 @section('body')
 <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-500" style="background: transparent;">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-fju-blue flex items-center justify-center"><i class="fas fa-university text-white text-lg"></i></div><div><span class="text-lg font-bold text-white" id="nav-title">天主教輔仁大學</span><span class="text-xs text-fju-yellow ml-2" id="nav-subtitle">課外活動指導組</span></div></div>
-    <div class="hidden md:flex items-center gap-6"><a href="#features" class="text-white/90 hover:text-fju-yellow transition-colors text-sm font-medium">功能特色</a><a href="#modules" class="text-white/90 hover:text-fju-yellow transition-colors text-sm font-medium">核心模組</a><a href="#testimonials" class="text-white/90 hover:text-fju-yellow transition-colors text-sm font-medium">使用評價</a><a href="#news" class="text-white/90 hover:text-fju-yellow transition-colors text-sm font-medium">最新消息</a><a href="/login" class="btn-yellow px-6 py-2 text-sm">登入系統</a></div>
+    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-fju-blue flex items-center justify-center"><i class="fas fa-university text-white text-lg"></i></div><div><span class="text-lg font-bold transition-colors duration-500" id="nav-title" style="color:#fff;">天主教輔仁大學</span><span class="text-xs ml-2 transition-colors duration-500" id="nav-subtitle" style="color:#DAA520;">課外活動指導組</span></div></div>
+    <div class="hidden md:flex items-center gap-6"><a href="#features" class="nav-link text-white/90 hover:text-fju-yellow transition-colors text-sm font-medium">功能特色</a><a href="#modules" class="nav-link text-white/90 hover:text-fju-yellow transition-colors text-sm font-medium">核心模組</a><a href="#testimonials" class="nav-link text-white/90 hover:text-fju-yellow transition-colors text-sm font-medium">使用評價</a><a href="#news" class="nav-link text-white/90 hover:text-fju-yellow transition-colors text-sm font-medium">最新消息</a><a href="/login" class="btn-yellow px-6 py-2 text-sm">登入系統</a></div>
   </div>
 </nav>
 <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -28,46 +28,65 @@
   </div>
   <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 animate-bounce"><i class="fas fa-chevron-down text-2xl"></i></div>
 </section>
+
+{{-- FEATURES: Only green solutions, with complete functional descriptions --}}
 <section id="features" class="py-24 bg-white">
   <div class="max-w-7xl mx-auto px-6">
     <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full bg-fju-blue/10 text-fju-blue text-sm font-bold mb-4">痛點 → 解方</span><h2 class="text-4xl font-black text-fju-blue mb-4">使用者痛點 & FJU Smart Hub 解方</h2><p class="text-gray-500 text-lg max-w-2xl mx-auto">透過 AI 與數位化轉型，全面提升校園活動管理效率</p></div>
     <div class="grid md:grid-cols-3 gap-8">
       @foreach([
-        ['fas fa-times-circle','#FF0000','場地預約跑三趟','以前借場地要跑教務處、課指組、總務處...','fas fa-robot','#008000','AI 三階段一鍵搞定','志願序演算法 + AI 協商 + 官方審核，線上完成全流程。'],
-        ['fas fa-clock','#FF0000','申請等半個月','紙本文件層層簽核，等待時間無法預估','fas fa-bolt','#008000','AI 預審即時回覆','RAG 引擎自動比對法規，即時標記合規風險，審核速度提升 10 倍。'],
-        ['fas fa-file-alt','#FF0000','表單填不完','每次活動都要填十幾份不同的表單','fas fa-wand-magic-sparkles','#008000','AI 一鍵生成企劃書','輸入基本資訊，AI 自動生成完整企劃書、預算表、風險評估。'],
-        ['fas fa-language','#FF0000','外籍生看不懂','系統介面只有中文，外籍生無法使用','fas fa-globe','#008000','五國語言即時切換','繁中、簡中、英、日、韓全系統翻譯，點一下全部切換。'],
-        ['fas fa-wheelchair','#FF0000','找不到無障礙設施','校園太大，不知道哪裡有坡道和電梯','fas fa-map-marked-alt','#008000','互動式無障礙地圖','Leaflet.js 互動地圖，一鍵顯示所有無障礙設施位置。'],
-        ['fas fa-shield-alt','#FF0000','場地衝突沒人管','兩個社團搶同一個場地，互相推諉','fas fa-handshake','#008000','AI 衝突協調中心','即時對話 + 郵件通知 + AI 建議方案 + 雙方確認按鈕。']
+        ['fas fa-robot','AI 三階段一鍵搞定','志願序演算法自動依優先權（活動規模/頻率 → 校方/處室 → 一般社團）配對場地，衝突時 AI 產出三方案協商，最終由課指組官方審核。全程線上完成，不必再跑三趟。','場地預約 · 志願序配對 · 衝突協調 · 官方核准'],
+        ['fas fa-bolt','AI 預審即時回覆','Dify RAG 引擎自動比對 8 項校內法規（活動申請辦法、場地管理規則、安全管理規範等），即時標記合規風險，審核速度提升 10 倍，1.3 秒完成全部檢查。','法規查詢 · RAG 語義比對 · 風險等級 · 合規報告'],
+        ['fas fa-wand-magic-sparkles','AI 一鍵生成企劃書','輸入活動名稱、人數、日期，AI 自動生成含宗旨、流程、預算明細（場地/餐飲/文具/保險）、SDGs 對應、風險評估的完整企劃書，直接送審。','企劃生成 · 預算規劃 · SDGs 對應 · 風險評估'],
+        ['fas fa-globe','五國語言即時切換','系統全面支援繁中、簡中、英文、日文、韓文介面，模組名稱與按鈕全部翻譯，點一下即時切換，協助外籍生順利使用校園服務。','國際化 · i18n API · 5 語言包 · 即時切換'],
+        ['fas fa-map-marked-alt','互動式無障礙地圖','Leaflet.js 互動地圖整合校園 20 棟建築、無障礙坡道/電梯/廁所、生活服務點、大眾運輸站，支援分類篩選、搜尋和即時定位。','校園地圖 · 無障礙設施 · 分類圖層 · 搜尋定位'],
+        ['fas fa-handshake','AI 衝突協調中心','當場地衝突發生時，系統自動偵測並進入協調流程：即時聊天對話 + Outlook/SMS/LINE 多管道通知 + AI 產出三方案（含信心度評分）+ 雙方確認按鈕。','即時聊天 · 郵件通知 · AI 建議 · 雙方確認']
       ] as $idx => $f)
       <div class="feature-card bg-white rounded-[15px] p-6 shadow-lg border border-gray-100 card-hover opacity-0">
         <div class="flex items-start gap-3 mb-4">
-          <div class="w-10 h-10 rounded-[12px] bg-red-50 flex items-center justify-center shrink-0"><i class="{{ $f[0] }}" style="color:{{ $f[1] }}"></i></div>
-          <div><div class="font-bold text-fju-red text-sm line-through decoration-2">{{ $f[2] }}</div><p class="text-gray-400 text-xs mt-1">{{ $f[3] }}</p></div>
+          <div class="w-12 h-12 rounded-[12px] bg-green-50 flex items-center justify-center shrink-0"><i class="{{ $f[0] }} text-lg" style="color:#008000"></i></div>
+          <div>
+            <div class="font-bold text-[#008000] text-base">{{ $f[1] }}</div>
+            <p class="text-gray-600 text-sm mt-2 leading-relaxed">{{ $f[2] }}</p>
+          </div>
         </div>
-        <div class="flex items-center gap-2 mb-3"><i class="fas fa-arrow-down text-fju-yellow"></i><span class="text-[10px] text-fju-yellow font-bold">Smart Hub 解方</span></div>
-        <div class="flex items-start gap-3">
-          <div class="w-10 h-10 rounded-[12px] bg-green-50 flex items-center justify-center shrink-0"><i class="{{ $f[4] }}" style="color:{{ $f[5] }}"></i></div>
-          <div><div class="font-bold text-fju-green text-sm">{{ $f[6] }}</div><p class="text-gray-500 text-xs mt-1">{{ $f[7] }}</p></div>
+        <div class="flex items-center gap-1 flex-wrap mt-3 pt-3 border-t border-gray-100">
+          @foreach(explode(' · ', $f[3]) as $tag)
+          <span class="px-2 py-0.5 rounded-full bg-green-50 text-[#008000] text-[10px] font-medium">{{ $tag }}</span>
+          @endforeach
         </div>
       </div>
       @endforeach
     </div>
   </div>
 </section>
+
 <section id="modules" class="py-24 bg-gradient-to-b from-white to-gray-50">
   <div class="max-w-7xl mx-auto px-6">
     <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full bg-fju-yellow/20 text-fju-yellow text-sm font-bold mb-4">核心架構</span><h2 class="text-4xl font-black text-fju-blue mb-4">十大支柱模組</h2></div>
     <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
-      @foreach([['fas fa-id-badge','職能 E-Portfolio','e-portfolio'],['fas fa-wand-magic-sparkles','AI 企劃生成器','ai-guide'],['fas fa-award','幹部證書自動化','certificate'],['fas fa-boxes-stacked','器材盤點追蹤','equipment'],['fas fa-brain','AI 智慧預審','rag-search'],['fas fa-map-location-dot','場地活化大數據','venue-booking'],['fas fa-comments','AI 申訴摘要','appeal'],['fas fa-newspaper','動態活動牆','activity-wall'],['fas fa-clock-rotate-left','數位時光膠囊','time-capsule'],['fas fa-lock','全方位 2FA','2fa']] as $idx => $m)
-      <div class="module-card bg-white rounded-[12px] p-6 shadow-md border border-gray-100 card-hover cursor-pointer opacity-0" onclick="window.location.href='/module/{{ $m[2] }}?role=student'">
-        <div class="w-12 h-12 rounded-[12px] {{ $idx % 2 === 0 ? 'bg-fju-yellow' : 'bg-fju-blue' }} flex items-center justify-center mb-4 shadow-md"><i class="{{ $m[0] }} {{ $idx % 2 === 0 ? 'text-fju-blue' : 'text-white' }}"></i></div>
-        <h3 class="font-bold text-fju-blue text-sm">{{ $m[1] }}</h3>
+      @foreach([
+        ['fas fa-id-badge','職能 E-Portfolio','e-portfolio','記錄社團幹部服務歷程、技能徽章、活動參與，生成雷達圖與成長曲線，支援匯出 PDF 求職履歷。'],
+        ['fas fa-wand-magic-sparkles','AI 企劃生成器','ai-overview','輸入基本資訊即可自動生成含預算、流程、SDGs、風險評估的完整企劃書，並自動送 AI 預審。'],
+        ['fas fa-award','幹部證書自動化','certificate','產出輔仁大學正式獎狀格式的數位證書，含校徽浮水印、數位簽章、QR Code 驗證，可下載 PDF 或列印。'],
+        ['fas fa-boxes-stacked','器材盤點追蹤','equipment','五大類器材即時盤點（擴音/影音/場佈/燈光/其他），借還流程全程追蹤，逾期自動記點通知。'],
+        ['fas fa-brain','AI 智慧預審','rag-search','Dify RAG + GPT-4 三層審核引擎，自動比對 8 項法規，1.3 秒完成審查，輸出風險等級與合規報告。'],
+        ['fas fa-map-location-dot','場地活化大數據','venue-booking','三階段資源調度（志願序配對→衝突協調→官方核准），即時使用率統計，支援 Outlook/SMS/LINE 通知。'],
+        ['fas fa-comments','AI 申訴摘要','appeal','AI 自動摘要申訴內容，分析情緒與緊急程度，提出三項建議方案，加速案件處理。'],
+        ['fas fa-newspaper','動態活動牆','activity-wall','即時活動卡片牆，支援標籤搜尋、狀態篩選、一鍵報名，Hashtag 分類讓探索更快速。'],
+        ['fas fa-clock-rotate-left','數位時光膠囊','time-capsule','社團留言、照片、影片時光膠囊，設定未來開啟日期，屆時自動 Outlook 通知，保存珍貴回憶。'],
+        ['fas fa-lock','全方位 2FA','2fa','支援 TOTP 驗證碼 + Outlook 信箱驗證 + SMS 簡訊驗證三種方式，保障帳號安全，管理已綁定裝置。']
+      ] as $idx => $m)
+      <div class="module-card bg-white rounded-[12px] p-5 shadow-md border border-gray-100 card-hover cursor-pointer opacity-0" onclick="window.location.href='/module/{{ $m[2] }}?role=student'">
+        <div class="w-12 h-12 rounded-[12px] {{ $idx % 2 === 0 ? 'bg-fju-yellow' : 'bg-fju-blue' }} flex items-center justify-center mb-3 shadow-md"><i class="{{ $m[0] }} {{ $idx % 2 === 0 ? 'text-fju-blue' : 'text-white' }}"></i></div>
+        <h3 class="font-bold text-fju-blue text-sm mb-1">{{ $m[1] }}</h3>
+        <p class="text-[11px] text-gray-500 leading-relaxed">{{ $m[3] }}</p>
       </div>
       @endforeach
     </div>
   </div>
 </section>
+
 <section id="testimonials" class="py-24 bg-white">
   <div class="max-w-7xl mx-auto px-6">
     <div class="text-center mb-16"><h2 class="text-4xl font-black text-fju-blue mb-4">師生好評推薦</h2></div>
@@ -93,7 +112,26 @@
   </div>
 </footer>
 <script>
-window.addEventListener('scroll',()=>{const n=document.getElementById('navbar');if(window.scrollY>80){n.classList.add('glassmorphism','shadow-lg');n.style.background=''}else{n.classList.remove('glassmorphism','shadow-lg');n.style.background='transparent'}});
+// Navbar scroll handler: change university name color on scroll
+window.addEventListener('scroll',()=>{
+  const n=document.getElementById('navbar');
+  const t=document.getElementById('nav-title');
+  const st=document.getElementById('nav-subtitle');
+  const links=document.querySelectorAll('.nav-link');
+  if(window.scrollY>80){
+    n.classList.add('glassmorphism','shadow-lg');
+    n.style.background='';
+    t.style.color='#003153'; // fju-blue for readability on white
+    st.style.color='#DAA520';
+    links.forEach(l=>{l.classList.remove('text-white/90');l.classList.add('text-fju-blue')});
+  }else{
+    n.classList.remove('glassmorphism','shadow-lg');
+    n.style.background='transparent';
+    t.style.color='#ffffff';
+    st.style.color='#DAA520';
+    links.forEach(l=>{l.classList.remove('text-fju-blue');l.classList.add('text-white/90')});
+  }
+});
 gsap.registerPlugin(ScrollTrigger);const heroTl=gsap.timeline({defaults:{ease:'power3.out'}});
 heroTl.to('#hero-badge',{opacity:1,y:0,duration:0.8,delay:0.3}).to('#hero-title',{opacity:1,y:0,duration:0.8},'-=0.4').to('#hero-subtitle',{opacity:1,y:0,duration:0.6},'-=0.3').to('#hero-desc',{opacity:1,y:0,duration:0.6},'-=0.3').to('#hero-btns',{opacity:1,y:0,duration:0.6},'-=0.3').to('#hero-stats',{opacity:1,y:0,duration:0.8},'-=0.2');
 document.querySelectorAll('.counter').forEach(el=>{const t=parseInt(el.dataset.target);gsap.to(el,{innerText:t,duration:2,delay:1.5,snap:{innerText:1},scrollTrigger:{trigger:el,start:'top 90%'}})});

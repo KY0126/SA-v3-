@@ -25,7 +25,6 @@ $roleSidebar = [
       ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
     ]],
     ['title'=>'管理與報表','items'=>[
-      ['id'=>'conflict-coordination','label'=>'衝突協調','icon'=>'fas fa-handshake','href'=>"/module/conflict-coordination?role={$role}"],
       ['id'=>'repair','label'=>'報修管理','icon'=>'fas fa-wrench','href'=>"/module/repair?role={$role}"],
       ['id'=>'appeal','label'=>'申訴記錄','icon'=>'fas fa-comments','href'=>"/module/appeal?role={$role}"],
       ['id'=>'reports','label'=>'統計報表','icon'=>'fas fa-chart-bar','href'=>"/module/reports?role={$role}"],
@@ -54,7 +53,6 @@ $roleSidebar = [
       ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
     ]],
     ['title'=>'管理','items'=>[
-      ['id'=>'conflict-coordination','label'=>'衝突協調','icon'=>'fas fa-handshake','href'=>"/module/conflict-coordination?role={$role}"],
       ['id'=>'repair','label'=>'報修管理','icon'=>'fas fa-wrench','href'=>"/module/repair?role={$role}"],
       ['id'=>'appeal','label'=>'申訴記錄','icon'=>'fas fa-comments','href'=>"/module/appeal?role={$role}"],
       ['id'=>'e-portfolio','label'=>'ePortfolio','icon'=>'fas fa-folder-open','href'=>"/module/e-portfolio?role={$role}"],
@@ -75,7 +73,6 @@ $roleSidebar = [
       ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
     ]],
     ['title'=>'管理','items'=>[
-      ['id'=>'conflict-coordination','label'=>'衝突協調','icon'=>'fas fa-handshake','href'=>"/module/conflict-coordination?role={$role}"],
       ['id'=>'appeal','label'=>'申訴記錄','icon'=>'fas fa-comments','href'=>"/module/appeal?role={$role}"],
       ['id'=>'reports','label'=>'統計報表','icon'=>'fas fa-chart-bar','href'=>"/module/reports?role={$role}"],
     ]],
@@ -153,7 +150,7 @@ $sidebarSections = $roleSidebar[$role] ?? $roleSidebar['student'];
   <div class="bg-fju-blue px-6 py-0">
     <div class="flex items-center justify-between">
       <nav class="flex items-center gap-1">
-        @foreach([['認識課指組','#','fas fa-info-circle'],['學會．社團',"/module/club-info?role={$role}",'fas fa-users'],['場地/器材借用',"/module/venue-booking?role={$role}",'fas fa-key'],['重要訊息','#','fas fa-bullhorn'],['表單下載','#','fas fa-download'],['常見問題','#','fas fa-question-circle']] as $nav)
+        @foreach([['認識課指組','#','fas fa-info-circle'],['學會．社團',"/module/club-info?role={$role}",'fas fa-users'],['場地/器材借用',"/module/venue-booking?role={$role}",'fas fa-key'],['重要訊息','#','fas fa-bullhorn'],['表單下載','#','fas fa-download'],['常見問題',"/module/faq?role={$role}",'fas fa-question-circle']] as $nav)
         <a href="{{ $nav[1] }}" class="flex items-center gap-1.5 px-4 py-3 text-white/80 hover:text-fju-yellow hover:bg-white/10 transition-all text-sm font-medium rounded-t-lg"><i class="{{ $nav[2] }} text-xs"></i><span>{{ $nav[0] }}</span></a>
         @endforeach
       </nav>
