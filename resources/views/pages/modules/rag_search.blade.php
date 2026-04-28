@@ -43,6 +43,12 @@
     </div>
   </div>
 
+  {{-- Rules as Dropdown FAQ --}}
+  <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
+    <h3 class="font-bold text-fju-blue text-sm mb-4"><i class="fas fa-question-circle mr-2 text-fju-yellow"></i>法規規則 FAQ（下拉式）</h3>
+    <div id="rules-faq" class="space-y-2"></div>
+  </div>
+
   {{-- Content Checker --}}
   <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
     <h3 class="font-bold text-fju-blue mb-4"><i class="fas fa-spell-check mr-2 text-fju-yellow"></i>內容合規檢查器</h3>
@@ -102,6 +108,22 @@ function renderRules(){
     '<div class="mt-1 text-xs text-gray-500"><i class="fas fa-code mr-1 text-fju-yellow"></i><code class="bg-gray-100 px-1 rounded text-[11px]">'+r.logic+'</code></div>'+
     '<div class="mt-1 text-xs text-gray-500"><i class="fas fa-arrow-right mr-1 text-fju-green"></i>'+r.action+'</div>'+
     '</div></div></div>'
+  ).join('');
+  // Also render as dropdown FAQ
+  document.getElementById('rules-faq').innerHTML=data.map((r,i)=>
+    `<div class="rounded-fju border border-gray-100 overflow-hidden">
+      <button onclick="document.getElementById('rfaq-${i}').classList.toggle('hidden');document.getElementById('rfaq-i-${i}').classList.toggle('rotate-180')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50 transition-all">
+        <div class="flex items-center gap-2"><span class="text-xs font-mono bg-fju-blue/10 text-fju-blue px-2 py-0.5 rounded">${r.id}</span><span class="text-xs px-2 py-0.5 rounded-full ${riskColors[r.risk]}">${riskLabels[r.risk]}</span><span class="text-sm font-medium text-fju-blue">${r.rule}</span></div>
+        <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="rfaq-i-${i}"></i>
+      </button>
+      <div id="rfaq-${i}" class="hidden px-4 pb-3">
+        <div class="p-3 rounded-fju bg-fju-bg text-sm text-gray-600 space-y-1">
+          <div><b>分類：</b>${r.cat}</div>
+          <div><b>判斷邏輯：</b><code class="bg-gray-200 px-1 rounded text-xs">${r.logic}</code></div>
+          <div><b>系統處置：</b>${r.action}</div>
+        </div>
+      </div>
+    </div>`
   ).join('');
 }
 renderRules();

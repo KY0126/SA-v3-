@@ -5,7 +5,10 @@
 <div class="space-y-6">
   <div class="flex items-center justify-between flex-wrap gap-2">
     <h2 class="font-bold text-fju-blue text-lg"><i class="fas fa-id-badge mr-2 text-fju-yellow"></i>職能 E-Portfolio</h2>
-    <button onclick="document.getElementById('add-entry-modal').classList.remove('hidden')" class="btn-yellow px-4 py-2 text-xs"><i class="fas fa-plus mr-1"></i>新增記錄</button>
+    <div class="flex gap-2">
+      <button onclick="document.getElementById('add-entry-modal').classList.remove('hidden')" class="btn-yellow px-4 py-2 text-xs"><i class="fas fa-plus mr-1"></i>新增紀錄</button>
+      <button class="btn-blue px-4 py-2 text-xs"><i class="fas fa-file-pdf mr-1"></i>匯出 PDF</button>
+    </div>
   </div>
 
   {{-- Profile Summary --}}
@@ -22,7 +25,51 @@
           <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-600 text-xs font-medium"><i class="fas fa-laptop-code mr-1"></i>數位技能</span>
         </div>
       </div>
-      <button class="btn-blue px-4 py-2 text-xs shrink-0"><i class="fas fa-file-pdf mr-1"></i>匯出 PDF</button>
+    </div>
+  </div>
+
+  {{-- System Usage Footprints --}}
+  <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
+    <h3 class="font-bold text-fju-blue text-sm mb-4"><i class="fas fa-shoe-prints mr-2 text-fju-yellow"></i>系統使用足跡</h3>
+    <div class="grid md:grid-cols-4 gap-3 mb-4">
+      <div class="text-center p-3 rounded-fju bg-fju-blue/5 border border-fju-blue/10">
+        <div class="text-2xl font-black text-fju-blue">12</div>
+        <div class="text-[10px] text-gray-500">場地預約次數</div>
+      </div>
+      <div class="text-center p-3 rounded-fju bg-fju-yellow/10 border border-fju-yellow/20">
+        <div class="text-2xl font-black text-fju-yellow">8</div>
+        <div class="text-[10px] text-gray-500">活動申請次數</div>
+      </div>
+      <div class="text-center p-3 rounded-fju bg-fju-green/5 border border-fju-green/10">
+        <div class="text-2xl font-black text-fju-green">5</div>
+        <div class="text-[10px] text-gray-500">器材借用次數</div>
+      </div>
+      <div class="text-center p-3 rounded-fju bg-purple-50 border border-purple-100">
+        <div class="text-2xl font-black text-purple-600">3</div>
+        <div class="text-[10px] text-gray-500">衝突協調參與</div>
+      </div>
+    </div>
+    <div class="space-y-2">
+      @foreach([
+        ['2026/04/25 14:30','使用 AI 企劃生成器建立「攝影社春季外拍」企劃書','fas fa-wand-magic-sparkles','bg-fju-yellow/10 text-fju-yellow'],
+        ['2026/04/22 10:15','預約淨心堂（2026/05/10 14:00-17:00）已核准','fas fa-map-marker-alt','bg-fju-green/10 text-fju-green'],
+        ['2026/04/20 16:45','歸還 AV-003 無線麥克風','fas fa-boxes-stacked','bg-fju-blue/10 text-fju-blue'],
+        ['2026/04/18 09:30','參與場地衝突協調 #5（攝影社 vs 吉他社）— 已解決','fas fa-handshake','bg-fju-yellow/10 text-fju-yellow'],
+        ['2026/04/15 11:00','AI 預審通過：「攝影社成果展」風險等級: 低','fas fa-robot','bg-fju-green/10 text-fju-green'],
+        ['2026/04/10 14:20','報名參加「程式設計工作坊」','fas fa-calendar-check','bg-fju-blue/10 text-fju-blue'],
+        ['2026/04/05 09:00','借用 EQ-001 數位單眼相機','fas fa-camera','bg-purple-50 text-purple-600'],
+        ['2026/03/28 16:00','上傳社團評鑑文件至系統','fas fa-upload','bg-fju-yellow/10 text-fju-yellow'],
+        ['2026/03/20 10:30','使用 RAG 法規查詢「場地安全管理辦法」','fas fa-gavel','bg-fju-blue/10 text-fju-blue'],
+        ['2026/03/15 08:45','登入系統（Outlook SSO）','fas fa-sign-in-alt','bg-gray-100 text-gray-500'],
+      ] as $log)
+      <div class="flex items-center gap-3 p-2 rounded-fju hover:bg-gray-50 transition-colors">
+        <div class="w-8 h-8 rounded-fju {{ $log[3] }} flex items-center justify-center shrink-0"><i class="{{ $log[2] }} text-xs"></i></div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs text-gray-600 truncate">{{ $log[1] }}</div>
+          <div class="text-[10px] text-gray-400">{{ $log[0] }}</div>
+        </div>
+      </div>
+      @endforeach
     </div>
   </div>
 
@@ -33,7 +80,7 @@
       <canvas id="portfolio-radar" height="250"></canvas>
     </div>
     <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
-      <h3 class="font-bold text-fju-blue text-sm mb-4"><i class="fas fa-tasks mr-2 text-fju-yellow"></i>職能 Steppers</h3>
+      <h3 class="font-bold text-fju-blue text-sm mb-4"><i class="fas fa-tasks mr-2 text-fju-yellow"></i>職能進度</h3>
       <div class="space-y-3">
         @foreach([['領導力',80,'bg-fju-blue'],['創意思考',70,'bg-fju-yellow'],['團隊合作',85,'bg-fju-green'],['溝通表達',75,'bg-purple-500'],['數位素養',90,'bg-fju-blue']] as $comp)
         <div>
@@ -47,7 +94,7 @@
 
   {{-- Portfolio Entries --}}
   <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100">
-    <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-folder-open mr-2 text-fju-yellow"></i>歷程記錄</h3></div>
+    <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-folder-open mr-2 text-fju-yellow"></i>歷程紀錄</h3></div>
     <div class="divide-y divide-gray-50">
       @foreach([
         ['攝影社春季外拍活動策劃','2026/04/20','活動企劃','fas fa-camera','bg-fju-blue','領導、企劃、攝影'],
@@ -86,13 +133,13 @@
   {{-- Add Entry Modal --}}
   <div id="add-entry-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-fju-lg p-6 w-full max-w-md mx-4 shadow-2xl">
-      <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-fju-blue"><i class="fas fa-plus mr-2 text-fju-yellow"></i>新增歷程記錄</h3><button onclick="document.getElementById('add-entry-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button></div>
+      <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-fju-blue"><i class="fas fa-plus mr-2 text-fju-yellow"></i>新增歷程紀錄</h3><button onclick="document.getElementById('add-entry-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button></div>
       <div class="space-y-3">
         <input type="text" placeholder="活動/經歷名稱" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
         <select class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm"><option>活動企劃</option><option>服務學習</option><option>競賽獲獎</option><option>教學助理</option><option>實習經驗</option></select>
         <textarea rows="3" placeholder="描述..." class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm"></textarea>
         <input type="text" placeholder="技能標籤（以頓號分隔）" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
-        <button class="w-full btn-yellow py-2.5 text-sm" onclick="alert('已新增！(outbox_table 異步處理中...)');document.getElementById('add-entry-modal').classList.add('hidden')"><i class="fas fa-save mr-1"></i>儲存記錄</button>
+        <button class="w-full btn-yellow py-2.5 text-sm" onclick="alert('已新增！');document.getElementById('add-entry-modal').classList.add('hidden')"><i class="fas fa-save mr-1"></i>儲存紀錄</button>
       </div>
     </div>
   </div>

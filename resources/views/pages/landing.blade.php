@@ -32,7 +32,7 @@
 {{-- FEATURES: Only green solutions, with complete functional descriptions --}}
 <section id="features" class="py-24 bg-white">
   <div class="max-w-7xl mx-auto px-6">
-    <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full bg-fju-blue/10 text-fju-blue text-sm font-bold mb-4">痛點 → 解方</span><h2 class="text-4xl font-black text-fju-blue mb-4">使用者痛點 & FJU Smart Hub 解方</h2><p class="text-gray-500 text-lg max-w-2xl mx-auto">透過 AI 與數位化轉型，全面提升校園活動管理效率</p></div>
+    <div class="text-center mb-16"><span class="inline-block px-4 py-1 rounded-full bg-fju-yellow/20 text-fju-yellow text-sm font-bold mb-4">痛點 → 解方</span><h2 class="text-4xl font-black text-fju-blue mb-4">使用者痛點 & FJU Smart Hub 解方</h2><p class="text-gray-500 text-lg max-w-2xl mx-auto">透過 AI 與數位化轉型，全面提升校園活動管理效率</p></div>
     <div class="grid md:grid-cols-3 gap-8">
       @foreach([
         ['fas fa-robot','AI 三階段一鍵搞定','志願序演算法自動依優先權（活動規模/頻率 → 校方/處室 → 一般社團）配對場地，衝突時 AI 產出三方案協商，最終由課指組官方審核。全程線上完成，不必再跑三趟。','場地預約 · 志願序配對 · 衝突協調 · 官方核准'],
@@ -44,15 +44,15 @@
       ] as $idx => $f)
       <div class="feature-card bg-white rounded-[15px] p-6 shadow-lg border border-gray-100 card-hover opacity-0">
         <div class="flex items-start gap-3 mb-4">
-          <div class="w-12 h-12 rounded-[12px] bg-green-50 flex items-center justify-center shrink-0"><i class="{{ $f[0] }} text-lg" style="color:#008000"></i></div>
+          <div class="w-12 h-12 rounded-[12px] bg-fju-blue/10 flex items-center justify-center shrink-0"><i class="{{ $f[0] }} text-lg text-fju-blue"></i></div>
           <div>
-            <div class="font-bold text-[#008000] text-base">{{ $f[1] }}</div>
+            <div class="font-bold text-fju-blue text-base">{{ $f[1] }}</div>
             <p class="text-gray-600 text-sm mt-2 leading-relaxed">{{ $f[2] }}</p>
           </div>
         </div>
         <div class="flex items-center gap-1 flex-wrap mt-3 pt-3 border-t border-gray-100">
           @foreach(explode(' · ', $f[3]) as $tag)
-          <span class="px-2 py-0.5 rounded-full bg-green-50 text-[#008000] text-[10px] font-medium">{{ $tag }}</span>
+          <span class="px-2 py-0.5 rounded-full bg-fju-yellow/20 text-fju-yellow text-[10px] font-medium">{{ $tag }}</span>
           @endforeach
         </div>
       </div>

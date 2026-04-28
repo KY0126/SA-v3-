@@ -1,11 +1,11 @@
 @extends('layouts.shell')
-@section('title', '行事曆')
+@section('title', '活動申請')
 @php $activePage = 'calendar'; @endphp
 @section('content')
 <div class="space-y-6">
   {{-- Header + Sorter --}}
   <div class="flex items-center justify-between flex-wrap gap-2">
-    <h2 class="font-bold text-fju-blue text-lg"><i class="fas fa-calendar-alt mr-2 text-fju-yellow"></i>協調後場地行事曆</h2>
+    <h2 class="font-bold text-fju-blue text-lg"><i class="fas fa-calendar-check mr-2 text-fju-yellow"></i>活動申請管理</h2>
     <div class="flex items-center gap-2">
       <select id="cal-sort" onchange="renderEventList()" class="px-3 py-1.5 rounded-fju border border-gray-200 text-xs">
         <option value="date-asc">日期 (舊→新)</option>
