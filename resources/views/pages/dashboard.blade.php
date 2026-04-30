@@ -138,10 +138,9 @@ function renderProfessorDashboard(el,d){
 
 function renderStudentDashboard(el,d){
   el.innerHTML=`
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="text-2xl font-black text-fju-blue">${d.activities_joined}</div><div class="text-xs text-gray-400">參加活動</div></div>
     <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="text-2xl font-black text-fju-yellow">${d.officer_roles}</div><div class="text-xs text-gray-400">幹部經歷</div></div>
-    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="text-2xl font-black ${d.credit_score<60?'text-fju-red':'text-fju-green'}">${d.credit_score}</div><div class="text-xs text-gray-400">信用積分</div></div>
     <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="text-2xl font-black text-fju-blue">${d.competency_level}</div><div class="text-xs text-gray-400">職能等級</div></div>
   </div>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -168,26 +167,11 @@ function renderStudentDashboard(el,d){
 
 function renderITDashboard(el,d){
   el.innerHTML=`
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="text-2xl font-black text-fju-blue">${d.cpu_usage}%</div><div class="text-xs text-gray-400">CPU 使用率</div></div>
-    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="text-2xl font-black text-fju-yellow">${d.memory_usage}%</div><div class="text-xs text-gray-400">記憶體</div></div>
-    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="text-2xl font-black text-fju-green">${d.api_success_rate}%</div><div class="text-xs text-gray-400">API 成功率</div></div>
-    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="text-2xl font-black text-fju-red">${d.waf_blocks_today}</div><div class="text-xs text-gray-400">WAF 攔截</div></div>
-  </div>
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100"><h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-fire mr-2 text-fju-yellow"></i>負載熱力圖</h3><canvas id="c-load" height="200"></canvas></div>
-    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100"><h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-tachometer-alt mr-2 text-fju-yellow"></i>API 延遲 (ms)</h3><canvas id="c-latency" height="200"></canvas></div>
-  </div>
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100"><h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-shield-alt mr-2 text-fju-yellow"></i>WAF 日誌</h3><div class="space-y-2">${['SQL Injection 攔截 (5次)','XSS 攻擊攔截 (8次)','DDoS 防護觸發 (2次)','非法 IP 封鎖 (8次)'].map((w,i)=>'<div class="flex items-center gap-2 p-2 rounded-fju bg-fju-red/5 border border-fju-red/10 text-xs"><i class="fas fa-exclamation-triangle text-fju-red"></i><span class="text-gray-600">'+w+'</span></div>').join('')}</div></div>
-    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100"><h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-hdd mr-2 text-fju-yellow"></i>R2 空間利用率 (圓餅)</h3><canvas id="c-r2" height="200"></canvas></div>
+  <div class="bg-white rounded-fju-lg p-12 shadow-sm border border-gray-100 text-center">
+    <i class="fas fa-server text-gray-300 text-5xl mb-4"></i>
+    <h3 class="font-bold text-gray-400 text-lg mb-2">資訊中心</h3>
+    <p class="text-sm text-gray-400">此頁面已重置為初始狀態。<br>系統監控與管理功能開發中。</p>
   </div>`;
-  setTimeout(()=>{
-    new Chart('c-load',{type:'bar',data:{labels:Array.from({length:12},(_,i)=>i*2+'h'),datasets:[{label:'CPU%',data:d.load_data,backgroundColor:d.load_data.map(v=>v>60?'#FF0000':v>40?'#DAA520':'#008000')}]},options:{responsive:true,plugins:{legend:{display:false}}}});
-    new Chart('c-latency',{type:'line',data:{labels:Array.from({length:12},(_,i)=>i*2+'h'),datasets:[{label:'延遲(ms)',data:d.api_latency,borderColor:'#003153',backgroundColor:'rgba(0,49,83,0.1)',fill:true,tension:0.3,pointBackgroundColor:'#DAA520'}]},options:{responsive:true,plugins:{legend:{display:false}}}});
-    const r2=d.r2_usage;
-    new Chart('c-r2',{type:'doughnut',data:{labels:Object.keys(r2),datasets:[{data:Object.values(r2),backgroundColor:['#003153','#DAA520','#008000','#666']}]},options:{responsive:true}});
-  },50);
 }
 </script>
 

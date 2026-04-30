@@ -83,3 +83,8 @@ Route::get('health', [CrudController::class, 'health']);
 
 // Gatekeeping
 Route::post('gatekeeping/check', [CrudController::class, 'gatekeepingCheck']);
+
+// Auth (CRUD accounts)
+Route::post('auth/login', [CrudController::class, 'authLogin']);
+Route::post('auth/register', [CrudController::class, 'authRegister']);
+Route::post('auth/forgot-password', [CrudController::class, 'authForgotPassword']);

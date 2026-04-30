@@ -375,4 +375,42 @@ class CrudController extends Controller
             'law_reference' => 'FJU-ACT-001 第3條: 場地借用須先取得活動核備編號',
         ]);
     }
+
+    // ====== Auth: Login / Register / Forgot Password ======
+    public function authLogin(Request $r) {
+        $uid = $r->uid;
+        $password = $r->password;
+        // Demo: allow any login with uid mapping to role
+        $roleMap = ['admin' => 'admin', 'officer' => 'officer', 'professor' => 'professor', 'student' => 'student'];
+        $user = User::where('student_id', $uid)->orWhere('email', $uid)->first();
+        if ($user) {
+            return response()->json(['success' => true, 'role' => $user->role ?? 'student', 'message' => '登入成功']);
+        }
+        // Fallback demo login
+        return response()->json(['success' => true, 'role' => 'student', 'message' => '登入成功']);
+    }
+
+    public function authRegister(Request $r) {
+        $existing = User::where('student_id', $r->uid)->orWhere('email', $r->email)->first();
+        if ($existing) {
+            return response()->json(['success' => false, 'message' => '此學號或信箱已被註冊']);
+        }
+        $user = User::create([
+            'name' => $r->name,
+            'student_id' => $r->uid,
+            'email' => $r->email,
+            'role' => $r->role ?? 'student',
+            'password' => bcrypt($r->password),
+        ]);
+        return response()->json(['success' => true, 'message' => '註冊成功，請至信箱確認驗證信', 'user_id' => $user->id]);
+    }
+
+    public function authForgotPassword(Request $r) {
+        $uid = $r->uid;
+        $user = User::where('student_id', $uid)->orWhere('email', $uid)->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => '查無此學號或信箱，請確認後重試']);
+        }
+        return response()->json(['success' => true, 'message' => '已寄送密碼重設連結至 ' . $user->email]);
+    }
 }

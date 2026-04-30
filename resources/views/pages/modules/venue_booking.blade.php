@@ -11,9 +11,9 @@
         <div class="flex items-center gap-2 mb-2"><div class="w-8 h-8 rounded-fju bg-fju-blue flex items-center justify-center text-white text-sm font-bold">1</div><span class="font-bold text-fju-blue text-sm">零信任預估 · 先搶先贏</span></div>
         <p class="text-xs text-gray-500 mb-2">三志願制 + 預估人數 + 活動屬性：</p>
         <div class="space-y-1 text-[11px]">
-          <div class="flex items-center gap-1 text-fju-blue font-medium"><span class="w-4 text-center font-bold">L1</span>大型活動/課程（>50人/一學期僅1次）</div>
-          <div class="flex items-center gap-1 text-fju-yellow font-medium"><span class="w-4 text-center font-bold">L2</span>校方/處室行政單位</div>
-          <div class="flex items-center gap-1 text-gray-500"><span class="w-4 text-center font-bold">L3</span>學生社團或自治組織</div>
+          <div class="flex items-center gap-1 text-fju-blue font-medium"><i class="fas fa-check-circle mr-1"></i>先搶先贏原則</div>
+          <div class="flex items-center gap-1 text-fju-yellow font-medium"><i class="fas fa-exclamation-triangle mr-1"></i>衝突時進入 AI 多方協商</div>
+          <div class="flex items-center gap-1 text-gray-500"><i class="fas fa-shield-alt mr-1"></i>協商完成後送課指組審核</div>
         </div>
       </div>
       <div class="p-4 rounded-fju bg-fju-yellow/10 border border-fju-yellow/20">
@@ -36,14 +36,10 @@
         </div>
       </div>
     </div>
-    {{-- Cancellation Ladder --}}
-    <div class="p-3 rounded-fju bg-fju-bg text-xs text-gray-600 mb-3">
-      <b class="text-fju-blue"><i class="fas fa-stairs mr-1 text-fju-yellow"></i>撤銷階梯算法：</b>
-      活動前 7 天取消<span class="text-fju-green font-bold">不扣分</span> → 前 3 天取消<span class="text-fju-yellow font-bold">扣 5 分</span> → 前 24 小時取消<span class="text-fju-red font-bold">扣 20 分</span> → 前 2 小時取消<span class="text-fju-red font-bold">惡意放鳥 · 停權審核</span>
-    </div>
-    <div class="p-3 rounded-fju bg-fju-blue/5 text-xs text-gray-600">
-      <b class="text-fju-blue"><i class="fas fa-sitemap mr-1 text-fju-yellow"></i>優先權判斷邏輯：</b>
-      送出三志願 → 系統先搶先贏配對 →「<span class="text-fju-blue font-bold">L1</span>: 大型活動/課程」→「<span class="text-fju-yellow font-bold">L2</span>: 校方/處室」→「<span class="font-bold">L3</span>: 社團」→ 同級衝突進入第二階段 AI 協調
+    {{-- Simple booking note --}}
+    <div class="p-3 rounded-fju bg-fju-bg text-xs text-gray-600">
+      <b class="text-fju-blue"><i class="fas fa-info-circle mr-1 text-fju-yellow"></i>預約說明：</b>
+      送出三志願 → 系統先搶先贏配對 → 若有衝突進入第二階段 AI 多方協商 → 協商完成後送審
     </div>
   </div>
 
@@ -141,7 +137,7 @@
           {{-- Extra fields --}}
           <div class="grid grid-cols-2 gap-3">
             <div><label class="text-xs text-gray-400 block mb-1">預估規模人數</label><input type="number" id="bk-est-ppl" value="30" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm"></div>
-            <div><label class="text-xs text-gray-400 block mb-1">優先等級</label><select id="bk-priority" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm"><option value="3">L3 - 一般社團</option><option value="2">L2 - 校方/處室</option><option value="1">L1 - 大型活動/課程</option></select></div>
+            <div><label class="text-xs text-gray-400 block mb-1">活動類型</label><select id="bk-priority" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm"><option value="3">一般社團活動</option><option value="2">行政/課程用途</option><option value="1">大型活動（>50人）</option></select></div>
           </div>
           <div><label class="text-xs text-gray-400 block mb-1">用途說明</label><textarea id="bk-purpose" rows="2" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm" placeholder="請說明借用目的..."></textarea></div>
           <div><label class="text-xs text-gray-400 block mb-1">核准後通知方式</label>

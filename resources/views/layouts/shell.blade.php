@@ -1,13 +1,17 @@
 @extends('layouts.app')
 
 @php
-$roleNames = ['admin'=>'課指組審核員','officer'=>'社團幹部','professor'=>'指導教授','student'=>'一般學生','it'=>'資訊中心'];
+// NEW ROLE STRUCTURE per prompt-6:
+// 1. 課指組 (admin) - full control
+// 2. 借用者 (officer/professor) - can book venues/equipment (社團幹部/學生自治組織, 處室職員, 教授)
+// 3. 學生/社員 (student) - view only
+$roleNames = ['admin'=>'課指組','officer'=>'借用者（社團幹部）','professor'=>'借用者（教授）','student'=>'一般學生/社員','it'=>'資訊中心'];
 $roleIcons = ['admin'=>'fas fa-user-tie','officer'=>'fas fa-user-shield','professor'=>'fas fa-chalkboard-teacher','student'=>'fas fa-user-graduate','it'=>'fas fa-server'];
 $role = $role ?? 'student';
 if (!isset($roleNames[$role])) $role = 'student';
 $activePage = $activePage ?? 'dashboard';
 
-// Simplified sidebar: 1.儀表板 2.活動申請 3.場地預約 4.設備借用 + role-specific extras
+// Sidebar structure per prompt-6: Dashboard, 活動申請, 場地預約, 設備借用
 $roleSidebar = [
   'admin' => [
     ['title'=>'核心功能','items'=>[
@@ -31,10 +35,8 @@ $roleSidebar = [
       ['id'=>'user-management','label'=>'使用者管理','icon'=>'fas fa-users-cog','href'=>"/module/user-management?role={$role}"],
     ]],
     ['title'=>'個人專區','items'=>[
-      ['id'=>'e-portfolio','label'=>'職能 E-Portfolio','icon'=>'fas fa-id-badge','href'=>"/module/e-portfolio?role={$role}"],
+      ['id'=>'personal-center','label'=>'個人中心','icon'=>'fas fa-id-badge','href'=>"/module/e-portfolio?role={$role}"],
       ['id'=>'certificate','label'=>'數位證書','icon'=>'fas fa-award','href'=>"/module/certificate?role={$role}"],
-      ['id'=>'time-capsule','label'=>'時光膠囊','icon'=>'fas fa-clock-rotate-left','href'=>"/module/time-capsule?role={$role}"],
-      ['id'=>'2fa','label'=>'雙因素驗證','icon'=>'fas fa-lock','href'=>"/module/2fa?role={$role}"],
     ]],
   ],
   'officer' => [
@@ -53,9 +55,9 @@ $roleSidebar = [
       ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
     ]],
     ['title'=>'個人專區','items'=>[
+      ['id'=>'personal-center','label'=>'個人中心','icon'=>'fas fa-id-badge','href'=>"/module/e-portfolio?role={$role}"],
       ['id'=>'repair','label'=>'報修管理','icon'=>'fas fa-wrench','href'=>"/module/repair?role={$role}"],
       ['id'=>'appeal','label'=>'申訴紀錄','icon'=>'fas fa-comments','href'=>"/module/appeal?role={$role}"],
-      ['id'=>'e-portfolio','label'=>'職能 E-Portfolio','icon'=>'fas fa-folder-open','href'=>"/module/e-portfolio?role={$role}"],
     ]],
   ],
   'professor' => [
@@ -73,36 +75,29 @@ $roleSidebar = [
       ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
     ]],
     ['title'=>'個人專區','items'=>[
+      ['id'=>'personal-center','label'=>'個人中心','icon'=>'fas fa-id-badge','href'=>"/module/e-portfolio?role={$role}"],
       ['id'=>'appeal','label'=>'申訴紀錄','icon'=>'fas fa-comments','href'=>"/module/appeal?role={$role}"],
-      ['id'=>'reports','label'=>'統計報表','icon'=>'fas fa-chart-bar','href'=>"/module/reports?role={$role}"],
     ]],
   ],
   'student' => [
     ['title'=>'核心功能','items'=>[
       ['id'=>'dashboard','label'=>'儀表板','icon'=>'fas fa-tachometer-alt','href'=>"/dashboard?role={$role}"],
-      ['id'=>'calendar','label'=>'活動申請','icon'=>'fas fa-calendar-check','href'=>"/module/calendar?role={$role}"],
-      ['id'=>'venue-booking','label'=>'場地預約','icon'=>'fas fa-map-marker-alt','href'=>"/module/venue-booking?role={$role}"],
-      ['id'=>'equipment','label'=>'設備借用','icon'=>'fas fa-boxes-stacked','href'=>"/module/equipment?role={$role}"],
+      ['id'=>'venue-booking','label'=>'場地預約（檢視）','icon'=>'fas fa-map-marker-alt','href'=>"/module/venue-booking?role={$role}"],
+      ['id'=>'equipment','label'=>'設備借用（檢視）','icon'=>'fas fa-boxes-stacked','href'=>"/module/equipment?role={$role}"],
     ]],
-    ['title'=>'社團管理','items'=>[
+    ['title'=>'瀏覽','items'=>[
       ['id'=>'club-info','label'=>'社團資訊','icon'=>'fas fa-users','href'=>"/module/club-info?role={$role}"],
       ['id'=>'activity-wall','label'=>'活動牆','icon'=>'fas fa-newspaper','href'=>"/module/activity-wall?role={$role}"],
-    ]],
-    ['title'=>'AI 智慧專區','items'=>[
-      ['id'=>'ai-overview','label'=>'AI 資訊概覽','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
       ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
     ]],
     ['title'=>'個人專區','items'=>[
-      ['id'=>'repair','label'=>'報修管理','icon'=>'fas fa-wrench','href'=>"/module/repair?role={$role}"],
-      ['id'=>'appeal','label'=>'申訴紀錄','icon'=>'fas fa-comments','href'=>"/module/appeal?role={$role}"],
-      ['id'=>'e-portfolio','label'=>'職能 E-Portfolio','icon'=>'fas fa-folder-open','href'=>"/module/e-portfolio?role={$role}"],
+      ['id'=>'personal-center','label'=>'個人中心','icon'=>'fas fa-id-badge','href'=>"/module/e-portfolio?role={$role}"],
       ['id'=>'certificate','label'=>'數位證書','icon'=>'fas fa-certificate','href'=>"/module/certificate?role={$role}"],
     ]],
   ],
   'it' => [
     ['title'=>'核心功能','items'=>[
       ['id'=>'dashboard','label'=>'儀表板','icon'=>'fas fa-tachometer-alt','href'=>"/dashboard?role={$role}"],
-      ['id'=>'calendar','label'=>'活動申請','icon'=>'fas fa-calendar-check','href'=>"/module/calendar?role={$role}"],
       ['id'=>'venue-booking','label'=>'場地預約','icon'=>'fas fa-map-marker-alt','href'=>"/module/venue-booking?role={$role}"],
       ['id'=>'equipment','label'=>'設備借用','icon'=>'fas fa-boxes-stacked','href'=>"/module/equipment?role={$role}"],
     ]],
@@ -137,9 +132,8 @@ $sidebarSections = $roleSidebar[$role] ?? $roleSidebar['student'];
         <a href="/" class="text-fju-blue hover:text-fju-yellow transition-colors font-medium">首頁</a>
         <a href="https://www.fju.edu.tw" target="_blank" class="text-fju-blue hover:text-fju-yellow transition-colors font-medium">輔仁大學</a>
         <a href="#" class="text-fju-blue hover:text-fju-yellow transition-colors font-medium">ENGLISH</a>
-        <a href="#" class="text-fju-blue hover:text-fju-yellow transition-colors font-medium">網站地圖</a>
         <div class="flex gap-1 ml-2 pl-3 border-l border-gray-200">
-          @foreach($roleNames as $r => $label)
+          @foreach(['admin'=>'課指組','officer'=>'借用者','student'=>'學生'] as $r => $label)
           <a href="/dashboard?role={{ $r }}" class="w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all {{ $r === $role ? 'bg-fju-yellow text-fju-blue' : 'bg-gray-100 text-gray-400 hover:bg-gray-200' }}" title="{{ $label }}"><i class="{{ $roleIcons[$r] }}"></i></a>
           @endforeach
         </div>
@@ -165,7 +159,7 @@ $sidebarSections = $roleSidebar[$role] ?? $roleSidebar['student'];
         <div class="relative" id="notif-wrapper">
           <button onclick="toggleNotifPanel()" class="relative w-8 h-8 rounded-fju bg-white/10 flex items-center justify-center text-white/70 hover:bg-white/15 hover:text-white transition-all" id="notif-bell">
             <i class="fas fa-bell text-sm"></i>
-            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-fju-red text-white text-[9px] font-bold flex items-center justify-center" id="notif-badge">3</span>
+            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-fju-red text-white text-[9px] font-bold flex items-center justify-center hidden" id="notif-badge">0</span>
           </button>
           <div id="notif-panel" class="hidden absolute right-0 top-full mt-2 w-96 bg-white rounded-fju-lg shadow-2xl border border-gray-200 z-[100] overflow-hidden">
             <div class="px-4 py-3 bg-fju-blue flex items-center justify-between">
@@ -173,16 +167,16 @@ $sidebarSections = $roleSidebar[$role] ?? $roleSidebar['student'];
               <button onclick="markAllRead()" class="text-fju-yellow text-xs hover:underline">全部標為已讀</button>
             </div>
             <div id="notif-list" class="max-h-80 overflow-y-auto">
-              <div class="p-4 text-center text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-1"></i>載入中...</div>
+              <div class="p-6 text-center text-gray-400 text-sm"><i class="fas fa-bell-slash mr-1"></i>暫無通知</div>
             </div>
             <div class="px-4 py-2 border-t border-gray-100 text-center">
               <a href="#" class="text-fju-blue text-xs hover:text-fju-yellow">查看所有通知</a>
             </div>
           </div>
         </div>
-        {{-- USER AVATAR → links to E-Portfolio --}}
+        {{-- USER AVATAR → links to 個人中心 (E-Portfolio by role) --}}
         <div class="flex items-center gap-2 pl-3 border-l border-white/15">
-          <a href="/module/e-portfolio?role={{ $role }}" class="w-8 h-8 rounded-full bg-fju-yellow flex items-center justify-center text-fju-blue text-xs font-bold hover:ring-2 hover:ring-fju-yellow/50 transition-all" title="前往 E-Portfolio"><i class="{{ $roleIcons[$role] }}"></i></a>
+          <a href="/module/e-portfolio?role={{ $role }}" class="w-8 h-8 rounded-full bg-fju-yellow flex items-center justify-center text-fju-blue text-xs font-bold hover:ring-2 hover:ring-fju-yellow/50 transition-all" title="前往個人中心"><i class="{{ $roleIcons[$role] }}"></i></a>
           <div class="hidden lg:block"><div class="text-white text-xs font-medium leading-tight">Demo User</div><div class="text-white/40 text-[10px]">{{ $roleNames[$role] }}</div></div>
           <a href="/login" class="text-white/40 hover:text-fju-red transition-colors ml-1" title="登出"><i class="fas fa-sign-out-alt text-xs"></i></a>
         </div>
@@ -236,10 +230,8 @@ const searchIndex = [
   {title:'法規查詢 (RAG)', url:'/module/rag-search?role={{ $role }}', cat:'頁面', icon:'fa-gavel'},
   {title:'報修管理', url:'/module/repair?role={{ $role }}', cat:'頁面', icon:'fa-wrench'},
   {title:'申訴紀錄', url:'/module/appeal?role={{ $role }}', cat:'頁面', icon:'fa-comments'},
-  {title:'職能 E-Portfolio', url:'/module/e-portfolio?role={{ $role }}', cat:'頁面', icon:'fa-id-badge'},
+  {title:'個人中心', url:'/module/e-portfolio?role={{ $role }}', cat:'頁面', icon:'fa-id-badge'},
   {title:'數位證書', url:'/module/certificate?role={{ $role }}', cat:'頁面', icon:'fa-award'},
-  {title:'時光膠囊', url:'/module/time-capsule?role={{ $role }}', cat:'頁面', icon:'fa-clock-rotate-left'},
-  {title:'雙因素驗證', url:'/module/2fa?role={{ $role }}', cat:'頁面', icon:'fa-lock'},
   {title:'統計報表', url:'/module/reports?role={{ $role }}', cat:'頁面', icon:'fa-chart-bar'},
   {title:'使用者管理', url:'/module/user-management?role={{ $role }}', cat:'頁面', icon:'fa-users-cog'},
   {title:'常見問題 FAQ', url:'/module/faq?role={{ $role }}', cat:'頁面', icon:'fa-question-circle'},
@@ -250,14 +242,10 @@ const searchIndex = [
   {title:'攝影社', url:'/module/club-info?role={{ $role }}', cat:'社團', icon:'fa-camera'},
   {title:'吉他社', url:'/module/club-info?role={{ $role }}', cat:'社團', icon:'fa-guitar'},
   {title:'街舞社', url:'/module/club-info?role={{ $role }}', cat:'社團', icon:'fa-music'},
-  {title:'登山社', url:'/module/club-info?role={{ $role }}', cat:'社團', icon:'fa-mountain'},
-  {title:'程式設計社', url:'/module/club-info?role={{ $role }}', cat:'社團', icon:'fa-laptop-code'},
   {title:'AI 預審', url:'/module/ai-overview?role={{ $role }}', cat:'AI 功能', icon:'fa-robot'},
   {title:'AI 企劃生成', url:'/module/ai-overview?role={{ $role }}', cat:'AI 功能', icon:'fa-wand-magic-sparkles'},
-  {title:'AI 衝突協商', url:'/module/venue-booking?role={{ $role }}', cat:'AI 功能', icon:'fa-handshake'},
   {title:'校園活動安全管理辦法', url:'/module/rag-search?role={{ $role }}', cat:'法規', icon:'fa-gavel'},
   {title:'場地管理規則', url:'/module/rag-search?role={{ $role }}', cat:'法規', icon:'fa-gavel'},
-  {title:'社團評鑑辦法', url:'/module/rag-search?role={{ $role }}', cat:'法規', icon:'fa-gavel'},
 ];
 function doGlobalSearch(e){
   const q = document.getElementById('global-search-input').value.trim().toLowerCase();
@@ -283,7 +271,7 @@ document.addEventListener('click',function(e){
 });
 </script>
 
-{{-- Notification Panel Script --}}
+{{-- Notification Panel Script (FIXED: proper error handling, stops loading on failure) --}}
 <script>
 function toggleNotifPanel(){
   const panel=document.getElementById('notif-panel');
@@ -295,51 +283,66 @@ document.addEventListener('click',function(e){
   if(w && !w.contains(e.target)){document.getElementById('notif-panel')?.classList.add('hidden')}
 });
 function loadNotifications(){
-  fetch('/api/users/1/notifications').then(r=>r.json()).then(res=>{
-    const list=res.data||[];
-    const unread=res.unread_count||0;
-    document.getElementById('notif-badge').textContent=unread;
-    if(unread===0) document.getElementById('notif-badge').classList.add('hidden');
-    else document.getElementById('notif-badge').classList.remove('hidden');
-    if(list.length===0){
-      document.getElementById('notif-list').innerHTML='<div class="p-6 text-center text-gray-400 text-sm"><i class="fas fa-bell-slash mr-1"></i>暫無通知</div>';
-      return;
-    }
-    document.getElementById('notif-list').innerHTML=list.map(n=>{
-      const isUnread=!n.is_read;
-      return `<div class="px-4 py-3 border-b border-gray-50 hover:bg-fju-bg/50 cursor-pointer transition-all ${isUnread?'bg-fju-yellow/5':''}" onclick="readNotif(${n.id})">
-        <div class="flex items-start gap-3">
-          <div class="w-8 h-8 rounded-full ${isUnread?'bg-fju-yellow/20':'bg-gray-100'} flex items-center justify-center shrink-0">
-            <i class="fas ${n.channel==='email'?'fa-envelope':n.channel==='sms'?'fa-sms':'fa-bell'} ${isUnread?'text-fju-yellow':'text-gray-400'} text-xs"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold ${isUnread?'text-fju-blue':'text-gray-500'}">${n.title}</span>
-              ${isUnread?'<span class="w-2 h-2 rounded-full bg-fju-yellow shrink-0"></span>':''}
+  const listEl=document.getElementById('notif-list');
+  listEl.innerHTML='<div class="p-4 text-center text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-1"></i>載入中...</div>';
+  // Use paginated endpoint with 30-day limit
+  fetch('/api/notifications/1?limit=20&days=30',{signal:AbortSignal.timeout(5000)})
+    .then(r=>{if(!r.ok) throw new Error('API error');return r.json()})
+    .then(res=>{
+      const list=res.data||[];
+      const unread=res.unread_count||0;
+      const badge=document.getElementById('notif-badge');
+      badge.textContent=unread;
+      if(unread>0){badge.classList.remove('hidden')} else {badge.classList.add('hidden')}
+      if(list.length===0){
+        listEl.innerHTML='<div class="p-6 text-center text-gray-400 text-sm"><i class="fas fa-bell-slash mr-1"></i>暫無通知</div>';
+        return;
+      }
+      listEl.innerHTML=list.map(n=>{
+        const isUnread=!n.read&&!n.is_read;
+        return `<div class="px-4 py-3 border-b border-gray-50 hover:bg-fju-bg/50 cursor-pointer transition-all ${isUnread?'bg-fju-yellow/5':''}" onclick="readNotif(${n.id})">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full ${isUnread?'bg-fju-yellow/20':'bg-gray-100'} flex items-center justify-center shrink-0">
+              <i class="fas ${n.channel==='email'?'fa-envelope':n.channel==='sms'?'fa-sms':'fa-bell'} ${isUnread?'text-fju-yellow':'text-gray-400'} text-xs"></i>
             </div>
-            <p class="text-[11px] text-gray-500 mt-0.5 truncate">${n.message}</p>
-            <span class="text-[10px] text-gray-400 mt-1">${new Date(n.created_at).toLocaleDateString('zh-TW')}</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold ${isUnread?'text-fju-blue':'text-gray-500'}">${n.title||'系統通知'}</span>
+                ${isUnread?'<span class="w-2 h-2 rounded-full bg-fju-yellow shrink-0"></span>':''}
+              </div>
+              <p class="text-[11px] text-gray-500 mt-0.5 truncate">${n.message||''}</p>
+              <span class="text-[10px] text-gray-400 mt-1">${n.created_at?new Date(n.created_at).toLocaleDateString('zh-TW'):''}</span>
+            </div>
           </div>
-        </div>
-      </div>`;
-    }).join('');
-  });
+        </div>`;
+      }).join('');
+    })
+    .catch(()=>{
+      // FIXED: Stop loading animation on failure
+      listEl.innerHTML='<div class="p-6 text-center text-gray-400 text-sm"><i class="fas fa-bell-slash mr-1"></i>暫無通知</div>';
+      document.getElementById('notif-badge').classList.add('hidden');
+    });
 }
 function readNotif(id){
-  fetch('/api/notifications/'+id+'/read',{method:'PATCH',headers:{'Accept':'application/json'}}).then(()=>loadNotifications());
+  fetch('/api/notifications/'+id+'/read',{method:'POST',headers:{'Accept':'application/json'}}).then(()=>loadNotifications()).catch(()=>{});
 }
 function markAllRead(){
-  fetch('/api/users/1/notifications').then(r=>r.json()).then(res=>{
-    const promises=(res.data||[]).filter(n=>!n.is_read).map(n=>fetch('/api/notifications/'+n.id+'/read',{method:'PATCH',headers:{'Accept':'application/json'}}));
+  fetch('/api/notifications/1?limit=50',{signal:AbortSignal.timeout(3000)}).then(r=>r.json()).then(res=>{
+    const promises=(res.data||[]).filter(n=>!n.read&&!n.is_read).map(n=>fetch('/api/notifications/'+n.id+'/read',{method:'POST',headers:{'Accept':'application/json'}}));
     Promise.all(promises).then(()=>loadNotifications());
+  }).catch(()=>{
+    document.getElementById('notif-list').innerHTML='<div class="p-6 text-center text-gray-400 text-sm"><i class="fas fa-bell-slash mr-1"></i>暫無通知</div>';
+    document.getElementById('notif-badge').classList.add('hidden');
   });
 }
+// Initial badge load with error handling
 document.addEventListener('DOMContentLoaded',function(){
-  fetch('/api/users/1/notifications').then(r=>r.json()).then(res=>{
+  fetch('/api/notifications/1?limit=5',{signal:AbortSignal.timeout(3000)}).then(r=>{if(!r.ok)throw new Error();return r.json()}).then(res=>{
     const unread=res.unread_count||0;
-    document.getElementById('notif-badge').textContent=unread;
-    if(unread===0) document.getElementById('notif-badge').classList.add('hidden');
-  }).catch(()=>{});
+    const badge=document.getElementById('notif-badge');
+    badge.textContent=unread;
+    if(unread>0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+  }).catch(()=>{document.getElementById('notif-badge').classList.add('hidden')});
 });
 </script>
 @endsection
