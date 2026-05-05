@@ -1,120 +1,350 @@
-# FJU Smart Hub v3.0
+# 輔仁大學課指組 — 器材與場地預約平台 v3.2
 
-## 專案概述
-- **名稱**: FJU Smart Hub — 輔仁大學智慧校園管理平台
-- **技術堆疊**: PHP 8.2 + Laravel 12 + MySQL 8.0 (MariaDB) + Tailwind CSS + Chart.js + Leaflet.js + GSAP + Dify AI
-- **目標**: 整合 AI 智慧預審、三階段資源調度、數位證書、活動管理的一站式校園解決方案
+> **Hono + Cloudflare Pages + D1 SQLite** 全端重構版  
+> 114 學年度系統分析課程 SA 範本 1.2 實作
 
-## URLs
-- **GitHub**: https://github.com/KY0126/SA-v3-
-- **版本**: v3.0.0
+## Demo URL
 
-## 已完成功能 (21 個模組頁面 + 30+ API)
+| 環境 | URL |
+|------|-----|
+| **Sandbox Demo** | https://3000-ines7d5od0umg4mb1ae8b-b9b802c4.sandbox.novita.ai |
+| **GitHub Repo** | https://github.com/KY0126/SA-v3 (branch: `branch2`) |
 
-### 前台模組
-| 模組 | 路徑 | 說明 |
-|------|------|------|
-| Landing Page | `/` | GSAP 動畫、痛點→解方、柴犬吉祥物、計數器、快訊輪播 |
-| 登入頁面 | `/login` | Google OAuth (hd 檢查)、Glassmorphism、5 角色快速切換 |
-| Dashboard | `/dashboard?role=XXX` | 5 角色專屬儀表板 (從 API 動態載入) |
-| 校園地圖 | `/campus-map` | Leaflet.js 互動地圖、4 圖層、20+ 建築 |
+### Demo 帳號（快速登入）
 
-### 核心業務模組
-| 模組 | 路徑 | 說明 |
-|------|------|------|
-| 場地預約 | `/module/venue-booking` | 三階段資源調度、衝突偵測、L1-L3 優先權 |
-| 設備借用 | `/module/equipment` | CRUD、借還流程、狀態篩選 |
-| 行事曆 | `/module/calendar` | EvoCalendar、事件 CRUD |
-| 社團資訊 | `/module/club-info` | 102 社團、8 分類、搜尋 |
-| 活動牆 | `/module/activity-wall` | CRUD、報名、篩選 |
-| 衝突協調中心 | `/module/conflict-coordination` | 即時對話、郵件、3/6分鐘計時器、紅光動畫、雙方確認→重導行事曆 |
+| 角色 | Email | 密碼 |
+|------|-------|------|
+| 管理員 | `admin01@mail.fju.edu.tw` | demo123 |
+| 社團幹部 A（王小明） | `s1100001@mail.fju.edu.tw` | demo123 |
+| 社團幹部 B（李小花） | `s1100002@mail.fju.edu.tw` | demo123 |
+| 學生 | `s1100003@mail.fju.edu.tw` | demo123 |
+| 教授 | `prof01@mail.fju.edu.tw` | demo123 |
+| 職員 | `staff01@mail.fju.edu.tw` | demo123 |
 
-### AI 智慧模組
-| 模組 | 路徑 | 說明 |
-|------|------|------|
-| AI 資訊概覽 | `/module/ai-overview` | AI 系統總覽 |
-| AI 導覽助理 | `/module/ai-guide` | AI 企劃生成器 |
-| 法規查詢 (RAG) | `/module/rag-search` | Dify RAG 知識庫、8 份法規索引、Gatekeeping 阻斷機制、AI 預審 |
+> 幹部 A（王小明）與幹部 B（李小花）用於模擬場地預約衝突協調場景
 
-### 管理與安全模組
-| 模組 | 路徑 | 說明 |
-|------|------|------|
-| 報修管理 | `/module/repair` | CRUD、追蹤碼 |
-| 申訴記錄 | `/module/appeal` | CRUD、AI 摘要 |
-| 統計報表 | `/module/reports` | **5 大核心流程圖** (SVG)、權限矩陣、功能清單、評分對照 |
-| 用戶管理 | `/module/user-management` | 使用者 CRUD (姓名/學號/Outlook/手機/角色) |
+---
 
-### 個人與證書模組
-| 模組 | 路徑 | 說明 |
-|------|------|------|
-| 職能 E-Portfolio | `/module/e-portfolio` | 歷程記錄、雷達圖、Steppers、SDGs 對應 |
-| 數位證書 | `/module/certificate` | 自動生成、SHA256 簽章 |
-| 時光膠囊 | `/module/time-capsule` | R2 文件封裝移交 |
-| 2FA 驗證 | `/module/2fa` | TOTP/SMS 雙因子 |
+## 已完成功能清單
 
-## 5 大核心流程圖 (在 `/module/reports` 頁面)
-1. **三階段資源調度狀態圖** — 志願序→協商→審核完整流程
-2. **系統全域架構圖** — Dify AI 中台 + Cloudflare 邊緣防護 + Laravel API + 多通路通知
-3. **多角色全端功能泳道圖** — 5 角色 × 6 階段 (登入→搜尋→預約→AI預審→審核→簽到)
-4. **Dify AI 智慧預審與 RAG 流程圖** — GuzzleHTTP → Dify API → Pinecone RAG → Reasoning JSON
-5. **安全驗證與身分生命週期圖** — Google OAuth → 2FA → JWT → 觀察者模式 → <60 強制失效
+### Epic 1 — 帳號認證管理
+- [x] 登入 / 登出（Demo 模式）
+- [x] 登入 Tab 切換（登入 / 建立帳號 / 忘記密碼）
+- [x] 註冊時選擇身份角色（學生 / 社團幹部 / 教授 / 職員）
+- [x] Email 限制 `@mail.fju.edu.tw` / `@cloud.fju.edu.tw`
+- [x] 帳號停權 / 解除停權
+- [x] 管理員權限切換
+- [x] 大頭貼選擇器（Emoji Avatar）
+- [x] 個人中心（預約/借用/申訴/報修/違規紀錄）
+- [x] 帳號到期日檢查
 
-## 角色專屬儀表板 (5 角色 × 各自圖表)
-- **Admin (課指組)**: 折線圖、圓餅圖、Gauge、堆疊長條、雷達圖、漏斗圖 (6 圖表)
-- **Officer (社團幹部)**: 簽到長條、留存折線、滿意度圓餅、經費水滴圖、傳承檢查表 (5 圖表)
-- **Professor (指導教授)**: 績效雷達圖、職能成長折線、紅黃綠燈風險指標 (4 圖表)
-- **Student (一般學生)**: 職能雷達圖、AI 推薦清單、Steppers、社團評價牆 (4 圖表)
-- **IT (資訊中心)**: 負載長條、API 延遲折線、WAF 日誌、R2 圓餅圖 (4 圖表)
+### Epic 2 — 設施管理
+- [x] 場地清單（搜尋/篩選）
+- [x] 新增場地（管理員）
+- [x] 場地編輯 / 軟刪除
+- [x] GIS 座標（GPS 經緯度）
+- [x] 維修紀錄 API
 
-## 權限矩陣
-5 角色 × 16 功能模組 完整 RBAC 矩陣
+### Epic 3 — 活動申請管理
+- [x] 活動申請（自動流水編號 `AAYYYYNNNNNN`）
+- [x] 核准 / 拒絕 / 取消
+- [x] 活動 PDF 申請書生成（新開視窗列印）
+- [x] AI 活動預審（風險評估）
 
-## 評分標準對應
-| 項目 | 權重 | 對應功能 |
-|------|------|----------|
-| 創新性 | 20% | 三階段調度、AI 預審、衝突協調中心、Gatekeeping、Workers AI 意圖過濾 |
-| 實用性 | 50% | 場地預約全流程、設備借用、活動牆、社團管理、行事曆、報修、申訴、信用積分、通知、證書、用戶管理 |
-| 技術完善度 | 10% | Laravel 12 + MySQL + 30+ API + E2E 測試 + JWT + 2FA + 觀察者模式 |
-| UI/UX 友善度 | 10% | 60-30-10 配色、Tailwind CSS、GSAP 動畫、Leaflet 地圖、Chart.js、柴犬 AI FAB |
-| 內容豐富度 | 10% | 102 社團、10 場地、20+ 建築、5 語言、5 流程圖、SDGs 對應 |
+### Epic 4 — 場地預約管理
+- [x] 場地預約送出（時段衝突偵測）
+- [x] 核准 / 拒絕 / 取消 / 歸還
+- [x] **月曆行事曆視圖**（可翻月、今日標記、色彩區分核准/待審）
+- [x] 場協大會登記 / 審核
+- [x] 衝突協調聊天室
+
+### Epic 5 — 器材借用管理
+- [x] 器材清單（含操作證要求）
+- [x] 多器材借用申請
+- [x] 操作證驗證
+- [x] 借用紀錄
+- [x] 器材操作證類型管理
+
+### Epic 6 — 報修管理
+- [x] 報修提交（最少 10 字描述）
+- [x] 管理員更新狀態（待處理 → 處理中 → 已完成）
+
+### Epic 7 — 申訴管理
+- [x] 停權申復 / 違規記點申復 / 其他檢舉
+- [x] 核准 / 駁回（附說明）
+
+### Epic 8 — 資訊查找與公告
+- [x] 公告清單（含有效期篩選）
+- [x] 新增 / 編輯 / 刪除公告
+
+### Epic 9 — 違規記點與銷點
+- [x] 單位違規點數一覽
+- [x] 新增記點（自動更新單位累計分數）
+- [x] 10 點自動停權
+- [x] 勞動服務銷點申請與審核
+
+### Epic 10 — 統計數據
+- [x] 儀表板（場地/器材/使用者/預約/報修統計）
+- [x] 場地使用率統計
+- [x] 器材使用統計
+- [x] **AI 學期總結評鑑報告**（Simpson 多樣性指數 + 報修/衝突/熱門時段/智慧建議）
+
+### AI / RAG 功能
+- [x] AI 聊天助理（支援 GitHub Models GPT-4o，含 RAG fallback）
+- [x] 角色專屬 System Prompt（5 種角色）
+- [x] 關鍵字 RAG 知識庫（場地預約/器材借用/衝突協調/違規/申訴/報修/活動申請/場協大會/勞動服務/操作證）
+- [x] AI 活動預審（風險等級 + 法規引用）
+- [x] AI 學期評鑑報告生成
+- [x] 活動申請 PDF 資料 API
+
+### Prompt 7 專項指令
+- [x] 7-1: 保留借用者/課指組兩種身份登入
+- [x] 7-2: 借用者細分為社團幹部/教授/職員
+- [x] 7-3: 修正隱藏錯誤（btoa Unicode、路由衝突等）
+- [x] 7-4: 選用 Hono + Cloudflare 架構
+- [x] 7-6A: AI 改用 GitHub Models PAT（含 fallback 至本地 RAG）
+- [x] 7-6B: 各角色頁面 FAQ 區塊
+- [x] 7-7A: 移除活動牆
+- [x] 7-9A: AI 資訊概覽與法規查詢整合至 FAQ 單一頁面
+- [x] 7-9B: 登入按鈕下方新增忘記密碼/建立帳號 Tab 切換
+- [x] 7-9C: 註冊時選身分（社團幹部/教授/職員/學生）
+- [x] 7-9E: 進入頁面後選擇大頭貼
+
+---
+
+## API 端點一覽
+
+### Auth（認證）
+| Method | Path | 說明 |
+|--------|------|------|
+| POST | `/api/auth/login` | 登入 |
+| POST | `/api/auth/register` | 註冊 |
+| POST | `/api/auth/forgot-password` | 忘記密碼 |
+| POST | `/api/auth/reset-password` | 重設密碼 |
+
+### Facilities（場地）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/facilities` | 場地清單（?q= 搜尋） |
+| GET | `/api/facilities/:id` | 場地詳情 |
+| GET | `/api/facilities/:id/calendar` | 場地月曆（?start=&end=） |
+| GET | `/api/facilities/:id/maintenance` | 維修紀錄 |
+| POST | `/api/facilities` | 新增場地 |
+| PUT | `/api/facilities/:id` | 編輯場地 |
+| DELETE | `/api/facilities/:id` | 停用場地 |
+
+### Equipment（器材）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/equipment` | 器材清單 |
+| GET | `/api/equipment/:id` | 器材詳情 |
+| GET | `/api/equipment/cert-types` | 操作證類型 |
+| POST | `/api/equipment` | 新增器材 |
+| POST | `/api/equipment/loans` | 借用器材 |
+| GET | `/api/equipment/loans/list` | 借用紀錄 |
+| GET | `/api/equipment/loans/:id/details` | 借用明細 |
+
+### Activities（活動申請）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/activities` | 活動清單（?status=&unitId=） |
+| GET | `/api/activities/:id` | 活動詳情 |
+| POST | `/api/activities` | 新增活動申請 |
+| PATCH | `/api/activities/:id/approve` | 核准活動 |
+| PATCH | `/api/activities/:id/reject` | 拒絕活動 |
+| PATCH | `/api/activities/:id/cancel` | 取消活動 |
+
+### Venue Bookings（場地預約）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/venue-bookings` | 預約清單（?status=&userId=&facId=） |
+| GET | `/api/venue-bookings/pending` | 待審核預約 |
+| POST | `/api/venue-bookings` | 送出預約（含衝突偵測） |
+| PATCH | `/api/venue-bookings/:id/approve` | 核准 |
+| PATCH | `/api/venue-bookings/:id/reject` | 拒絕 |
+| PATCH | `/api/venue-bookings/:id/cancel` | 取消 |
+| PATCH | `/api/venue-bookings/:id/return` | 歸還 |
+
+### Venue Coordination（場協大會）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/venue-coordination` | 登記清單（?semester=&status=） |
+| GET | `/api/venue-coordination/:id` | 登記詳情 |
+| POST | `/api/venue-coordination` | 新增登記 |
+| PATCH | `/api/venue-coordination/:id/approve` | 核准 |
+| PATCH | `/api/venue-coordination/:id/reject` | 駁回 |
+
+### Conflicts（衝突協調）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/conflicts` | 衝突清單 |
+| GET | `/api/conflicts/:id` | 衝突詳情（含聊天紀錄） |
+| POST | `/api/conflicts` | 建立衝突案件 |
+| POST | `/api/conflicts/:id/messages` | 發送聊天訊息 |
+| PATCH | `/api/conflicts/:id/resolve` | 標記解決 |
+| PATCH | `/api/conflicts/:id/fail` | 標記失敗 |
+
+### Repairs（報修）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/repairs` | 報修清單 |
+| GET | `/api/repairs/:id` | 報修詳情 |
+| POST | `/api/repairs` | 提交報修 |
+| PUT | `/api/repairs/:id` | 更新狀態 |
+
+### Appeals（申訴）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/appeals` | 申訴清單 |
+| POST | `/api/appeals` | 提交申訴 |
+| PATCH | `/api/appeals/:id/approve` | 核准 |
+| PATCH | `/api/appeals/:id/reject` | 駁回 |
+
+### Users（使用者管理）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/users` | 使用者清單 |
+| GET | `/api/users/:id` | 使用者詳情 |
+| GET | `/api/users/:id/profile` | 個人中心（預約/借用/申訴/報修/違規） |
+| PUT | `/api/users/:id` | 更新資料 |
+| PATCH | `/api/users/:id/avatar` | 更新大頭貼 |
+| PATCH | `/api/users/:id/suspend` | 停權 |
+| PATCH | `/api/users/:id/unsuspend` | 解除停權 |
+| PATCH | `/api/users/:id/toggle-admin` | 切換管理員 |
+
+### Violations & Labor（違規記點 / 勞動服務）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/violations` | 記點紀錄 |
+| GET | `/api/violations/unit-points` | 單位點數一覽 |
+| POST | `/api/violations` | 新增記點 |
+| GET | `/api/labor` | 勞動服務清單 |
+| POST | `/api/labor` | 申請銷點 |
+| PATCH | `/api/labor/:id/approve` | 核准銷點 |
+| PATCH | `/api/labor/:id/reject` | 駁回銷點 |
+
+### Stats & AI（統計 / AI）
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/stats/dashboard` | 儀表板統計 |
+| GET | `/api/stats/facility-usage` | 場地使用統計 |
+| GET | `/api/stats/equipment-usage` | 器材使用統計 |
+| POST | `/api/ai/chat` | AI 聊天（RAG + GPT-4o） |
+| POST | `/api/ai/pre-review` | AI 活動預審 |
+| POST | `/api/ai/generate-report` | AI 學期評鑑報告 |
+| POST | `/api/ai/generate-pdf` | 活動 PDF 資料 |
+
+### Others
+| Method | Path | 說明 |
+|--------|------|------|
+| GET | `/api/announcements` | 公告清單 |
+| POST | `/api/announcements` | 新增公告 |
+| GET | `/api/units` | 單位清單 |
+| GET | `/api/units/:id` | 單位詳情（含成員） |
+| GET | `/api/faq` | FAQ（含角色專屬問答 ?role=） |
+| GET | `/api/health` | 健康檢查 |
+
+---
 
 ## 資料架構
-- **MySQL 8.0 (MariaDB)**: 21 張表 (users, clubs, venues, activities, reservations, conflicts, etc.)
-- **Redis**: 計時器 + 2FA OTP 暫存
-- **Dify AI**: RAG 知識庫 (8 份法規) + Workflow (預審/企劃/摘要)
 
-## API 接口 (30+)
-- Users CRUD, Clubs CRUD, Venues CRUD, Activities CRUD, Equipment CRUD
-- Reservations (negotiate, accept-suggestion)
-- Conflicts (chat, send-email, confirm, negotiate)
-- Credits (show, deduct)
-- Notifications (index, read)
-- Certificates (generate)
-- Calendar Events CRUD
-- Repairs CRUD, Appeals CRUD (ai-summary)
-- Dashboard stats (per role)
-- AI (pre-review, generate-proposal)
-- Gatekeeping (dependency check)
-- i18n (zh-TW, en, ja, ko, zh-CN)
-- Health check
+### 技術棧
+- **Backend**: Hono Framework (TypeScript)
+- **Runtime**: Cloudflare Workers / Pages
+- **Database**: Cloudflare D1 (SQLite)
+- **Frontend**: Vanilla JS SPA + Tailwind CSS (CDN) + Font Awesome
+- **AI**: GitHub Models API (GPT-4o) + 本地 RAG 知識庫
 
-## 部署方式
+### Database Schema（27 Tables）
+1. **User** — 使用者
+2. **Unit** — 單位（社團/學生會/行政單位）
+3. **UnitMember** — 單位成員
+4. **UnitViolationPoint** — 單位違規點數
+5. **EquipmentCertType** — 器材操作證類型
+6. **EquipmentCert** — 操作證
+7. **Facility** — 場地
+8. **FacilityMaintenanceLog** — 維修紀錄
+9. **Equipment** — 器材
+10. **ActivityApplication** — 活動申請
+11. **VenueBooking** — 場地預約
+12. **VenueBookingRecurrence** — 重複預約
+13. **EquipmentLoan** — 器材借用
+14. **EquipmentLoanDetail** — 借用明細
+15. **EquipmentLoanRecurrence** — 重複借用
+16. **EquipmentLoanRecurrenceDetail** — 重複借用明細
+17. **ConflictNegotiation** — 衝突協調
+18. **CoordinationMessage** — 協調訊息
+19. **VenueCoordination** — 場協大會登記
+20. **RepairRequest** — 報修
+21. **RepairRequestPhoto** — 報修照片
+22. **AppealCase** — 申訴
+23. **LaborServiceApplication** — 勞動服務
+24. **ViolationPointLog** — 違規記點日誌
+25. **OperationLog** — 操作日誌
+26. **Announcement** — 公告
+27. **StatsSummary** — 統計摘要
+
+### 角色權限矩陣
+
+| 功能 | admin | officer | professor | student | staff |
+|------|:-----:|:-------:|:---------:|:-------:|:-----:|
+| 儀表板 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 活動申請 | ✅ | ✅ | ✅ | ❌ | ✅ |
+| 場地預約 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 器材借用 | ✅ | ✅ | ✅ | ❌ | ✅ |
+| 場協大會 | ✅ | ✅ | ❌ | ❌ | ❌ |
+| 衝突協調 | ✅ | ✅ | ❌ | ❌ | ❌ |
+| 報修管理 | ✅ | ✅ | ❌ | ✅ | ✅ |
+| 申訴管理 | ✅ | ✅ | ❌ | ✅ | ❌ |
+| FAQ / AI | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 統計報表 | ✅ | ❌ | ❌ | ❌ | ❌ |
+| 使用者管理 | ✅ | ❌ | ❌ | ❌ | ❌ |
+| 違規記點 | ✅ | ✅ | ❌ | ✅ | ❌ |
+| 勞動服務 | ✅ | ✅ | ❌ | ✅ | ❌ |
+| 單位管理 | ✅ | ✅ | ❌ | ❌ | ❌ |
+| 個人中心 | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+---
+
+## 本地開發
+
 ```bash
 # 安裝依賴
-composer install && npm install
+npm install
 
-# 環境設定
-cp .env.example .env
-php artisan key:generate
+# 初始化 DB
+npx wrangler d1 migrations apply DB --local
+npx wrangler d1 execute DB --local --file=./seed.sql
 
-# 資料庫
-php artisan migrate:fresh --seed
+# 建置
+npm run build
 
-# 啟動
-php artisan serve --port=3000
+# 啟動開發伺服器
+npx wrangler pages dev dist --d1=DB --local --ip 0.0.0.0 --port 3000
 ```
 
-## 最後更新
-- **日期**: 2026-04-21
-- **版本**: v3.0.0
-- **狀態**: ✅ Active
+### 啟用 GitHub Models AI
+```bash
+# 在 .dev.vars 中設定
+echo "GITHUB_TOKEN=your-github-pat" > .dev.vars
+```
+設定後 AI 聊天將使用 GPT-4o；未設定則使用本地 RAG 知識庫回覆。
+
+---
+
+## E2E 測試結果
+
+- **測試端點數**: 131 個測試案例
+- **HTTP 狀態碼**: 全部 API 回傳正確 HTTP Code（200/201/400/401/403/404/409）
+- **覆蓋範圍**: Auth、Facilities、Equipment、Activities、VenueBookings、Repairs、Appeals、Announcements、Stats、Users、Violations、Labor、Units、Conflicts、VenueCoordination、FAQ、AI、Frontend SPA
+- **已修復問題**: btoa Unicode、cert-types 路由衝突、DB binding 不匹配
+
+---
+
+## 部署狀態
+
+- **平台**: Cloudflare Pages (Sandbox Demo)
+- **框架**: Hono v4 + TypeScript
+- **資料庫**: Cloudflare D1 (SQLite)
+- **版本**: v3.2.0
+- **最後更新**: 2026-05-05
