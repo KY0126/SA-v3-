@@ -1,13 +1,12 @@
 module.exports = {
   apps: [
     {
-      name: 'fju-smart-hub',
-      script: 'php',
-      args: 'artisan serve --host=0.0.0.0 --port=3000',
-      cwd: '/home/user/webapp',
+      name: 'fju-course-platform',
+      script: 'npx',
+      args: 'wrangler pages dev dist --d1=DB --local --ip 0.0.0.0 --port 3000',
       env: {
-        APP_ENV: 'local',
-        APP_DEBUG: 'true',
+        NODE_ENV: 'development',
+        PORT: 3000
       },
       watch: false,
       instances: 1,

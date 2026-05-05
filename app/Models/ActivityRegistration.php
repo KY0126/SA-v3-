@@ -1,8 +1,0 @@
-<?php
-namespace App\Models;
-use Illuminate\Database\Eloquent\Model;
-class ActivityRegistration extends Model {
-    protected $guarded = [];
-    public function activity() { return $this->belongsTo(Activity::class); }
-    public function user() { return $this->belongsTo(User::class); }
-}
