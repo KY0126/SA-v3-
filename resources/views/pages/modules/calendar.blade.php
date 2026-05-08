@@ -1,213 +1,301 @@
 @extends('layouts.shell')
-@section('title', '活動申請')
+@section('title', '行事曆總覽')
 @php $activePage = 'calendar'; @endphp
 @section('content')
 <div class="space-y-6">
-  {{-- Header + Sorter --}}
+
+  {{-- Header --}}
   <div class="flex items-center justify-between flex-wrap gap-2">
-    <h2 class="font-bold text-fju-blue text-lg"><i class="fas fa-calendar-check mr-2 text-fju-yellow"></i>活動申請管理</h2>
+    <div>
+      <h2 class="font-bold text-fju-blue text-xl"><i class="fas fa-calendar-alt mr-2 text-fju-yellow"></i>行事曆總覽</h2>
+      <p class="text-xs text-gray-400 mt-0.5">整合活動申請、器材借用、場地預約於同一行事曆</p>
+    </div>
     <div class="flex items-center gap-2">
-      <select id="cal-sort" onchange="renderEventList()" class="px-3 py-1.5 rounded-fju border border-gray-200 text-xs">
-        <option value="date-asc">日期 (舊→新)</option>
-        <option value="date-desc" selected>日期 (新→舊)</option>
-        <option value="title-asc">標題 A→Z</option>
-      </select>
-      <select id="cal-type-filter" onchange="renderEventList()" class="px-3 py-1.5 rounded-fju border border-gray-200 text-xs">
-        <option value="all">全部類型</option>
-        <option value="meeting">會議</option>
-        <option value="competition">比賽</option>
-        <option value="performance">表演</option>
-        <option value="workshop">工作坊</option>
-        <option value="service">服務</option>
-        <option value="sports">體育</option>
-      </select>
+      {{-- Task 1: 審核者（admin）不顯示「新增事件」 --}}
+      @if(!in_array($role ?? 'student', ['admin']))
       <button onclick="openEventModal()" class="btn-yellow px-4 py-2 text-sm"><i class="fas fa-plus mr-1"></i>新增事件</button>
+      @endif
     </div>
   </div>
 
-  {{-- View Toggle --}}
-  <div class="flex items-center gap-2 justify-end">
-    <button onclick="setCalView('week')" id="view-week" class="px-3 py-1 rounded-fju text-xs bg-gray-100 text-gray-500">週</button>
-    <button onclick="setCalView('month')" id="view-month" class="px-3 py-1 rounded-fju text-xs bg-fju-blue text-white">月</button>
+  {{-- Task 2: Legend --}}
+  <div class="flex flex-wrap gap-3 items-center bg-white px-4 py-3 rounded-fju-lg shadow-sm border border-gray-100">
+    <span class="text-xs text-gray-400 font-bold mr-1">圖例：</span>
+    <span class="flex items-center gap-1.5 text-xs"><span class="w-3 h-3 rounded-full inline-block" style="background:#3b82f6"></span><span class="text-gray-600">活動申請</span></span>
+    <span class="flex items-center gap-1.5 text-xs"><span class="w-3 h-3 rounded-full inline-block" style="background:#f59e0b"></span><span class="text-gray-600">器材借用</span></span>
+    <span class="flex items-center gap-1.5 text-xs"><span class="w-3 h-3 rounded-full inline-block" style="background:#22c55e"></span><span class="text-gray-600">場地預約</span></span>
+    <span class="flex items-center gap-1.5 text-xs"><span class="w-3 h-3 rounded-full inline-block" style="background:#8b5cf6"></span><span class="text-gray-600">行事曆事件</span></span>
+    <div class="ml-auto flex gap-1">
+      <select id="cal-type-filter" onchange="renderCalendar()" class="px-3 py-1.5 rounded-fju border border-gray-200 text-xs">
+        <option value="all">全部類型</option>
+        <option value="activity">僅活動申請</option>
+        <option value="equipment">僅器材借用</option>
+        <option value="venue">僅場地預約</option>
+        <option value="event">僅行事曆事件</option>
+      </select>
+    </div>
   </div>
 
-  {{-- Custom Calendar --}}
+  {{-- Month Calendar --}}
   <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
       <button onclick="prevMonth()" class="w-8 h-8 rounded-fju hover:bg-fju-bg flex items-center justify-center"><i class="fas fa-chevron-left text-fju-blue"></i></button>
       <h3 class="font-bold text-fju-blue text-base" id="cal-month-label"></h3>
       <button onclick="nextMonth()" class="w-8 h-8 rounded-fju hover:bg-fju-bg flex items-center justify-center"><i class="fas fa-chevron-right text-fju-blue"></i></button>
     </div>
-    <div id="cal-grid" class="p-2"></div>
-  </div>
-
-  {{-- Event List --}}
-  <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-list mr-2 text-fju-yellow"></i>事件列表</h3></div>
-    <div id="event-list"><div class="p-4 text-center text-gray-400"><i class="fas fa-spinner fa-spin"></i></div></div>
-  </div>
-
-  {{-- Add Event Modal --}}
-  <div id="event-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-fju-lg p-6 w-full max-w-md mx-4">
-      <h3 class="font-bold text-fju-blue text-lg mb-4"><i class="fas fa-calendar-plus mr-2 text-fju-yellow"></i>新增行事曆事件</h3>
-      <div class="space-y-3">
-        <div><label class="text-xs text-gray-400">標題</label><input id="ev-title" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm" required></div>
-        <div><label class="text-xs text-gray-400">日期</label><input type="date" id="ev-date" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm" required></div>
-        <div><label class="text-xs text-gray-400">類型</label><select id="ev-type" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm"><option>meeting</option><option>competition</option><option>performance</option><option>workshop</option><option>service</option><option>sports</option></select></div>
-        <div><label class="text-xs text-gray-400">說明</label><textarea id="ev-desc" rows="2" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm"></textarea></div>
-      </div>
-      <div class="flex gap-2 mt-4">
-        <button onclick="addEvent()" class="flex-1 btn-yellow py-2"><i class="fas fa-check mr-1"></i>新增</button>
-        <button onclick="closeEventModal()" class="flex-1 py-2 rounded-fju border border-gray-200 text-sm text-gray-500">取消</button>
-      </div>
+    <div id="cal-grid" class="p-2">
+      <div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div>
     </div>
   </div>
 
-  {{-- Date Detail Modal: shows who booked this date + reservation modify --}}
-  <div id="date-detail-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-fju-lg p-6 w-full max-w-lg mx-4 shadow-2xl">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-fju-blue text-lg"><i class="fas fa-calendar-day mr-2 text-fju-yellow"></i><span id="dd-date"></span></h3>
-        <button onclick="closeDateDetail()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+  {{-- Unified Event List --}}
+  <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-list mr-2 text-fju-yellow"></i>近期事項</h3>
+      <select id="list-sort" onchange="renderList()" class="px-3 py-1.5 rounded-fju border border-gray-200 text-xs">
+        <option value="date-asc">日期 (舊→新)</option>
+        <option value="date-desc" selected>日期 (新→舊)</option>
+      </select>
+    </div>
+    <div id="unified-list"><div class="p-6 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div></div>
+  </div>
+
+</div>
+
+{{-- Add Event Modal (hidden for admin per Task 1) --}}
+<div id="event-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+  <div class="bg-white rounded-fju-lg p-6 w-full max-w-md mx-4">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-fju-blue text-lg"><i class="fas fa-calendar-plus mr-2 text-fju-yellow"></i>新增行事曆事件</h3>
+      <button onclick="closeEventModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="space-y-3">
+      <div><label class="text-xs text-gray-400">標題</label><input id="ev-title" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm mt-1"></div>
+      <div><label class="text-xs text-gray-400">日期</label><input type="date" id="ev-date" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm mt-1"></div>
+      <div><label class="text-xs text-gray-400">類型</label>
+        <select id="ev-type" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm mt-1">
+          <option>meeting</option><option>competition</option><option>performance</option><option>workshop</option><option>service</option><option>sports</option>
+        </select>
       </div>
-      <div id="dd-events" class="mb-4"></div>
-      <div id="dd-reservations" class="mb-4"></div>
-      <div id="dd-modify" class="hidden">
-        <h4 class="font-bold text-fju-blue text-sm mb-2"><i class="fas fa-edit mr-1 text-fju-yellow"></i>修改場地預約</h4>
-        <div class="p-3 rounded-fju bg-fju-bg mb-3 text-sm" id="dd-current-res"></div>
-        <div><label class="text-xs text-gray-400">選擇新時段</label>
-          <select id="dd-new-slot" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm mt-1"></select>
-        </div>
-        <div class="flex gap-2 mt-3">
-          <button onclick="closeModify()" class="flex-1 py-2 rounded-fju border border-gray-200 text-sm text-gray-500">取消</button>
-          <button onclick="confirmModify()" class="flex-1 btn-yellow py-2 text-sm"><i class="fas fa-check mr-1"></i>確認修改</button>
-        </div>
-      </div>
+      <div><label class="text-xs text-gray-400">說明</label><textarea id="ev-desc" rows="2" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm mt-1 resize-none"></textarea></div>
+    </div>
+    <div class="flex gap-2 mt-4">
+      <button onclick="addEvent()" class="flex-1 btn-yellow py-2.5 text-sm"><i class="fas fa-check mr-1"></i>新增</button>
+      <button onclick="closeEventModal()" class="flex-1 py-2.5 rounded-fju border border-gray-200 text-sm text-gray-500">取消</button>
     </div>
   </div>
 </div>
 
-<script>
-let allEvents=[], allReservations=[], calYear, calMonth;
+{{-- Day Detail Modal --}}
+<div id="day-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+  <div class="bg-white rounded-fju-lg p-6 w-full max-w-lg mx-4 shadow-2xl max-h-[80vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-fju-blue text-lg"><i class="fas fa-calendar-day mr-2 text-fju-yellow"></i><span id="day-modal-date"></span></h3>
+      <button onclick="document.getElementById('day-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="day-modal-body" class="space-y-2 text-sm"></div>
+  </div>
+</div>
 
-// Init
+<script>
+// Task 2: Three data sources + calendar events
+let allActivities = [], allLoans = [], allVenues = [], allCalEvents = [];
+let calYear, calMonth;
+
+const COLORS = {
+  activity:  { bg: '#eff6ff', border: '#3b82f6', text: '#1d4ed8', dot: '#3b82f6' },
+  equipment: { bg: '#fffbeb', border: '#f59e0b', text: '#b45309', dot: '#f59e0b' },
+  venue:     { bg: '#f0fdf4', border: '#22c55e', text: '#15803d', dot: '#22c55e' },
+  event:     { bg: '#f5f3ff', border: '#8b5cf6', text: '#6d28d9', dot: '#8b5cf6' },
+};
+
+const STATUS_LABELS = {
+  // activities
+  submitted: '待審核', approved: '已核准', returned: '已退件', rejected: '已拒絕', draft: '草稿',
+  // loans
+  pending: '待審核', picked_up: '使用中', returned_eq: '已歸還',
+  // venues
+  confirmed: '已確認', negotiating: '協商中',
+};
+
 (function(){
-  const now=new Date();
-  calYear=now.getFullYear(); calMonth=now.getMonth();
-  loadCalData();
+  const now = new Date();
+  calYear = now.getFullYear(); calMonth = now.getMonth();
+  loadAllData();
 })();
 
-function loadCalData(){
+function loadAllData() {
   Promise.all([
-    fetch('/api/calendar/events').then(r=>r.json()),
-    fetch('/api/reservations').then(r=>r.json())
-  ]).then(([evRes,resRes])=>{
-    allEvents=evRes.data||[];
-    allReservations=(resRes.data||[]);
+    fetch('/api/activity-applications').then(r => r.json()).catch(() => ({ data: [] })),
+    fetch('/api/equipment-loans').then(r => r.json()).catch(() => ({ data: [] })),
+    fetch('/api/venue-bookings').then(r => r.json()).catch(() => ({ data: [] })),
+    fetch('/api/calendar/events').then(r => r.json()).catch(() => ({ data: [] })),
+  ]).then(([aaRes, elRes, vbRes, evRes]) => {
+    allActivities  = (aaRes.data || []).filter(a => a.status !== 'draft');
+    allLoans       = elRes.data || [];
+    allVenues      = vbRes.data || [];
+    allCalEvents   = evRes.data || [];
     renderCalendar();
-    renderEventList();
+    renderList();
   });
 }
 
-function renderCalendar(){
-  const label=calYear+'年 '+(calMonth+1)+'月';
-  document.getElementById('cal-month-label').textContent=label;
-  const firstDay=new Date(calYear,calMonth,1).getDay();
-  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
-  const today=new Date();
-  const days=['日','一','二','三','四','五','六'];
+// Build a map of date → array of unified events
+function buildDayMap() {
+  const typeFilter = document.getElementById('cal-type-filter')?.value || 'all';
+  const map = {};
+  const add = (dateStr, item) => { if (!map[dateStr]) map[dateStr] = []; map[dateStr].push(item); };
 
-  let html='<div class="grid grid-cols-7 gap-0">';
-  days.forEach(d=>{html+='<div class="text-center text-xs font-bold text-white py-2 bg-fju-blue">'+d+'</div>'});
-  for(let i=0;i<firstDay;i++){html+='<div class="p-2 min-h-[80px] border border-gray-50 bg-gray-50/50"></div>'}
-  for(let d=1;d<=daysInMonth;d++){
-    const dateStr=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
-    const dayEvents=allEvents.filter(e=>e.date===dateStr);
-    const dayRes=allReservations.filter(r=>r.reservation_date===dateStr);
-    const hasBooking=dayRes.length>0;
-    html+='<div class="p-1.5 min-h-[80px] border border-gray-100 cursor-pointer hover:bg-fju-yellow/5 transition-all relative '+(isToday?'bg-fju-blue/5 ring-2 ring-fju-blue/30':'')+'" onclick="openDateDetail(\''+dateStr+'\')">';
-    html+='<div class="flex items-center justify-between"><span class="text-sm font-bold '+(isToday?'text-fju-blue':'text-gray-700')+'">'+d+'</span>';
-    if(hasBooking) html+='<span class="text-[9px] px-1.5 py-0.5 rounded-full bg-fju-yellow/20 text-fju-yellow font-bold">'+dayRes.length+'預約</span>';
-    html+='</div>';
-    html+='<div class="text-[10px] text-gray-400 mt-0.5">'+(dayRes.length===0&&dayEvents.length===0?'可用':'')+'</div>';
-    dayEvents.slice(0,2).forEach(e=>{html+='<div class="text-[9px] px-1 py-0.5 rounded mt-0.5 truncate" style="background:'+((e.color||'#003153')+'20')+';color:'+(e.color||'#003153')+'">'+e.title+'</div>'});
-    dayRes.slice(0,1).forEach(r=>{html+='<div class="text-[9px] px-1 py-0.5 rounded mt-0.5 truncate bg-fju-blue/10 text-fju-blue"><i class="fas fa-user text-[8px] mr-0.5"></i>'+(r.user_name||r.club_name||'')+'</div>'});
-    html+='</div>';
+  if (typeFilter === 'all' || typeFilter === 'activity') {
+    allActivities.forEach(a => {
+      if (a.event_date) add(a.event_date, { type: 'activity', title: a.activity_name, sub: STATUS_LABELS[a.status] || a.status, date: a.event_date });
+    });
   }
-  html+='</div>';
-  document.getElementById('cal-grid').innerHTML=html;
+  if (typeFilter === 'all' || typeFilter === 'equipment') {
+    allLoans.forEach(l => {
+      const names = (l.details || []).map(d => d.equipment?.name || '').filter(Boolean).join('、') || '器材借用';
+      if (l.borrow_date) add(l.borrow_date, { type: 'equipment', title: names, sub: STATUS_LABELS[l.status] || l.status, date: l.borrow_date });
+      if (l.expected_return_date && l.expected_return_date !== l.borrow_date)
+        add(l.expected_return_date, { type: 'equipment', title: names + '（歸還）', sub: l.expected_return_date, date: l.expected_return_date });
+    });
+  }
+  if (typeFilter === 'all' || typeFilter === 'venue') {
+    allVenues.forEach(v => {
+      const dateKey = v.booking_date || v.reservation_date || v.event_date;
+      if (dateKey) add(dateKey, { type: 'venue', title: v.venue?.name || v.venue_name || '場地預約', sub: STATUS_LABELS[v.status] || v.status, date: dateKey });
+    });
+  }
+  if (typeFilter === 'all' || typeFilter === 'event') {
+    allCalEvents.forEach(e => {
+      if (e.date) add(e.date, { type: 'event', title: e.title, sub: e.type || '', date: e.date, id: e.id });
+    });
+  }
+  return map;
 }
 
-function renderEventList(){
-  const sort=document.getElementById('cal-sort').value;
-  const typeF=document.getElementById('cal-type-filter').value;
-  let data=[...allEvents];
-  if(typeF!=='all') data=data.filter(e=>e.type===typeF);
-  if(sort==='date-asc') data.sort((a,b)=>a.date.localeCompare(b.date));
-  else if(sort==='date-desc') data.sort((a,b)=>b.date.localeCompare(a.date));
-  else if(sort==='title-asc') data.sort((a,b)=>a.title.localeCompare(b.title));
-  document.getElementById('event-list').innerHTML=data.length===0?'<div class="p-4 text-center text-gray-400">無事件</div>':
-    '<table class="w-full text-sm"><tbody>'+data.map(e=>'<tr class="border-t border-gray-50 hover:bg-gray-50"><td class="p-3"><span class="w-3 h-3 rounded-full inline-block mr-2" style="background:'+(e.color||'#003153')+'"></span></td><td class="p-3 font-medium text-fju-blue">'+e.title+'</td><td class="p-3 text-xs text-gray-400">'+e.date+'</td><td class="p-3 text-xs text-gray-400">'+(e.type||'')+'</td><td class="p-3 text-xs text-gray-400">'+(e.venue||'')+'</td><td class="p-3"><button onclick="event.stopPropagation();deleteEvent('+e.id+')" class="text-fju-red text-xs hover:bg-fju-red/10 px-2 py-1 rounded"><i class="fas fa-trash"></i></button></td></tr>').join('')+'</tbody></table>';
+function renderCalendar() {
+  const map = buildDayMap();
+  const label = calYear + '年 ' + (calMonth + 1) + '月';
+  document.getElementById('cal-month-label').textContent = label;
+  const firstDay   = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today       = new Date();
+  const days = ['日', '一', '二', '三', '四', '五', '六'];
+
+  let html = '<div class="grid grid-cols-7 gap-0">';
+  days.forEach(d => { html += '<div class="text-center text-xs font-bold text-white py-2 bg-fju-blue">' + d + '</div>'; });
+  for (let i = 0; i < firstDay; i++) { html += '<div class="p-1.5 min-h-[90px] border border-gray-50 bg-gray-50/40"></div>'; }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === d;
+    const dayItems = map[ds] || [];
+    html += '<div class="p-1.5 min-h-[90px] border border-gray-100 cursor-pointer hover:bg-fju-yellow/5 transition-all '
+          + (isToday ? 'bg-fju-blue/5 ring-2 ring-inset ring-fju-blue/30' : '')
+          + '" onclick="openDayModal(\'' + ds + '\')">';
+    html += '<div class="flex items-center justify-between mb-0.5">';
+    html += '<span class="text-sm font-bold ' + (isToday ? 'w-6 h-6 rounded-full bg-fju-blue text-white flex items-center justify-center' : 'text-gray-700') + '">' + d + '</span>';
+    if (dayItems.length > 2) html += '<span class="text-[9px] text-gray-400">+' + (dayItems.length - 2) + '</span>';
+    html += '</div>';
+    dayItems.slice(0, 3).forEach(item => {
+      const c = COLORS[item.type];
+      html += '<div class="text-[9px] px-1 py-0.5 rounded mb-0.5 truncate" style="background:' + c.bg + ';color:' + c.text + ';border-left:2px solid ' + c.border + '">' + item.title + '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  document.getElementById('cal-grid').innerHTML = html;
 }
 
-function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCalendar()}
-function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCalendar()}
-function setCalView(v){
-  document.getElementById('view-week').className='px-3 py-1 rounded-fju text-xs '+(v==='week'?'bg-fju-blue text-white':'bg-gray-100 text-gray-500');
-  document.getElementById('view-month').className='px-3 py-1 rounded-fju text-xs '+(v==='month'?'bg-fju-blue text-white':'bg-gray-100 text-gray-500');
-}
-
-function openDateDetail(dateStr){
-  document.getElementById('dd-date').textContent=dateStr;
-  const dayEvents=allEvents.filter(e=>e.date===dateStr);
-  const dayRes=allReservations.filter(r=>r.reservation_date===dateStr);
-
-  // Events
-  document.getElementById('dd-events').innerHTML=dayEvents.length>0?
-    '<h4 class="font-bold text-sm text-fju-blue mb-2"><i class="fas fa-calendar-check mr-1 text-fju-yellow"></i>當日事件</h4>'+dayEvents.map(e=>'<div class="flex items-center gap-2 p-2 rounded-fju bg-fju-bg mb-1"><span class="w-3 h-3 rounded-full" style="background:'+(e.color||'#003153')+'"></span><span class="text-sm text-fju-blue font-medium">'+e.title+'</span><span class="text-xs text-gray-400 ml-auto">'+(e.type||'')+'</span></div>').join(''):'<p class="text-xs text-gray-400 mb-2">當日無事件</p>';
-
-  // Reservations (who has booked)
-  if(dayRes.length>0){
-    document.getElementById('dd-reservations').innerHTML='<h4 class="font-bold text-sm text-fju-blue mb-2"><i class="fas fa-users mr-1 text-fju-yellow"></i>已預約時段</h4>'+dayRes.map(r=>{
-      const confirmed=r.status==='confirmed';
-      return '<div class="flex items-center justify-between p-2 rounded-fju border border-gray-100 mb-1"><div><span class="text-sm font-medium text-fju-blue">'+(r.venue_name||'場地')+'</span><span class="text-xs text-gray-400 ml-2">'+r.start_time+' - '+r.end_time+'</span></div><div class="flex items-center gap-2"><span class="text-xs px-2 py-0.5 rounded-full '+(confirmed?'bg-fju-green/10 text-fju-green':'bg-fju-yellow/20 text-fju-yellow')+'">'+r.status+'</span><span class="text-xs text-gray-500"><i class="fas fa-user mr-0.5"></i>'+(r.user_name||r.club_name||'')+'</span>'+(confirmed?'<button onclick="openModify('+r.id+',\''+dateStr+'\')" class="text-xs btn-yellow px-2 py-0.5">修改</button>':'')+'</div></div>'}).join('');
+function openDayModal(ds) {
+  const map = buildDayMap();
+  document.getElementById('day-modal-date').textContent = ds;
+  const items = map[ds] || [];
+  if (!items.length) {
+    document.getElementById('day-modal-body').innerHTML = '<p class="text-gray-400 text-center py-4"><i class="fas fa-calendar-check mr-1 text-fju-green"></i>此日無任何事項</p>';
   } else {
-    document.getElementById('dd-reservations').innerHTML='<p class="text-xs text-fju-green"><i class="fas fa-check-circle mr-1"></i>此日尚無場地預約，可用</p>';
+    document.getElementById('day-modal-body').innerHTML = items.map(item => {
+      const c = COLORS[item.type];
+      const typeLabel = { activity: '活動申請', equipment: '器材借用', venue: '場地預約', event: '行事曆事件' }[item.type];
+      return `<div class="flex items-start gap-3 p-3 rounded-fju" style="background:${c.bg};border-left:3px solid ${c.border}">
+        <div class="w-2 h-2 rounded-full mt-1.5 shrink-0" style="background:${c.dot}"></div>
+        <div class="flex-1">
+          <div class="font-bold text-xs mb-0.5" style="color:${c.text}">${typeLabel}</div>
+          <div class="text-sm text-gray-700">${item.title}</div>
+          ${item.sub ? '<div class="text-xs text-gray-400 mt-0.5">' + item.sub + '</div>' : ''}
+        </div>
+      </div>`;
+    }).join('');
   }
-  document.getElementById('dd-modify').classList.add('hidden');
-  document.getElementById('date-detail-modal').classList.remove('hidden');
+  document.getElementById('day-modal').classList.remove('hidden');
 }
 
-let modifyResId=null;
-function openModify(resId, dateStr){
-  modifyResId=resId;
-  const res=allReservations.find(r=>r.id===resId);
-  document.getElementById('dd-current-res').innerHTML='<b>現有預約：</b>'+(res?.venue_name||'場地')+'<br>'+dateStr+' '+(res?.start_time||'')+' - '+(res?.end_time||'');
-  // Generate available slots
-  const slots=['09:00-12:00','13:00-16:00','14:00-17:00','18:00-21:00'];
-  document.getElementById('dd-new-slot').innerHTML=slots.map(s=>'<option value="'+s+'">'+dateStr.replace(/-/g,'/')+'  '+s+'</option>').join('');
-  document.getElementById('dd-modify').classList.remove('hidden');
-}
-function closeModify(){document.getElementById('dd-modify').classList.add('hidden')}
-function confirmModify(){
-  const slot=document.getElementById('dd-new-slot').value;
-  const [start,end]=slot.split('-');
-  fetch('/api/reservations/'+modifyResId,{method:'PUT',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({start_time:start,end_time:end,status:'confirmed'})}).then(r=>r.json()).then(()=>{
-    alert('預約時段已修改！');
-    closeDateDetail();
-    loadCalData();
-  });
-}
-function closeDateDetail(){document.getElementById('date-detail-modal').classList.add('hidden')}
+function renderList() {
+  const typeFilter = document.getElementById('cal-type-filter')?.value || 'all';
+  const sort = document.getElementById('list-sort')?.value || 'date-desc';
+  let items = [];
 
-function openEventModal(){document.getElementById('event-modal').classList.remove('hidden')}
-function closeEventModal(){document.getElementById('event-modal').classList.add('hidden')}
-function addEvent(){
-  const d={title:document.getElementById('ev-title').value,date:document.getElementById('ev-date').value,type:document.getElementById('ev-type').value,description:document.getElementById('ev-desc').value,color:'#003153'};
-  fetch('/api/calendar/events',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(d)}).then(r=>r.json()).then(()=>{closeEventModal();loadCalData()});
+  if (typeFilter === 'all' || typeFilter === 'activity') {
+    allActivities.forEach(a => { if (a.event_date) items.push({ type: 'activity', title: a.activity_name, date: a.event_date, sub: (STATUS_LABELS[a.status] || a.status) + ' · ' + a.event_date }); });
+  }
+  if (typeFilter === 'all' || typeFilter === 'equipment') {
+    allLoans.forEach(l => {
+      const names = (l.details || []).map(d => d.equipment?.name || '').filter(Boolean).join('、') || '器材借用';
+      if (l.borrow_date) items.push({ type: 'equipment', title: names, date: l.borrow_date, sub: (STATUS_LABELS[l.status] || l.status) + ' · 借出 ' + l.borrow_date + ' 歸還 ' + l.expected_return_date });
+    });
+  }
+  if (typeFilter === 'all' || typeFilter === 'venue') {
+    allVenues.forEach(v => {
+      const dateKey = v.booking_date || v.reservation_date || v.event_date;
+      if (dateKey) items.push({ type: 'venue', title: v.venue?.name || v.venue_name || '場地預約', date: dateKey, sub: (STATUS_LABELS[v.status] || v.status) + ' · ' + dateKey });
+    });
+  }
+  if (typeFilter === 'all' || typeFilter === 'event') {
+    allCalEvents.forEach(e => { if (e.date) items.push({ type: 'event', title: e.title, date: e.date, sub: (e.type || '') + ' · ' + e.date, id: e.id }); });
+  }
+
+  if (sort === 'date-asc') items.sort((a, b) => a.date.localeCompare(b.date));
+  else items.sort((a, b) => b.date.localeCompare(a.date));
+
+  if (!items.length) {
+    document.getElementById('unified-list').innerHTML = '<div class="p-8 text-center text-gray-400">目前無資料</div>';
+    return;
+  }
+
+  const typeLabel = { activity: '活動申請', equipment: '器材借用', venue: '場地預約', event: '行事曆事件' };
+  document.getElementById('unified-list').innerHTML =
+    '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400">' +
+    '<th class="p-4">類型</th><th class="p-4">標題</th><th class="p-4">日期</th><th class="p-4">狀態</th></tr></thead><tbody>' +
+    items.map(item => {
+      const c = COLORS[item.type];
+      return `<tr class="border-t border-gray-50 hover:bg-gray-50">
+        <td class="p-4"><span class="flex items-center gap-1.5 text-xs font-bold" style="color:${c.text}">
+          <span class="w-2 h-2 rounded-full shrink-0" style="background:${c.dot}"></span>${typeLabel[item.type]}
+        </span></td>
+        <td class="p-4 font-medium text-fju-blue">${item.title}</td>
+        <td class="p-4 text-xs text-gray-500">${item.date}</td>
+        <td class="p-4 text-xs text-gray-400">${item.sub}</td>
+      </tr>`;
+    }).join('') + '</tbody></table>';
 }
-function deleteEvent(id){if(!confirm('確定刪除？'))return;fetch('/api/calendar/events/'+id,{method:'DELETE',headers:{'Accept':'application/json'}}).then(()=>loadCalData())}
+
+function prevMonth() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+function nextMonth() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+
+function openEventModal() { document.getElementById('event-modal').classList.remove('hidden'); }
+function closeEventModal() { document.getElementById('event-modal').classList.add('hidden'); }
+function addEvent() {
+  const d = {
+    title:       document.getElementById('ev-title').value,
+    date:        document.getElementById('ev-date').value,
+    type:        document.getElementById('ev-type').value,
+    description: document.getElementById('ev-desc').value,
+    color:       '#8b5cf6',
+  };
+  if (!d.title || !d.date) { alert('請填寫標題和日期'); return; }
+  fetch('/api/calendar/events', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(d),
+  }).then(r => r.json()).then(() => { closeEventModal(); loadAllData(); });
+}
 </script>
 @endsection

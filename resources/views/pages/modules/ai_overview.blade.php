@@ -1,15 +1,16 @@
 @extends('layouts.shell')
-@section('title', 'AI 資訊概覽')
+@section('title', 'AI 資訊概覽 & 法規查詢')
 @php $activePage = 'ai-overview'; $currentRole = $role ?? 'student'; @endphp
 @section('content')
 <div class="space-y-6">
   <div class="flex items-center justify-between flex-wrap gap-2">
-    <h2 class="font-bold text-fju-blue text-lg"><i class="fas fa-brain mr-2 text-fju-yellow"></i>AI 資訊概覽</h2>
+    <h2 class="font-bold text-fju-blue text-lg"><i class="fas fa-brain mr-2 text-fju-yellow"></i>AI 資訊概覽 & 法規查詢</h2>
     <select id="ai-role-view" onchange="switchAIRole(this.value)" class="px-3 py-1.5 rounded-fju border border-gray-200 text-xs">
       <option value="all">全部角色</option>
       <option value="admin" {{ $currentRole === 'admin' ? 'selected' : '' }}>課指組審核員</option>
       <option value="officer" {{ $currentRole === 'officer' ? 'selected' : '' }}>社團幹部</option>
       <option value="professor" {{ $currentRole === 'professor' ? 'selected' : '' }}>指導教授</option>
+      <option value="staff" {{ $currentRole === 'staff' ? 'selected' : '' }}>處室職員</option>
       <option value="student" {{ $currentRole === 'student' ? 'selected' : '' }}>一般學生</option>
       <option value="it" {{ $currentRole === 'it' ? 'selected' : '' }}>資訊中心</option>
     </select>
@@ -41,21 +42,21 @@
     <div class="p-3 rounded-fju bg-fju-bg text-xs text-gray-500">
       <i class="fas fa-info-circle mr-1 text-fju-yellow"></i>
       <b>設計邏輯：</b>三層防護 — 第一層規則引擎自動過濾，第二層 RAG 語義比對法規，第三層 GPT-4 深度分析。每次 AI 決策均有完整審計日誌。
-      <b class="ml-2">衝突協商</b>已整合至「輔寶 AI 助理」，發生衝突時直接透過右下角 🐕 輔寶諮詢。
+      <b class="ml-2">衝突協商</b>已整合至「輔寶 AI 助理」，發生衝突時直接透過右下角輔寶諮詢。
     </div>
     <div class="mt-3 p-3 rounded-fju bg-fju-blue/5 border border-fju-blue/10 text-xs text-gray-600">
       <i class="fas fa-lightbulb mr-1 text-fju-yellow"></i>
-      <b>AI 運作方式說明：</b>目前 AI 功能採模擬引擎實作。建議未來可透過 <b>GitHub Models</b> 功能，使用 GitHub 個人存取權杖 (PAT) 呼叫 AI 模型 API（如 GPT-4o、Phi-3 等），讓系統 AI 實際運作。可直接在 GitHub Copilot 當中選用模型，透過 REST API 串接至本系統。
+      <b>AI 運作方式說明：</b>建議未來可透過 <b>GitHub Models</b> 功能，使用 GitHub 個人存取權杖 (PAT) 呼叫 AI 模型 API（如 GPT-4o、Phi-3 等），讓系統 AI 實際運作。可直接在 GitHub Copilot 當中選用模型，透過 REST API 串接至本系統。
     </div>
   </div>
 
   {{-- Role-based AI Features --}}
   <div id="ai-features-container"></div>
 
-  {{-- AI Pre-Review Card (with embedded demo) --}}
+  {{-- AI Pre-Review Card --}}
   <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="font-bold text-fju-blue"><i class="fas fa-search mr-2 text-fju-yellow"></i>AI 預審檢查（實作）</h3>
+      <h3 class="font-bold text-fju-blue"><i class="fas fa-search mr-2 text-fju-yellow"></i>AI 預審檢查</h3>
       <button onclick="togglePrereviewDemo()" class="text-xs px-3 py-1.5 rounded-fju bg-fju-blue/10 text-fju-blue hover:bg-fju-blue/20 transition-colors"><i class="fas fa-play-circle mr-1"></i>查看模擬演示</button>
     </div>
     <div id="prereview-demo-area" class="hidden mb-4 rounded-fju bg-fju-bg p-4 border border-gray-100">
@@ -70,10 +71,10 @@
     </div>
   </div>
 
-  {{-- AI Proposal Generator Card (with embedded demo) --}}
+  {{-- AI Proposal Generator Card --}}
   <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="font-bold text-fju-blue"><i class="fas fa-wand-magic-sparkles mr-2 text-fju-yellow"></i>AI 企劃生成器（實作）</h3>
+      <h3 class="font-bold text-fju-blue"><i class="fas fa-wand-magic-sparkles mr-2 text-fju-yellow"></i>AI 企劃生成器</h3>
       <button onclick="toggleProposalDemo()" class="text-xs px-3 py-1.5 rounded-fju bg-fju-yellow/10 text-fju-yellow hover:bg-fju-yellow/20 transition-colors"><i class="fas fa-play-circle mr-1"></i>查看模擬演示</button>
     </div>
     <div id="proposal-demo-area" class="hidden mb-4 rounded-fju bg-fju-bg p-4 border border-gray-100">
@@ -90,22 +91,69 @@
 
   {{-- AI Activity Recommendation --}}
   <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
-    <h3 class="font-bold text-fju-blue mb-4"><i class="fas fa-lightbulb mr-2 text-fju-yellow"></i>AI 活動推薦（實作）</h3>
+    <h3 class="font-bold text-fju-blue mb-4"><i class="fas fa-lightbulb mr-2 text-fju-yellow"></i>AI 活動推薦</h3>
     <button onclick="getRecommendations()" class="btn-yellow px-6 py-2 text-sm mb-3"><i class="fas fa-magic mr-1"></i>取得個人化推薦</button>
     <div id="recommend-result" class="space-y-2"></div>
   </div>
 
-  {{-- AI Credit Warning --}}
-  <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
-    <h3 class="font-bold text-fju-blue mb-4"><i class="fas fa-user-check mr-2 text-fju-yellow"></i>AI 信用預警系統（實作）</h3>
-    <button onclick="checkCreditWarnings()" class="btn-yellow px-6 py-2 text-sm mb-3"><i class="fas fa-shield-alt mr-1"></i>掃描信用異常</button>
-    <div id="credit-warning-result" class="space-y-2"></div>
+  {{-- RAG Section Divider --}}
+  <div class="flex items-center gap-3 py-2">
+    <div class="flex-1 border-t border-gray-200"></div>
+    <span class="text-xs text-gray-400 font-bold"><i class="fas fa-gavel mr-1 text-fju-yellow"></i>法規查詢 (RAG)</span>
+    <div class="flex-1 border-t border-gray-200"></div>
   </div>
 
-  {{-- AI Service Monitor --}}
+  {{-- RAG Flowchart --}}
   <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
-    <h3 class="font-bold text-fju-blue mb-4"><i class="fas fa-server mr-2 text-fju-yellow"></i>AI 服務監控面板（實作）</h3>
-    <div id="ai-monitor" class="grid md:grid-cols-4 gap-3"></div>
+    <h3 class="font-bold text-fju-blue text-sm mb-4"><i class="fas fa-project-diagram mr-2 text-fju-yellow"></i>RAG 法規審查流程圖</h3>
+    <div class="flex items-center justify-center gap-0 flex-wrap">
+      <div class="flex flex-col items-center"><div class="w-28 py-3 rounded-fju bg-fju-blue text-white text-center text-xs font-bold">使用者提交<br>活動企劃</div><i class="fas fa-arrow-down text-fju-blue my-1"></i></div>
+      <i class="fas fa-arrow-right text-fju-yellow mx-2 hidden md:block"></i>
+      <div class="flex flex-col items-center"><div class="w-28 py-3 rounded-fju bg-fju-yellow/20 text-fju-blue text-center text-xs font-bold">規則引擎<br>基本驗證</div><i class="fas fa-arrow-down text-fju-yellow my-1"></i></div>
+      <i class="fas fa-arrow-right text-fju-yellow mx-2 hidden md:block"></i>
+      <div class="flex flex-col items-center"><div class="w-28 py-3 rounded-fju bg-fju-blue/10 text-fju-blue text-center text-xs font-bold">Embedding<br>向量搜索</div><i class="fas fa-arrow-down text-fju-blue my-1"></i></div>
+      <i class="fas fa-arrow-right text-fju-yellow mx-2 hidden md:block"></i>
+      <div class="flex flex-col items-center"><div class="w-28 py-3 rounded-fju bg-fju-yellow text-fju-blue text-center text-xs font-bold">RAG 法規<br>語義比對</div><i class="fas fa-arrow-down text-fju-yellow my-1"></i></div>
+      <i class="fas fa-arrow-right text-fju-yellow mx-2 hidden md:block"></i>
+      <div class="flex flex-col items-center"><div class="w-28 py-3 rounded-fju bg-fju-green text-white text-center text-xs font-bold">GPT-4<br>風險判斷</div><i class="fas fa-arrow-down text-fju-green my-1"></i></div>
+      <i class="fas fa-arrow-right text-fju-yellow mx-2 hidden md:block"></i>
+      <div class="flex flex-col items-center"><div class="w-28 py-3 rounded-fju bg-fju-blue text-white text-center text-xs font-bold">產出審查<br>結果報告</div></div>
+    </div>
+    <div class="mt-3 flex justify-center gap-4 text-[10px] text-gray-500">
+      <span><span class="inline-block w-3 h-3 rounded bg-fju-green mr-1"></span>通過 → 進入 Gatekeeping</span>
+      <span><span class="inline-block w-3 h-3 rounded bg-fju-yellow mr-1"></span>警告 → 附修改建議</span>
+      <span><span class="inline-block w-3 h-3 rounded bg-fju-red mr-1"></span>不通過 → 退回申請人</span>
+    </div>
+  </div>
+
+  {{-- Content Checker --}}
+  <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
+    <h3 class="font-bold text-fju-blue mb-4"><i class="fas fa-spell-check mr-2 text-fju-yellow"></i>內容合規檢查器</h3>
+    <p class="text-xs text-gray-500 mb-3">輸入活動企劃的內容片段，AI 將逐條比對法規，標記潛在違規項目並提供修改建議。</p>
+    <div class="space-y-3">
+      <textarea id="rag-content" rows="4" placeholder="請輸入活動企劃內容，例如：本社擬於 5 月 1 日在中美堂舉辦年度成果展，預計邀請 150 位校內外人士參加，活動時間為 18:00-22:00，需使用音響設備..." class="w-full px-4 py-3 rounded-fju border border-gray-200 text-sm"></textarea>
+      <button onclick="checkContent()" class="btn-yellow px-6 py-2 text-sm"><i class="fas fa-search mr-1"></i>執行法規合規檢查</button>
+    </div>
+    <div id="content-check-result" class="hidden mt-4"></div>
+  </div>
+
+  {{-- AI Pre-review Simulation --}}
+  <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
+    <h3 class="font-bold text-fju-blue mb-4"><i class="fas fa-brain mr-2 text-fju-yellow"></i>AI 預審模擬（RAG）</h3>
+    <div class="grid md:grid-cols-2 gap-3">
+      <div>
+        <label class="text-xs text-gray-400">預計參加人數</label>
+        <input type="number" id="ra-ppl" placeholder="預計參加人數" value="60" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+      </div>
+      <div>
+        <label class="text-xs text-gray-400">活動類型</label>
+        <select id="ra-type" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+          <option>學術講座</option><option>成果展覽</option><option>體育競賽</option><option>戶外活動</option><option>公益服務</option>
+        </select>
+      </div>
+    </div>
+    <button onclick="doRAGReview()" class="btn-yellow px-6 py-2 text-sm mt-3"><i class="fas fa-search mr-1"></i>進行 RAG 法規預審</button>
+    <div id="review-result" class="hidden mt-4 p-4 rounded-fju text-sm"></div>
   </div>
 </div>
 
@@ -113,8 +161,7 @@
 const aiFeatures={
   admin:[
     {icon:'fa-chart-bar',name:'審核統計看板',desc:'即時查看所有 AI 預審通過率、風險分佈、審核時間等統計數據。',color:'#003153',action:'showAdminDashboard()'},
-    {icon:'fa-gavel',name:'RAG 法規比對',desc:'批量上傳企劃書，AI 自動比對 8 項校內法規並標記不合規條款。',color:'#DAA520',action:'window.location.href="/module/rag-search?role=admin"'},
-    {icon:'fa-user-check',name:'信用預警系統',desc:'AI 監控全校社團信用積分，自動發送預警通知。',color:'#008000',action:'checkCreditWarnings()'},
+    {icon:'fa-gavel',name:'RAG 法規比對',desc:'批量上傳企劃書，AI 自動比對 8 項校內法規並標記不合規條款。',color:'#DAA520',action:'document.getElementById("rag-content").scrollIntoView({behavior:"smooth"})'},
     {icon:'fa-robot',name:'自動核准建議',desc:'對低風險案件（人數≤50、預算合理），AI 自動產出核准建議。',color:'#004070',action:'doPreReview()'}
   ],
   officer:[
@@ -126,22 +173,26 @@ const aiFeatures={
     {icon:'fa-clipboard-check',name:'審查輔助',desc:'AI 自動摘要學生企劃書，標示重點和潛在風險。',color:'#003153',action:'doPreReview()'},
     {icon:'fa-chart-line',name:'社團表現分析',desc:'AI 分析指導社團的活動成效、參與率、預算執行率等指標趨勢。',color:'#DAA520',action:'showProfessorAnalysis()'}
   ],
+  staff:[
+    {icon:'fa-file-alt',name:'企劃書 AI 生成',desc:'輸入活動基本資訊，AI 自動生成含預算、流程、SDGs 的完整企劃書。',color:'#003153',action:'document.getElementById("pg-title").scrollIntoView({behavior:"smooth"})'},
+    {icon:'fa-search',name:'AI 預審自檢',desc:'送出前先透過 AI 預審系統自我檢查，確保通過率。',color:'#DAA520',action:'doPreReview()'},
+    {icon:'fa-gavel',name:'法規合規查詢',desc:'輸入活動內容，AI 自動比對 8 項校內法規，提供修改建議。',color:'#008000',action:'document.getElementById("rag-content").scrollIntoView({behavior:"smooth"})'}
+  ],
   student:[
     {icon:'fa-lightbulb',name:'活動推薦',desc:'根據過往參與紀錄和興趣標籤，AI 推薦最適合的活動。',color:'#003153',action:'getRecommendations()'},
-    {icon:'fa-search',name:'法規查詢助手',desc:'用自然語言詢問校內活動相關法規，AI 搜尋法規庫回答。',color:'#DAA520',action:'window.location.href="/module/rag-search?role=student"'},
+    {icon:'fa-search',name:'法規查詢助手',desc:'用自然語言詢問校內活動相關法規，AI 搜尋法規庫回答。',color:'#DAA520',action:'document.getElementById("rag-content").scrollIntoView({behavior:"smooth"})'},
     {icon:'fa-file-alt',name:'企劃書 AI 生成',desc:'填入活動概要，AI 自動產出完整企劃書草稿。',color:'#008000',action:'document.getElementById("pg-title").scrollIntoView({behavior:"smooth"})'}
   ],
   it:[
-    {icon:'fa-server',name:'AI 服務監控',desc:'監控 AI API 回應時間、成功率、Token 使用量。',color:'#003153',action:'loadAIMonitor()'},
-    {icon:'fa-shield-alt',name:'WAF + 安全分析',desc:'AI 分析 API 呼叫模式，偵測異常行為。',color:'#C0392B',action:'loadAIMonitor()'},
-    {icon:'fa-database',name:'資料品質監控',desc:'AI 定期掃描資料庫一致性，偵測異常資料。',color:'#DAA520',action:'loadAIMonitor()'}
+    {icon:'fa-shield-alt',name:'WAF + 安全分析',desc:'AI 分析 API 呼叫模式，偵測異常行為。',color:'#C0392B',action:''},
+    {icon:'fa-database',name:'資料品質監控',desc:'AI 定期掃描資料庫一致性，偵測異常資料。',color:'#DAA520',action:''}
   ]
 };
 
 function switchAIRole(r){
-  const roles=r==='all'?['admin','officer','professor','student','it']:[r];
-  const names={admin:'課指組審核員',officer:'社團幹部',professor:'指導教授',student:'一般學生',it:'資訊中心'};
-  const icons={admin:'fa-user-tie',officer:'fa-user-shield',professor:'fa-chalkboard-teacher',student:'fa-user-graduate',it:'fa-server'};
+  const roles=r==='all'?['admin','officer','professor','staff','student','it']:[r];
+  const names={admin:'課指組審核員',officer:'社團幹部',professor:'指導教授',staff:'處室職員',student:'一般學生',it:'資訊中心'};
+  const icons={admin:'fa-user-tie',officer:'fa-user-shield',professor:'fa-chalkboard-teacher',staff:'fa-user-cog',student:'fa-user-graduate',it:'fa-server'};
   let html='';
   roles.forEach(role=>{
     const features=aiFeatures[role]||[];
@@ -152,7 +203,6 @@ function switchAIRole(r){
       html+=`<div class="p-4 rounded-fju border border-gray-100 hover:shadow-md transition-all card-hover cursor-pointer" onclick="${f.action||''}">
         <div class="flex items-center gap-2 mb-2"><div class="w-8 h-8 rounded-fju flex items-center justify-center" style="background:${f.color}20"><i class="fas ${f.icon}" style="color:${f.color}"></i></div><span class="font-bold text-fju-blue text-xs">${f.name}</span></div>
         <p class="text-[11px] text-gray-500">${f.desc}</p>
-        <div class="mt-2"><span class="text-[10px] px-2 py-0.5 rounded-full bg-fju-green/10 text-fju-green"><i class="fas fa-check mr-0.5"></i>已實作</span></div>
       </div>`;
     });
     html+='</div></div>';
@@ -161,7 +211,6 @@ function switchAIRole(r){
 }
 switchAIRole(document.getElementById('ai-role-view').value);
 
-// Demo toggles (embedded in cards)
 function togglePrereviewDemo(){
   const area=document.getElementById('prereview-demo-area');
   if(!area.classList.contains('hidden')){area.classList.add('hidden');return}
@@ -193,7 +242,6 @@ function toggleProposalDemo(){
 
 function animateSteps(area,steps,delay){let html='';steps.forEach((s,i)=>{setTimeout(()=>{html+=s;area.innerHTML=html;area.scrollTop=area.scrollHeight},i*delay)})}
 
-// Working AI functions
 function genProposal(){
   fetch('/api/ai/generate-proposal',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({title:document.getElementById('pg-title').value,description:document.getElementById('pg-desc').value,participants:parseInt(document.getElementById('pg-ppl').value),date:document.getElementById('pg-date').value})}).then(r=>r.json()).then(res=>{
     const b=document.getElementById('proposal-result');b.classList.remove('hidden');
@@ -239,42 +287,45 @@ function getRecommendations(){
   },800);
 }
 
-function checkCreditWarnings(){
-  const el=document.getElementById('credit-warning-result');
-  el.innerHTML='<div class="text-center py-2"><i class="fas fa-spinner fa-spin text-fju-blue"></i></div>';
+function checkContent(){
+  const content=document.getElementById('rag-content').value;
+  if(!content.trim()){alert('請輸入內容');return}
+  const resultDiv=document.getElementById('content-check-result');
+  resultDiv.classList.remove('hidden');
+  resultDiv.innerHTML='<div class="text-center py-3"><i class="fas fa-spinner fa-spin text-fju-yellow text-xl"></i><p class="text-xs text-gray-400 mt-1">AI 正在比對法規...</p></div>';
   setTimeout(()=>{
-    const warnings=[
-      {club:'街舞社',score:62,alert:'連續 3 月下降，接近停權門檻 (60)'},
-      {club:'桌遊社',score:71,alert:'本月因逾期歸還器材扣 5 分'},
-      {club:'登山社',score:55,alert:'已低於 60 分門檻！建議立即處理'},
-    ];
-    el.innerHTML=warnings.map(w=>`<div class="p-3 rounded-fju border ${w.score<60?'border-fju-red/30 bg-fju-red/5':'border-fju-yellow/30 bg-fju-yellow/5'} flex items-center justify-between">
-      <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-fju ${w.score<60?'bg-fju-red/10':'bg-fju-yellow/10'} flex items-center justify-center"><span class="text-sm font-bold ${w.score<60?'text-fju-red':'text-fju-yellow'}">${w.score}</span></div>
-      <div><div class="font-bold text-fju-blue text-sm">${w.club}</div><div class="text-[10px] ${w.score<60?'text-fju-red':'text-fju-yellow'}">${w.alert}</div></div></div>
-      <button class="px-3 py-1 rounded-fju text-xs ${w.score<60?'bg-fju-red text-white':'bg-fju-yellow text-fju-blue'}">${w.score<60?'緊急處理':'發送預警'}</button>
-    </div>`).join('');
-  },600);
+    let findings=[];
+    if(content.includes('150')||content.includes('200')||content.includes('100')||parseInt(content.match(/\d{3}/)?.[0]||0)>80){
+      findings.push({rule:'R01',severity:'high',msg:'偵測到大型活動（超過 80 人），需額外提交大型集會安全計畫書',fix:'建議將參加人數控制在 80 人以下，或補提「大型集會安全計畫書」'});
+    }
+    if(content.includes('22:')||content.includes('23:')||content.includes('22:00')){
+      findings.push({rule:'R02',severity:'medium',msg:'活動時間超過校園場地使用上限（22:00）',fix:'建議將結束時間調整為 21:30 前'});
+    }
+    if(content.includes('音響')||content.includes('喇叭')){
+      findings.push({rule:'R08',severity:'low',msg:'使用音響設備，需注意噪音控制',fix:'建議使用低音量設備，或選擇非教學區場地'});
+    }
+    if(content.includes('飲食')||content.includes('餐')||content.includes('食物')){
+      findings.push({rule:'R07',severity:'medium',msg:'活動涉及飲食，需符合食品安全規範',fix:'請上傳食品安全合格證明'});
+    }
+    if(findings.length===0) findings.push({rule:'—',severity:'pass',msg:'內容初步比對未發現違規項目',fix:''});
+    const sevColors={high:'border-fju-red bg-fju-red/5',medium:'border-fju-yellow bg-fju-yellow/5',low:'border-fju-blue bg-fju-blue/5',pass:'border-fju-green bg-fju-green/5'};
+    const sevIcons={high:'fa-times-circle text-fju-red',medium:'fa-exclamation-triangle text-fju-yellow',low:'fa-info-circle text-fju-blue',pass:'fa-check-circle text-fju-green'};
+    resultDiv.innerHTML='<h4 class="font-bold text-fju-blue text-sm mb-2"><i class="fas fa-clipboard-check mr-1 text-fju-yellow"></i>合規檢查結果</h4>'+findings.map(f=>
+      '<div class="p-3 rounded-fju border '+sevColors[f.severity]+' mb-2"><div class="flex items-start gap-2"><i class="fas '+sevIcons[f.severity]+' mt-0.5"></i><div class="flex-1"><p class="text-sm font-medium text-gray-700">'+f.msg+'</p>'+(f.fix?'<p class="text-xs text-gray-500 mt-1"><i class="fas fa-lightbulb mr-1 text-fju-yellow"></i>'+f.fix+'</p>':'')+'</div></div></div>'
+    ).join('');
+  }, 1500);
+}
+
+function doRAGReview(){
+  fetch('/api/ai/pre-review',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({participants:parseInt(document.getElementById('ra-ppl').value)})}).then(r=>r.json()).then(res=>{
+    const b=document.getElementById('review-result');b.classList.remove('hidden');
+    b.className='mt-4 p-4 rounded-fju text-sm '+(res.allow_next_step?'bg-fju-green/10':'bg-fju-red/10');
+    b.innerHTML='<div class="font-bold mb-2">'+(res.allow_next_step?'✅ 通過':'❌ 未通過')+' (風險：'+res.risk_level+')</div><p>'+res.reasoning+'</p>'+(res.violations.length?'<div class="mt-2"><b>違規項目：</b>'+res.violations.join(', ')+'</div>':'')+(res.suggestions.length?'<div class="mt-2"><b>建議：</b><ul class="list-disc pl-4">'+res.suggestions.map(s=>'<li>'+s+'</li>').join('')+'</ul></div>':'');
+  });
 }
 
 function showAdminDashboard(){window.location.href='/module/reports?role=admin'}
 function showProfessorAnalysis(){window.location.href='/dashboard?role=professor'}
-
-function loadAIMonitor(){
-  const metrics=[
-    {label:'API 回應時間',value:'92ms',icon:'fa-tachometer-alt',color:'fju-green',sub:'P99: 185ms'},
-    {label:'預審成功率',value:'99.5%',icon:'fa-check-circle',color:'fju-green',sub:'今日 47/47'},
-    {label:'Token 使用量',value:'12.3K',icon:'fa-coins',color:'fju-yellow',sub:'本月上限 100K'},
-    {label:'WAF 攔截',value:'23',icon:'fa-shield-alt',color:'fju-red',sub:'今日攔截次數'},
-  ];
-  document.getElementById('ai-monitor').innerHTML=metrics.map(m=>`
-    <div class="p-3 rounded-fju bg-white border border-gray-100 text-center card-hover">
-      <i class="fas ${m.icon} text-${m.color} text-lg mb-1"></i>
-      <div class="text-lg font-black text-fju-blue">${m.value}</div>
-      <div class="text-[10px] text-gray-400">${m.label}</div>
-      <div class="text-[9px] text-gray-300 mt-1">${m.sub}</div>
-    </div>`).join('');
-}
-loadAIMonitor();
 </script>
 <style>
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}

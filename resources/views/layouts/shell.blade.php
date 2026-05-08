@@ -5,8 +5,8 @@
 // 1. 課指組 (admin) - full control
 // 2. 借用者 (officer/professor) - can book venues/equipment (社團幹部/學生自治組織, 處室職員, 教授)
 // 3. 學生/社員 (student) - view only
-$roleNames = ['admin'=>'課指組','officer'=>'借用者（社團幹部）','professor'=>'借用者（教授）','student'=>'一般學生/社員','it'=>'資訊中心'];
-$roleIcons = ['admin'=>'fas fa-user-tie','officer'=>'fas fa-user-shield','professor'=>'fas fa-chalkboard-teacher','student'=>'fas fa-user-graduate','it'=>'fas fa-server'];
+$roleNames = ['admin'=>'課指組','officer'=>'借用者（社團幹部）','professor'=>'借用者（教授）','staff'=>'借用者（處室職員）','student'=>'一般學生/社員','it'=>'資訊中心'];
+$roleIcons = ['admin'=>'fas fa-user-tie','officer'=>'fas fa-user-shield','professor'=>'fas fa-chalkboard-teacher','staff'=>'fas fa-user-cog','student'=>'fas fa-user-graduate','it'=>'fas fa-server'];
 $role = $role ?? 'student';
 if (!isset($roleNames[$role])) $role = 'student';
 $activePage = $activePage ?? 'dashboard';
@@ -16,17 +16,16 @@ $roleSidebar = [
   'admin' => [
     ['title'=>'核心功能','items'=>[
       ['id'=>'dashboard','label'=>'儀表板','icon'=>'fas fa-tachometer-alt','href'=>"/dashboard?role={$role}"],
-      ['id'=>'calendar','label'=>'活動申請','icon'=>'fas fa-calendar-check','href'=>"/module/calendar?role={$role}"],
+      ['id'=>'activity-application','label'=>'活動申請','icon'=>'fas fa-file-alt','href'=>"/module/activity-application?role={$role}"],
       ['id'=>'venue-booking','label'=>'場地預約','icon'=>'fas fa-map-marker-alt','href'=>"/module/venue-booking?role={$role}"],
       ['id'=>'equipment','label'=>'設備借用','icon'=>'fas fa-boxes-stacked','href'=>"/module/equipment?role={$role}"],
+      ['id'=>'calendar','label'=>'行事曆','icon'=>'fas fa-calendar-check','href'=>"/module/calendar?role={$role}"],
     ]],
     ['title'=>'社團管理','items'=>[
       ['id'=>'club-info','label'=>'社團資訊','icon'=>'fas fa-users','href'=>"/module/club-info?role={$role}"],
-      ['id'=>'activity-wall','label'=>'活動牆','icon'=>'fas fa-newspaper','href'=>"/module/activity-wall?role={$role}"],
     ]],
     ['title'=>'AI 智慧專區','items'=>[
-      ['id'=>'ai-overview','label'=>'AI 資訊概覽','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
-      ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
+      ['id'=>'ai-overview','label'=>'AI 資訊概覽 & 法規查詢','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
     ]],
     ['title'=>'管理工具','items'=>[
       ['id'=>'repair','label'=>'報修管理','icon'=>'fas fa-wrench','href'=>"/module/repair?role={$role}"],
@@ -42,17 +41,16 @@ $roleSidebar = [
   'officer' => [
     ['title'=>'核心功能','items'=>[
       ['id'=>'dashboard','label'=>'儀表板','icon'=>'fas fa-tachometer-alt','href'=>"/dashboard?role={$role}"],
-      ['id'=>'calendar','label'=>'活動申請','icon'=>'fas fa-calendar-check','href'=>"/module/calendar?role={$role}"],
+      ['id'=>'activity-application','label'=>'活動申請','icon'=>'fas fa-file-alt','href'=>"/module/activity-application?role={$role}"],
       ['id'=>'venue-booking','label'=>'場地預約','icon'=>'fas fa-map-marker-alt','href'=>"/module/venue-booking?role={$role}"],
       ['id'=>'equipment','label'=>'設備借用','icon'=>'fas fa-boxes-stacked','href'=>"/module/equipment?role={$role}"],
+      ['id'=>'calendar','label'=>'行事曆','icon'=>'fas fa-calendar-check','href'=>"/module/calendar?role={$role}"],
     ]],
     ['title'=>'社團管理','items'=>[
       ['id'=>'club-info','label'=>'社團資訊','icon'=>'fas fa-users','href'=>"/module/club-info?role={$role}"],
-      ['id'=>'activity-wall','label'=>'活動牆','icon'=>'fas fa-newspaper','href'=>"/module/activity-wall?role={$role}"],
     ]],
     ['title'=>'AI 智慧專區','items'=>[
-      ['id'=>'ai-overview','label'=>'AI 資訊概覽','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
-      ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
+      ['id'=>'ai-overview','label'=>'AI 資訊概覽 & 法規查詢','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
     ]],
     ['title'=>'個人專區','items'=>[
       ['id'=>'personal-center','label'=>'個人中心','icon'=>'fas fa-id-badge','href'=>"/module/e-portfolio?role={$role}"],
@@ -63,19 +61,34 @@ $roleSidebar = [
   'professor' => [
     ['title'=>'核心功能','items'=>[
       ['id'=>'dashboard','label'=>'儀表板','icon'=>'fas fa-tachometer-alt','href'=>"/dashboard?role={$role}"],
-      ['id'=>'calendar','label'=>'活動申請','icon'=>'fas fa-calendar-check','href'=>"/module/calendar?role={$role}"],
+      ['id'=>'activity-application','label'=>'活動申請','icon'=>'fas fa-file-alt','href'=>"/module/activity-application?role={$role}"],
       ['id'=>'venue-booking','label'=>'場地預約','icon'=>'fas fa-map-marker-alt','href'=>"/module/venue-booking?role={$role}"],
     ]],
     ['title'=>'社團管理','items'=>[
       ['id'=>'club-info','label'=>'社團資訊','icon'=>'fas fa-users','href'=>"/module/club-info?role={$role}"],
-      ['id'=>'activity-wall','label'=>'活動牆','icon'=>'fas fa-newspaper','href'=>"/module/activity-wall?role={$role}"],
     ]],
     ['title'=>'AI 智慧專區','items'=>[
-      ['id'=>'ai-overview','label'=>'AI 資訊概覽','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
-      ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
+      ['id'=>'ai-overview','label'=>'AI 資訊概覽 & 法規查詢','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
     ]],
     ['title'=>'個人專區','items'=>[
       ['id'=>'personal-center','label'=>'個人中心','icon'=>'fas fa-id-badge','href'=>"/module/e-portfolio?role={$role}"],
+      ['id'=>'appeal','label'=>'申訴紀錄','icon'=>'fas fa-comments','href'=>"/module/appeal?role={$role}"],
+    ]],
+  ],
+  'staff' => [
+    ['title'=>'核心功能','items'=>[
+      ['id'=>'dashboard','label'=>'儀表板','icon'=>'fas fa-tachometer-alt','href'=>"/dashboard?role={$role}"],
+      ['id'=>'activity-application','label'=>'活動申請','icon'=>'fas fa-file-alt','href'=>"/module/activity-application?role={$role}"],
+      ['id'=>'venue-booking','label'=>'場地預約','icon'=>'fas fa-map-marker-alt','href'=>"/module/venue-booking?role={$role}"],
+      ['id'=>'equipment','label'=>'設備借用','icon'=>'fas fa-boxes-stacked','href'=>"/module/equipment?role={$role}"],
+      ['id'=>'calendar','label'=>'行事曆','icon'=>'fas fa-calendar-check','href'=>"/module/calendar?role={$role}"],
+    ]],
+    ['title'=>'AI 智慧專區','items'=>[
+      ['id'=>'ai-overview','label'=>'AI 資訊概覽 & 法規查詢','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
+    ]],
+    ['title'=>'個人專區','items'=>[
+      ['id'=>'personal-center','label'=>'個人中心','icon'=>'fas fa-id-badge','href'=>"/module/e-portfolio?role={$role}"],
+      ['id'=>'repair','label'=>'報修管理','icon'=>'fas fa-wrench','href'=>"/module/repair?role={$role}"],
       ['id'=>'appeal','label'=>'申訴紀錄','icon'=>'fas fa-comments','href'=>"/module/appeal?role={$role}"],
     ]],
   ],
@@ -87,8 +100,7 @@ $roleSidebar = [
     ]],
     ['title'=>'瀏覽','items'=>[
       ['id'=>'club-info','label'=>'社團資訊','icon'=>'fas fa-users','href'=>"/module/club-info?role={$role}"],
-      ['id'=>'activity-wall','label'=>'活動牆','icon'=>'fas fa-newspaper','href'=>"/module/activity-wall?role={$role}"],
-      ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
+      ['id'=>'ai-overview','label'=>'AI 資訊概覽 & 法規查詢','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
     ]],
     ['title'=>'個人專區','items'=>[
       ['id'=>'personal-center','label'=>'個人中心','icon'=>'fas fa-id-badge','href'=>"/module/e-portfolio?role={$role}"],
@@ -102,8 +114,7 @@ $roleSidebar = [
       ['id'=>'equipment','label'=>'設備借用','icon'=>'fas fa-boxes-stacked','href'=>"/module/equipment?role={$role}"],
     ]],
     ['title'=>'AI 智慧專區','items'=>[
-      ['id'=>'ai-overview','label'=>'AI 資訊概覽','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
-      ['id'=>'rag-search','label'=>'法規查詢 (RAG)','icon'=>'fas fa-gavel','href'=>"/module/rag-search?role={$role}"],
+      ['id'=>'ai-overview','label'=>'AI 資訊概覽 & 法規查詢','icon'=>'fas fa-brain','href'=>"/module/ai-overview?role={$role}"],
     ]],
     ['title'=>'系統管理','items'=>[
       ['id'=>'repair','label'=>'報修管理','icon'=>'fas fa-wrench','href'=>"/module/repair?role={$role}"],
@@ -133,7 +144,7 @@ $sidebarSections = $roleSidebar[$role] ?? $roleSidebar['student'];
         <a href="https://www.fju.edu.tw" target="_blank" class="text-fju-blue hover:text-fju-yellow transition-colors font-medium">輔仁大學</a>
         <a href="#" class="text-fju-blue hover:text-fju-yellow transition-colors font-medium">ENGLISH</a>
         <div class="flex gap-1 ml-2 pl-3 border-l border-gray-200">
-          @foreach(['admin'=>'課指組','officer'=>'借用者','student'=>'學生'] as $r => $label)
+          @foreach(['admin'=>'課指組','officer'=>'借用者','professor'=>'教授','staff'=>'職員','student'=>'學生','it'=>'資訊中心'] as $r => $label)
           <a href="/dashboard?role={{ $r }}" class="w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all {{ $r === $role ? 'bg-fju-yellow text-fju-blue' : 'bg-gray-100 text-gray-400 hover:bg-gray-200' }}" title="{{ $label }}"><i class="{{ $roleIcons[$r] }}"></i></a>
           @endforeach
         </div>
@@ -215,8 +226,6 @@ $sidebarSections = $roleSidebar[$role] ?? $roleSidebar['student'];
   {{-- FOOTER --}}
   @include('partials.footer')
 </div>
-@include('partials.chatbot')
-
 {{-- === GLOBAL SEARCH SCRIPT === --}}
 <script>
 const searchIndex = [
@@ -225,9 +234,7 @@ const searchIndex = [
   {title:'場地預約', url:'/module/venue-booking?role={{ $role }}', cat:'頁面', icon:'fa-map-marker-alt'},
   {title:'設備借用', url:'/module/equipment?role={{ $role }}', cat:'頁面', icon:'fa-boxes-stacked'},
   {title:'社團資訊', url:'/module/club-info?role={{ $role }}', cat:'頁面', icon:'fa-users'},
-  {title:'活動牆', url:'/module/activity-wall?role={{ $role }}', cat:'頁面', icon:'fa-newspaper'},
-  {title:'AI 資訊概覽', url:'/module/ai-overview?role={{ $role }}', cat:'頁面', icon:'fa-brain'},
-  {title:'法規查詢 (RAG)', url:'/module/rag-search?role={{ $role }}', cat:'頁面', icon:'fa-gavel'},
+  {title:'AI 資訊概覽 & 法規查詢', url:'/module/ai-overview?role={{ $role }}', cat:'頁面', icon:'fa-brain'},
   {title:'報修管理', url:'/module/repair?role={{ $role }}', cat:'頁面', icon:'fa-wrench'},
   {title:'申訴紀錄', url:'/module/appeal?role={{ $role }}', cat:'頁面', icon:'fa-comments'},
   {title:'個人中心', url:'/module/e-portfolio?role={{ $role }}', cat:'頁面', icon:'fa-id-badge'},
@@ -244,7 +251,7 @@ const searchIndex = [
   {title:'街舞社', url:'/module/club-info?role={{ $role }}', cat:'社團', icon:'fa-music'},
   {title:'AI 預審', url:'/module/ai-overview?role={{ $role }}', cat:'AI 功能', icon:'fa-robot'},
   {title:'AI 企劃生成', url:'/module/ai-overview?role={{ $role }}', cat:'AI 功能', icon:'fa-wand-magic-sparkles'},
-  {title:'校園活動安全管理辦法', url:'/module/rag-search?role={{ $role }}', cat:'法規', icon:'fa-gavel'},
+  {title:'校園活動安全管理辦法', url:'/module/ai-overview?role={{ $role }}', cat:'法規', icon:'fa-gavel'},
   {title:'場地管理規則', url:'/module/rag-search?role={{ $role }}', cat:'法規', icon:'fa-gavel'},
 ];
 function doGlobalSearch(e){
@@ -342,7 +349,47 @@ document.addEventListener('DOMContentLoaded',function(){
     const badge=document.getElementById('notif-badge');
     badge.textContent=unread;
     if(unread>0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+    _eqNotifBaseline=unread; // Task 2: set baseline after initial load
   }).catch(()=>{document.getElementById('notif-badge').classList.add('hidden')});
 });
+
+@if(in_array($role ?? 'student', ['admin', 'officer']))
+// Task 2: Background polling for new equipment loan notifications (admin/officer only)
+let _eqNotifBaseline = null;
+setInterval(function(){
+  fetch('/api/notifications/1?limit=10',{signal:AbortSignal.timeout(3000)})
+    .then(r=>{if(!r.ok)throw new Error();return r.json()})
+    .then(res=>{
+      const unread=res.unread_count||0;
+      const badge=document.getElementById('notif-badge');
+      badge.textContent=unread;
+      if(unread>0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+      if(_eqNotifBaseline!==null && unread>_eqNotifBaseline){
+        const newNotifs=(res.data||[]).filter(n=>!n.read&&!n.is_read);
+        const eqNotif=newNotifs.find(n=>n.title&&n.title.includes('器材借用'));
+        if(eqNotif) showEqLoanPopup(eqNotif.title,eqNotif.message);
+      }
+      _eqNotifBaseline=unread;
+    }).catch(()=>{});
+},30000);
+
+function showEqLoanPopup(title,msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;top:24px;right:24px;z-index:9999;max-width:320px;animation:slideIn .3s ease';
+  t.innerHTML=`<div style="background:#fff;border-left:4px solid #eab308;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:16px 18px;display:flex;gap:12px;align-items:flex-start;">
+    <div style="width:40px;height:40px;border-radius:50%;background:#fef9c3;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <i class="fas fa-box" style="color:#a16207;font-size:16px;"></i>
+    </div>
+    <div style="flex:1;">
+      <div style="font-weight:bold;color:#1e3a8a;font-size:13px;margin-bottom:3px;">${title}</div>
+      <div style="font-size:11px;color:#64748b;line-height:1.4;">${msg}</div>
+      <a href="/module/equipment?role={{ $role }}" style="display:inline-block;margin-top:6px;font-size:11px;color:#1e3a8a;font-weight:bold;text-decoration:underline;">前往審核 →</a>
+    </div>
+    <button onclick="this.closest('[style*=position]').remove()" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;">&times;</button>
+  </div>`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),10000);
+}
+@endif
 </script>
 @endsection

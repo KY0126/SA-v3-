@@ -1,6 +1,11 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\{UserController, ClubController, VenueController, ActivityController, EquipmentController, ReservationController, CrudController};
+use App\Http\Controllers\Api\{
+    UserController, ClubController, VenueController, ActivityController,
+    EquipmentController, ReservationController, CrudController,
+    ActivityApplicationController, EquipmentLoanController,
+    VenueBookingController, MsAuthController,
+};
 
 // Users CRUD
 Route::apiResource('users', UserController::class);
@@ -88,3 +93,27 @@ Route::post('gatekeeping/check', [CrudController::class, 'gatekeepingCheck']);
 Route::post('auth/login', [CrudController::class, 'authLogin']);
 Route::post('auth/register', [CrudController::class, 'authRegister']);
 Route::post('auth/forgot-password', [CrudController::class, 'authForgotPassword']);
+
+// Microsoft OAuth (@mail.fju.edu.tw)
+Route::post('auth/ms-login', [MsAuthController::class, 'login']);
+Route::post('auth/ms-logout', [MsAuthController::class, 'logout']);
+Route::get('auth/me', [MsAuthController::class, 'me']);
+
+// Activity Applications (活動申請)
+Route::post('activity-applications/{id}/approve', [ActivityApplicationController::class, 'approve']);
+Route::post('activity-applications/{id}/reject',  [ActivityApplicationController::class, 'reject']);
+Route::post('activity-applications/{id}/return',  [ActivityApplicationController::class, 'returnApp']);
+Route::apiResource('activity-applications', ActivityApplicationController::class);
+
+// Equipment Loans — multi-item (器材借用明細)
+Route::post('equipment-loans/{id}/pickup',  [EquipmentLoanController::class, 'pickup']);
+Route::post('equipment-loans/{id}/return',  [EquipmentLoanController::class, 'returnLoan']);
+Route::post('equipment-loans/{id}/approve', [EquipmentLoanController::class, 'approve']);
+Route::post('equipment-loans/{id}/reject',  [EquipmentLoanController::class, 'reject']);
+Route::apiResource('equipment-loans', EquipmentLoanController::class);
+
+// Venue Bookings — with pessimistic lock (場地預約)
+Route::get('venue-bookings/schedule',      [VenueBookingController::class, 'schedule']);
+Route::post('venue-bookings/{id}/approve', [VenueBookingController::class, 'approve']);
+Route::post('venue-bookings/{id}/reject',  [VenueBookingController::class, 'reject']);
+Route::apiResource('venue-bookings', VenueBookingController::class);

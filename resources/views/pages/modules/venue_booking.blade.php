@@ -3,43 +3,14 @@
 @php $activePage = 'venue-booking'; @endphp
 @section('content')
 <div class="space-y-6">
-  {{-- Three-Stage Resource Allocation --}}
-  <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
-    <h2 class="font-bold text-fju-blue text-lg mb-4"><i class="fas fa-chess mr-2 text-fju-yellow"></i>三階段資源調度系統</h2>
-    <div class="grid md:grid-cols-3 gap-4 mb-4">
-      <div class="p-4 rounded-fju bg-fju-blue/5 border-2 border-fju-blue/20">
-        <div class="flex items-center gap-2 mb-2"><div class="w-8 h-8 rounded-fju bg-fju-blue flex items-center justify-center text-white text-sm font-bold">1</div><span class="font-bold text-fju-blue text-sm">零信任預估 · 先搶先贏</span></div>
-        <p class="text-xs text-gray-500 mb-2">三志願制 + 預估人數 + 活動屬性：</p>
-        <div class="space-y-1 text-[11px]">
-          <div class="flex items-center gap-1 text-fju-blue font-medium"><i class="fas fa-check-circle mr-1"></i>先搶先贏原則</div>
-          <div class="flex items-center gap-1 text-fju-yellow font-medium"><i class="fas fa-exclamation-triangle mr-1"></i>衝突時進入 AI 多方協商</div>
-          <div class="flex items-center gap-1 text-gray-500"><i class="fas fa-shield-alt mr-1"></i>協商完成後送課指組審核</div>
-        </div>
-      </div>
-      <div class="p-4 rounded-fju bg-fju-yellow/10 border border-fju-yellow/20">
-        <div class="flex items-center gap-2 mb-2"><div class="w-8 h-8 rounded-fju bg-fju-yellow flex items-center justify-center text-fju-blue text-sm font-bold">2</div><span class="font-bold text-fju-blue text-sm">AI 多方協商</span></div>
-        <p class="text-xs text-gray-500 mb-2">衝突時透過輔寶 AI 助理協商：</p>
-        <div class="space-y-1 text-[11px] text-gray-600">
-          <div><i class="fas fa-comments text-fju-yellow mr-1"></i>多人即時聊天（實名制）</div>
-          <div><i class="fas fa-envelope text-fju-blue mr-1"></i>Outlook / SMS / LINE 邀請</div>
-          <div><i class="fas fa-robot text-fju-green mr-1"></i>AI 三方案 + 信心度</div>
-          <div><i class="fas fa-file-pdf text-fju-red mr-1"></i>AI 生成協商紀錄 PDF</div>
-        </div>
-      </div>
-      <div class="p-4 rounded-fju bg-fju-green/5 border border-fju-green/10">
-        <div class="flex items-center gap-2 mb-2"><div class="w-8 h-8 rounded-fju bg-fju-green flex items-center justify-center text-white text-sm font-bold">3</div><span class="font-bold text-fju-blue text-sm">官方核准</span></div>
-        <p class="text-xs text-gray-500 mb-2">通過協調後送審：</p>
-        <div class="space-y-1 text-[11px] text-gray-600">
-          <div><i class="fas fa-gavel text-fju-blue mr-1"></i>RAG 法規比對（8項法規）</div>
-          <div><i class="fas fa-shield-alt text-fju-green mr-1"></i>Gatekeeping 前置檢查</div>
-          <div><i class="fas fa-bell text-fju-yellow mr-1"></i>核准後自動 Outlook 通知</div>
-        </div>
-      </div>
+  {{-- Task 3: Simplified single-preference booking info --}}
+  <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 flex items-start gap-3">
+    <div class="w-9 h-9 rounded-fju bg-fju-blue flex items-center justify-center shrink-0">
+      <i class="fas fa-bolt text-fju-yellow"></i>
     </div>
-    {{-- Simple booking note --}}
-    <div class="p-3 rounded-fju bg-fju-bg text-xs text-gray-600">
-      <b class="text-fju-blue"><i class="fas fa-info-circle mr-1 text-fju-yellow"></i>預約說明：</b>
-      送出三志願 → 系統先搶先贏配對 → 若有衝突進入第二階段 AI 多方協商 → 協商完成後送審
+    <div>
+      <div class="font-bold text-fju-blue text-sm">先搶先贏制場地預約</div>
+      <div class="text-xs text-gray-500 mt-1">送出預約申請後，系統依伺服器收到請求的時間戳記決定優先順序。若所選時段已被他人預約，系統將直接拒絕並通知，請另選時段。</div>
     </div>
   </div>
 
@@ -59,7 +30,9 @@
     </div>
     <div class="flex gap-2">
       <input id="vb-search" oninput="renderVenues()" type="text" placeholder="搜尋場地..." class="px-3 py-1.5 rounded-fju border border-gray-200 text-xs w-40">
-      <button onclick="openBookingModal()" class="btn-yellow px-4 py-1.5 text-xs"><i class="fas fa-plus mr-1"></i>新增預約（三志願）</button>
+      @if(!in_array($role ?? 'student', ['admin']))
+      <button onclick="openBookingModal()" class="btn-yellow px-4 py-1.5 text-xs"><i class="fas fa-plus mr-1"></i>新增預約</button>
+      @endif
     </div>
   </div>
 
@@ -97,50 +70,62 @@
     </div>
   </div>
 
-  {{-- Booking Modal (3 Wishes) --}}
+  {{-- Task 3: Booking Modal — single preference, first-come-first-served --}}
   <div id="booking-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-fju-lg p-6 w-full max-w-lg mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-fju-blue text-lg"><i class="fas fa-calendar-plus mr-2 text-fju-yellow"></i>三志願場地預約</h3><button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button></div>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-fju-blue text-lg"><i class="fas fa-calendar-plus mr-2 text-fju-yellow"></i>新增預約</h3>
+        <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+      </div>
       <form id="booking-form" onsubmit="submitBooking(event)">
         <div class="space-y-3">
-          <div class="p-3 rounded-fju bg-fju-blue/5 border border-fju-blue/10 text-xs text-gray-600"><i class="fas fa-info-circle mr-1 text-fju-blue"></i>請依志願排序選擇三個時段，系統將依先搶先贏原則配對。衝突時段會顯示<span class="text-fju-red font-bold">紅字提醒</span>。</div>
-          {{-- Wish 1 --}}
-          <div class="p-3 rounded-fju border-2 border-fju-blue/30 bg-fju-blue/5">
-            <div class="text-xs font-bold text-fju-blue mb-2"><i class="fas fa-star mr-1 text-fju-yellow"></i>第一志願</div>
-            <select id="bk-venue-1" onchange="checkConflict(1)" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm mb-2" required></select>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="date" id="bk-date-1" onchange="checkConflict(1)" class="px-3 py-2 rounded-fju border border-gray-200 text-sm" required>
-              <div class="flex gap-1"><input type="time" id="bk-start-1" value="14:00" class="flex-1 px-2 py-2 rounded-fju border border-gray-200 text-sm"><input type="time" id="bk-end-1" value="17:00" class="flex-1 px-2 py-2 rounded-fju border border-gray-200 text-sm"></div>
-            </div>
-            <div id="conflict-warn-1" class="hidden mt-2 text-xs text-fju-red font-medium p-2 rounded bg-fju-red/5 border border-fju-red/20"><i class="fas fa-exclamation-triangle mr-1"></i><span id="conflict-text-1"></span></div>
+          <div class="p-3 rounded-fju bg-fju-blue/5 border border-fju-blue/10 text-xs text-gray-600">
+            <i class="fas fa-bolt mr-1 text-fju-yellow"></i>先搶先贏：系統以收到請求的時間為準，若時段已被預約將直接拒絕，請另選時段。
           </div>
-          {{-- Wish 2 --}}
-          <div class="p-3 rounded-fju border border-fju-yellow/30 bg-fju-yellow/5">
-            <div class="text-xs font-bold text-fju-yellow mb-2"><i class="fas fa-star-half-alt mr-1"></i>第二志願</div>
-            <select id="bk-venue-2" onchange="checkConflict(2)" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm mb-2"></select>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="date" id="bk-date-2" onchange="checkConflict(2)" class="px-3 py-2 rounded-fju border border-gray-200 text-sm">
-              <div class="flex gap-1"><input type="time" id="bk-start-2" value="14:00" class="flex-1 px-2 py-2 rounded-fju border border-gray-200 text-sm"><input type="time" id="bk-end-2" value="17:00" class="flex-1 px-2 py-2 rounded-fju border border-gray-200 text-sm"></div>
-            </div>
-            <div id="conflict-warn-2" class="hidden mt-2 text-xs text-fju-red font-medium p-2 rounded bg-fju-red/5 border border-fju-red/20"><i class="fas fa-exclamation-triangle mr-1"></i><span id="conflict-text-2"></span></div>
+          {{-- Single preference --}}
+          <div>
+            <label class="text-xs text-gray-400 block mb-1">選擇場地 <span class="text-red-400">*</span></label>
+            <select id="bk-venue-1" onchange="checkConflict()" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm" required></select>
           </div>
-          {{-- Wish 3 --}}
-          <div class="p-3 rounded-fju border border-gray-200 bg-gray-50">
-            <div class="text-xs font-bold text-gray-500 mb-2"><i class="far fa-star mr-1"></i>第三志願</div>
-            <select id="bk-venue-3" onchange="checkConflict(3)" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm mb-2"></select>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="date" id="bk-date-3" onchange="checkConflict(3)" class="px-3 py-2 rounded-fju border border-gray-200 text-sm">
-              <div class="flex gap-1"><input type="time" id="bk-start-3" value="14:00" class="flex-1 px-2 py-2 rounded-fju border border-gray-200 text-sm"><input type="time" id="bk-end-3" value="17:00" class="flex-1 px-2 py-2 rounded-fju border border-gray-200 text-sm"></div>
-            </div>
-            <div id="conflict-warn-3" class="hidden mt-2 text-xs text-fju-red font-medium p-2 rounded bg-fju-red/5 border border-fju-red/20"><i class="fas fa-exclamation-triangle mr-1"></i><span id="conflict-text-3"></span></div>
-          </div>
-          {{-- Extra fields --}}
           <div class="grid grid-cols-2 gap-3">
-            <div><label class="text-xs text-gray-400 block mb-1">預估規模人數</label><input type="number" id="bk-est-ppl" value="30" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm"></div>
-            <div><label class="text-xs text-gray-400 block mb-1">活動類型</label><select id="bk-priority" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm"><option value="3">一般社團活動</option><option value="2">行政/課程用途</option><option value="1">大型活動（>50人）</option></select></div>
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">預約日期 <span class="text-red-400">*</span></label>
+              <input type="date" id="bk-date-1" onchange="checkConflict()" class="w-full px-3 py-2 rounded-fju border border-gray-200 text-sm" required>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">預估人數</label>
+              <input type="number" id="bk-est-ppl" value="30" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+            </div>
           </div>
-          <div><label class="text-xs text-gray-400 block mb-1">用途說明</label><textarea id="bk-purpose" rows="2" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm" placeholder="請說明借用目的..."></textarea></div>
-          <div><label class="text-xs text-gray-400 block mb-1">核准後通知方式</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">開始時間 <span class="text-red-400">*</span></label>
+              <input type="time" id="bk-start-1" value="14:00" onchange="checkConflict()" class="w-full px-3 py-2 rounded-fju border border-gray-200 text-sm" required>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">結束時間 <span class="text-red-400">*</span></label>
+              <input type="time" id="bk-end-1" value="17:00" class="w-full px-3 py-2 rounded-fju border border-gray-200 text-sm" required>
+            </div>
+          </div>
+          {{-- Conflict warning (blocking) --}}
+          <div id="conflict-warn-1" class="hidden p-3 rounded-fju bg-red-50 border border-red-200 text-xs text-red-600 font-medium">
+            <i class="fas fa-times-circle mr-1"></i><span id="conflict-text-1"></span>
+            <div class="mt-1 text-red-400">此時段已被他人優先預約，依先搶先贏原則無法送出，請選擇其他時段。</div>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 block mb-1">活動類型</label>
+            <select id="bk-priority" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+              <option value="3">一般社團活動</option>
+              <option value="2">行政/課程用途</option>
+              <option value="1">大型活動（>50人）</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 block mb-1">用途說明</label>
+            <textarea id="bk-purpose" rows="2" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm resize-none" placeholder="請說明借用目的..."></textarea>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 block mb-1">核准後通知方式</label>
             <div class="flex gap-3 text-xs">
               <label class="flex items-center gap-1"><input type="checkbox" id="bk-n-outlook" checked> Outlook 信箱</label>
               <label class="flex items-center gap-1"><input type="checkbox" id="bk-n-sms"> SMS 簡訊</label>
@@ -149,7 +134,9 @@
           </div>
         </div>
         <div id="booking-result" class="hidden mt-3 p-3 rounded-fju text-sm"></div>
-        <button type="submit" class="w-full btn-yellow py-3 mt-4"><i class="fas fa-paper-plane mr-2"></i>送出三志願預約申請</button>
+        <button type="submit" id="booking-submit-btn" class="w-full btn-yellow py-3 mt-4">
+          <i class="fas fa-paper-plane mr-2"></i>送出預約申請
+        </button>
       </form>
     </div>
   </div>
@@ -250,13 +237,12 @@ let allVenues=[],allConflicts=[],allReservations=[],currentConflictId=null,curre
     renderVenueStats();
     renderVenues();
     renderActiveConflicts(allConflicts);
-    // Fill all venue dropdowns (3 wishes)
-    [1,2,3].forEach(i=>{
-      const sel=document.getElementById('bk-venue-'+i);
-      if(!sel) return;
+    // Task 3: Fill single venue dropdown only
+    const sel=document.getElementById('bk-venue-1');
+    if(sel){
       sel.innerHTML='<option value="">選擇場地</option>';
       allVenues.filter(v=>v.status==='available').forEach(v=>{sel.innerHTML+='<option value="'+v.id+'">'+v.name+' ('+v.capacity+'人)</option>'});
-    });
+    }
     if(allConflicts.length>0){
       document.getElementById('conflict-section').classList.remove('hidden');
       renderConflictStats();
@@ -265,20 +251,31 @@ let allVenues=[],allConflicts=[],allReservations=[],currentConflictId=null,curre
   });
 })();
 
-function checkConflict(wishNum){
-  const venueId=document.getElementById('bk-venue-'+wishNum)?.value;
-  const date=document.getElementById('bk-date-'+wishNum)?.value;
-  const warnEl=document.getElementById('conflict-warn-'+wishNum);
-  const textEl=document.getElementById('conflict-text-'+wishNum);
-  if(!venueId||!date){warnEl?.classList.add('hidden');return}
-  // Check existing reservations for this venue/date
-  const conflicting=allReservations.filter(r=>String(r.venue_id)===String(venueId)&&r.reservation_date===date);
+// Task 3: Single-preference conflict check — blocks submission if slot is taken
+function checkConflict(){
+  const venueId=document.getElementById('bk-venue-1')?.value;
+  const date=document.getElementById('bk-date-1')?.value;
+  const start=document.getElementById('bk-start-1')?.value;
+  const end=document.getElementById('bk-end-1')?.value;
+  const warnEl=document.getElementById('conflict-warn-1');
+  const textEl=document.getElementById('conflict-text-1');
+  const submitBtn=document.getElementById('booking-submit-btn');
+  if(!venueId||!date){warnEl?.classList.add('hidden');if(submitBtn)submitBtn.disabled=false;return}
+  // Overlap check: existing reservations for this venue/date that overlap the chosen time
+  const conflicting=allReservations.filter(r=>{
+    if(String(r.venue_id)!==String(venueId)||r.reservation_date!==date) return false;
+    if(!start||!end) return true; // date-only check
+    const rs=r.start_time||'00:00', re=r.end_time||'23:59';
+    return start<re && end>rs; // overlap
+  });
   if(conflicting.length>0){
     const c=conflicting[0];
-    textEl.innerHTML=`此場地在 ${date} 已有人預約（${c.user_name||c.club_name||'其他使用者'}，狀態: ${c.status==='confirmed'?'已完成申請流程':'網路登記中'}，時段: ${c.start_time||''}-${c.end_time||''}）。若仍送出，將進入衝突協調流程。`;
+    textEl.innerHTML=`${c.user_name||c.club_name||'其他使用者'} 已於 ${c.start_time||'—'}–${c.end_time||'—'} 預約此場地`;
     warnEl.classList.remove('hidden');
+    if(submitBtn){submitBtn.disabled=true;submitBtn.className='w-full py-3 mt-4 rounded-fju bg-gray-200 text-gray-400 text-sm font-bold cursor-not-allowed';}
   } else {
     warnEl.classList.add('hidden');
+    if(submitBtn){submitBtn.disabled=false;submitBtn.className='w-full btn-yellow py-3 mt-4';}
   }
 }
 
@@ -469,24 +466,58 @@ function openBookingModal(){document.getElementById('booking-modal').classList.r
 function closeBookingModal(){document.getElementById('booking-modal').classList.add('hidden');document.getElementById('booking-result').classList.add('hidden')}
 function quickBook(n){openBookingModal()}
 
+// Task 3: Submit single preference — first-come-first-served
 function submitBooking(e){
   e.preventDefault();
+  // Block if conflict detected on frontend
+  if(!document.getElementById('conflict-warn-1').classList.contains('hidden')){
+    return;
+  }
   const channels=[];
   if(document.getElementById('bk-n-outlook').checked) channels.push('outlook');
   if(document.getElementById('bk-n-sms').checked) channels.push('sms');
   if(document.getElementById('bk-n-line').checked) channels.push('line');
-  // Submit first wish
-  const d={venue_id:document.getElementById('bk-venue-1').value,venue_name:document.getElementById('bk-venue-1').selectedOptions[0]?.text||'',reservation_date:document.getElementById('bk-date-1').value,start_time:document.getElementById('bk-start-1').value,end_time:document.getElementById('bk-end-1').value,priority_level:parseInt(document.getElementById('bk-priority').value),purpose:document.getElementById('bk-purpose').value,estimated_participants:parseInt(document.getElementById('bk-est-ppl').value)||30,user_id:1,user_name:'Demo User',club_name:'攝影社',notify_channels:channels};
-  fetch('/api/reservations',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(d)}).then(r=>r.json()).then(res=>{
-    const b=document.getElementById('booking-result');b.classList.remove('hidden');
-    if(res.success){
-      b.className='mt-3 p-3 rounded-fju text-sm bg-fju-green/10 text-fju-green';
-      b.innerHTML=`<i class="fas fa-check-circle mr-1"></i>${res.message} (階段：${res.stage})<br><span class="text-xs text-gray-500 mt-1 block">通知管道：${channels.join(', ')||'無'}</span>`;
-    } else {
-      b.className='mt-3 p-3 rounded-fju text-sm bg-fju-yellow/20 text-fju-blue';
-      b.innerHTML=`<i class="fas fa-exclamation-triangle mr-1"></i>${res.message}<br><span class="text-xs text-gray-500">系統將自動嘗試第二、第三志願...</span>${res.conflict_id?'<br><button onclick="openDetail('+res.conflict_id+');closeBookingModal()" class="inline-flex items-center gap-1 mt-2 btn-yellow px-4 py-1.5 text-xs"><i class="fas fa-handshake"></i>進入多方協商</button>':''}`;
-    }
-  });
+  const d={
+    venue_id:               document.getElementById('bk-venue-1').value,
+    venue_name:             document.getElementById('bk-venue-1').selectedOptions[0]?.text||'',
+    reservation_date:       document.getElementById('bk-date-1').value,
+    start_time:             document.getElementById('bk-start-1').value,
+    end_time:               document.getElementById('bk-end-1').value,
+    priority_level:         parseInt(document.getElementById('bk-priority').value),
+    purpose:                document.getElementById('bk-purpose').value,
+    estimated_participants: parseInt(document.getElementById('bk-est-ppl').value)||30,
+    user_id:    1,
+    user_name:  'Demo User',
+    club_name:  '攝影社',
+    notify_channels: channels,
+  };
+  const submitBtn=document.getElementById('booking-submit-btn');
+  if(submitBtn){submitBtn.disabled=true;submitBtn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i>送出中...';}
+  fetch('/api/reservations',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(d)})
+    .then(r=>r.json())
+    .then(res=>{
+      const b=document.getElementById('booking-result');
+      b.classList.remove('hidden');
+      if(res.success){
+        b.className='mt-3 p-3 rounded-fju text-sm bg-fju-green/10 text-fju-green border border-fju-green/20';
+        b.innerHTML=`<i class="fas fa-check-circle mr-1"></i>預約成功！${res.message||''}<br><span class="text-xs text-gray-500 mt-1 block">通知管道：${channels.join(', ')||'無'}</span>`;
+        if(submitBtn) submitBtn.classList.add('hidden');
+        // Refresh reservation list
+        fetch('/api/reservations').then(r=>r.json()).then(r2=>{allReservations=r2.data||[];renderVenues();});
+      } else {
+        // Task 3: On conflict — show rejection, do NOT enter negotiation
+        b.className='mt-3 p-3 rounded-fju text-sm bg-red-50 text-red-600 border border-red-200';
+        b.innerHTML=`<i class="fas fa-times-circle mr-1"></i>預約失敗：${res.message||'此時段已被他人優先預約'}<br><span class="text-xs text-red-400 mt-1 block">依先搶先贏原則，請選擇其他時段重新送出。</span>`;
+        if(submitBtn){submitBtn.disabled=false;submitBtn.innerHTML='<i class="fas fa-paper-plane mr-2"></i>送出預約申請';submitBtn.className='w-full btn-yellow py-3 mt-4';}
+      }
+    })
+    .catch(()=>{
+      const b=document.getElementById('booking-result');
+      b.classList.remove('hidden');
+      b.className='mt-3 p-3 rounded-fju text-sm bg-red-50 text-red-600';
+      b.innerHTML='<i class="fas fa-exclamation-circle mr-1"></i>網路錯誤，請稍後再試';
+      if(submitBtn){submitBtn.disabled=false;submitBtn.innerHTML='<i class="fas fa-paper-plane mr-2"></i>送出預約申請';}
+    });
 }
 </script>
 @endsection

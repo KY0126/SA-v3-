@@ -1,12 +1,15 @@
-<div class="chatbot-fab" onclick="toggleChatbot()" title="輔寶 AI 助理">🐕</div>
+<div class="chatbot-fab" onclick="toggleChatbot()" id="chatbot-fab-btn" title="AI 助理"></div>
 <div id="chatbot-panel" class="chatbot-panel">
   <div class="chatbot-header">
-    <div class="w-8 h-8 rounded-full bg-fju-yellow flex items-center justify-center text-lg">🐕</div>
-    <div><div class="font-bold text-sm">輔寶 AI 助理</div><div class="text-white/50 text-[10px]">FJU Smart Hub Navigator</div></div>
+    <div class="w-8 h-8 rounded-full overflow-hidden bg-fju-yellow flex items-center justify-center" id="chatbot-header-avatar"></div>
+    <div><div class="font-bold text-sm" id="chatbot-name-display">AI 助理</div><div class="text-white/50 text-[10px]">FJU Smart Hub Navigator</div></div>
     <button onclick="toggleChatbot()" class="ml-auto text-white/50 hover:text-white"><i class="fas fa-times"></i></button>
   </div>
   <div class="chatbot-messages" id="chatbot-messages">
-    <div class="flex gap-2 mb-3"><div class="w-7 h-7 rounded-full bg-fju-yellow flex items-center justify-center shrink-0 text-sm">🐕</div><div class="bg-white rounded-fju rounded-tl-none p-3 text-xs text-gray-600 shadow-sm max-w-[85%]">汪！你好～我是輔寶 🐾<br><br>今天想要問輔寶什麼事呢？我可以幫你：<br>📍 查詢場地資訊與預約<br>📅 活動申請與審核流程<br>📋 查詢法規與常見問題 FAQ<br>🤖 AI 衝突協商建議<br>🗺️ 校園無障礙導覽<br><br>試試問我：「場地衝突怎麼辦？」</div></div>
+    <div class="flex gap-2 mb-3" id="chatbot-welcome-msg">
+      <div class="w-7 h-7 rounded-full overflow-hidden bg-fju-yellow flex items-center justify-center shrink-0" id="chatbot-msg-avatar"></div>
+      <div class="bg-white rounded-fju rounded-tl-none p-3 text-xs text-gray-600 shadow-sm max-w-[85%]">汪！你好～我是 <span id="chatbot-name-inline">AI 助理</span> 🐾<br><br>今天想要問我什麼事呢？我可以幫你：<br>📍 查詢場地資訊與預約<br>📅 活動申請與審核流程<br>📋 查詢法規與常見問題 FAQ<br>🤖 AI 衝突協商建議<br>🗺️ 校園無障礙導覽<br><br>試試問我：「場地衝突怎麼辦？」</div>
+    </div>
   </div>
   <div class="chatbot-quick-actions px-3 pb-2 flex gap-1 flex-wrap">
     <button onclick="askChatbot('場地衝突怎麼處理？')" class="px-2 py-1 rounded-full bg-fju-blue/10 text-fju-blue text-[10px] hover:bg-fju-blue/20 transition-colors">🏫 場地衝突</button>
@@ -20,6 +23,44 @@
   </div>
 </div>
 <script>
+// Dog avatar definitions — names & colors
+const _dogAvatars = [
+  {name:'雜摳', bg:'#f5c6a0', emoji:'🐕'},
+  {name:'Dear',  bg:'#3d2b1f', emoji:'🐾'},
+  {name:'帥帥',  bg:'#8b6f47', emoji:'🐕'},
+  {name:'哲哲',  bg:'#1a1a1a', emoji:'🐾'},
+  {name:'孟軒',  bg:'#2c2c2c', emoji:'🐕'},
+  {name:'大S',   bg:'#6b6b6b', emoji:'🐾'},
+  {name:'迷你熊',bg:'#3b2314', emoji:'🐕'},
+  {name:'阿毛',  bg:'#c4a882', emoji:'🐾'},
+];
+
+// Pick once per session; persist until page close
+(function initDogAvatar(){
+  let idx = sessionStorage.getItem('_fjuDogIdx');
+  if(idx === null){
+    idx = Math.floor(Math.random() * _dogAvatars.length);
+    sessionStorage.setItem('_fjuDogIdx', idx);
+  }
+  idx = parseInt(idx);
+  const dog = _dogAvatars[idx];
+
+  // Build avatar HTML: colored circle with emoji + name label
+  const avatarHTML = `<div style="width:100%;height:100%;background:${dog.bg};display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;">
+    <span style="font-size:14px;line-height:1">${dog.emoji}</span>
+  </div>`;
+  const fabHTML = `<div style="width:100%;height:100%;background:${dog.bg};border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;">
+    <span style="font-size:20px;line-height:1">${dog.emoji}</span>
+    <span style="font-size:7px;color:#fff;font-weight:bold;margin-top:1px;text-shadow:0 1px 2px rgba(0,0,0,.5)">${dog.name}</span>
+  </div>`;
+
+  document.getElementById('chatbot-fab-btn').innerHTML = fabHTML;
+  document.getElementById('chatbot-header-avatar').innerHTML = avatarHTML;
+  document.getElementById('chatbot-msg-avatar').innerHTML = avatarHTML;
+  document.getElementById('chatbot-name-display').textContent = dog.name + ' AI 助理';
+  document.getElementById('chatbot-name-inline').textContent = dog.name;
+})();
+
 const faqKB = {
   '場地': [
     {q:'場地衝突怎麼處理？',a:'當您的預約與他人衝突時，系統會自動偵測並顯示紅字提示。您可以選擇：\n1️⃣ 若在場協大會時間內，可走場協大會流程\n2️⃣ 若超過場協時間，進入私下協調（多人即時聊天）\n3️⃣ AI 會自動提供三個替代方案（含信心度評分）\n\n協調結束後 AI 會生成對話紀錄 PDF，雙方確認後自動更新行事曆。'},
@@ -38,7 +79,7 @@ const faqKB = {
     {q:'器材借用流程？',a:'器材借用流程：\n1️⃣ 前往「設備借用」頁面選擇器材\n2️⃣ 需先確認是否持有有效器材證\n3️⃣ 填寫借用人資訊與預計歸還日期\n4️⃣ 系統自動檢查器材證是否為本人\n5️⃣ 逾期歸還將自動扣分並發送通知\n\n⚠️ 器材證過期需重新申請！'},
   ],
   '衝突': [
-    {q:'衝突協商怎麼進行？',a:'當您遇到場地衝突需要協商時：\n1️⃣ 我（輔寶 AI）會先提供 3 個替代方案\n2️⃣ 如需進一步討論，可開啟多方私下協商（即時聊天）\n3️⃣ 協商結束後，AI 自動整理對話紀錄 PDF\n4️⃣ 雙方確認後，自動更新行事曆\n5️⃣ 對話紀錄和變更資訊會通知課指組\n\n💡 每個爭議單一社團僅有 4 小時忙碌豁免權'},
+    {q:'衝突協商怎麼進行？',a:'當您遇到場地衝突需要協商時：\n1️⃣ AI 會先提供 3 個替代方案\n2️⃣ 如需進一步討論，可開啟多方私下協商（即時聊天）\n3️⃣ 協商結束後，AI 自動整理對話紀錄 PDF\n4️⃣ 雙方確認後，自動更新行事曆\n5️⃣ 對話紀錄和變更資訊會通知課指組\n\n💡 每個爭議單一社團僅有 4 小時忙碌豁免權'},
     {q:'忙碌按鈕可以一直按嗎？',a:'不行喔！忙碌按鈕有嚴格規則：\n📌 每個預約爭議，單一社團僅有 4 小時忙碌豁免權\n📌 系統可連動學校課表驗證\n📌 若幹部無課卻點忙碌，AI 會標註「疑似誠信異常」\n📌 異常行為會自動調低該社團的仲裁權重'},
   ],
 };
@@ -50,22 +91,29 @@ function askChatbot(q){
   sendChatMessage();
 }
 
+function _getDogAvatarHTML(small){
+  const idx = parseInt(sessionStorage.getItem('_fjuDogIdx')||0);
+  const dog = _dogAvatars[idx];
+  const size = small ? '7px' : '8px';
+  return `<div style="width:100%;height:100%;background:${dog.bg};border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+    <span style="font-size:${small?'11px':'13px'};line-height:1">${dog.emoji}</span>
+  </div>`;
+}
+
 function sendChatMessage(){
   var input=document.getElementById('chatbot-input'),msg=input.value.trim();
   if(!msg)return;
   var container=document.getElementById('chatbot-messages');
-  // User bubble
   container.innerHTML+='<div class="flex gap-2 mb-3 justify-end"><div class="bg-fju-blue text-white rounded-fju rounded-tr-none p-3 text-xs max-w-[85%]">'+msg+'</div></div>';
   input.value='';
   container.scrollTop=container.scrollHeight;
-  // Show typing indicator
-  container.innerHTML+='<div id="typing-indicator" class="flex gap-2 mb-3"><div class="w-7 h-7 rounded-full bg-fju-yellow flex items-center justify-center shrink-0 text-sm">🐕</div><div class="bg-white rounded-fju rounded-tl-none p-3 text-xs text-gray-400 shadow-sm"><i class="fas fa-spinner fa-spin mr-1"></i>輔寶思考中...</div></div>';
+  container.innerHTML+='<div id="typing-indicator" class="flex gap-2 mb-3"><div class="w-7 h-7 rounded-full overflow-hidden shrink-0">'+_getDogAvatarHTML(true)+'</div><div class="bg-white rounded-fju rounded-tl-none p-3 text-xs text-gray-400 shadow-sm"><i class="fas fa-spinner fa-spin mr-1"></i>思考中...</div></div>';
   container.scrollTop=container.scrollHeight;
   setTimeout(function(){
     var indicator=document.getElementById('typing-indicator');
     if(indicator) indicator.remove();
     var reply = matchFAQ(msg);
-    container.innerHTML+='<div class="flex gap-2 mb-3"><div class="w-7 h-7 rounded-full bg-fju-yellow flex items-center justify-center shrink-0 text-sm">🐕</div><div class="bg-white rounded-fju rounded-tl-none p-3 text-xs text-gray-600 shadow-sm max-w-[85%]" style="white-space:pre-line">'+reply+'</div></div>';
+    container.innerHTML+='<div class="flex gap-2 mb-3"><div class="w-7 h-7 rounded-full overflow-hidden shrink-0">'+_getDogAvatarHTML(true)+'</div><div class="bg-white rounded-fju rounded-tl-none p-3 text-xs text-gray-600 shadow-sm max-w-[85%]" style="white-space:pre-line">'+reply+'</div></div>';
     container.scrollTop=container.scrollHeight;
   },1000);
 }
@@ -77,64 +125,44 @@ function matchFAQ(query){
     faqKB[cat].forEach(function(item){
       var score = 0;
       var keywords = item.q.toLowerCase().split(/[\s？！，。、]/);
-      keywords.forEach(function(kw){
-        if(kw.length > 1 && q.includes(kw)) score += 2;
-      });
-      // Check category match
+      keywords.forEach(function(kw){if(kw.length > 1 && q.includes(kw)) score += 2;});
       if(q.includes(cat.toLowerCase())) score += 3;
       if(score > bestScore){ bestScore = score; bestMatch = item; }
     });
   }
-  // Also check for specific keywords
   if(q.includes('衝突') || q.includes('協商') || q.includes('協調')){
-    var conflictFaqs = faqKB['衝突'] || faqKB['場地'];
-    if(conflictFaqs && conflictFaqs.length > 0){
-      var matched = conflictFaqs.find(function(f){ return f.q.includes('衝突') || f.q.includes('協商'); });
-      if(matched) return '🐾 ' + matched.a + '\n\n💡 需要我幫你開啟協商嗎？可以前往「場地預約」頁面查看詳情。';
-    }
+    var f=(faqKB['衝突']||[]).find(function(x){return x.q.includes('衝突')||x.q.includes('協商');});
+    if(f) return '🐾 ' + f.a + '\n\n💡 需要幫你開啟協商嗎？可以前往「場地預約」頁面查看詳情。';
   }
   if(q.includes('預約') || q.includes('場地')){
-    var venueFaqs = faqKB['場地'];
-    if(venueFaqs) {
-      var matched = venueFaqs.find(function(f){ return f.q.includes('預約') || f.q.includes('流程'); });
-      if(matched) return '🐾 ' + matched.a;
-    }
+    var f=(faqKB['場地']||[]).find(function(x){return x.q.includes('預約')||x.q.includes('流程');});
+    if(f) return '🐾 ' + f.a;
   }
   if(q.includes('取消') || q.includes('撤銷') || q.includes('扣分')){
-    var cancelFaq = (faqKB['場地']||[]).find(function(f){ return f.q.includes('取消'); });
-    if(cancelFaq) return '🐾 ' + cancelFaq.a;
+    var f=(faqKB['場地']||[]).find(function(x){return x.q.includes('取消');});
+    if(f) return '🐾 ' + f.a;
   }
   if(q.includes('活動') || q.includes('申請')){
-    var actFaqs = faqKB['活動'];
-    if(actFaqs){
-      var matched = actFaqs.find(function(f){ return f.q.includes('申請'); });
-      if(matched) return '🐾 ' + matched.a;
-    }
+    var f=(faqKB['活動']||[]).find(function(x){return x.q.includes('申請');});
+    if(f) return '🐾 ' + f.a;
   }
   if(q.includes('評鑑') || q.includes('社團')){
-    var clubFaqs = faqKB['社團'];
-    if(clubFaqs){
-      var matched = clubFaqs.find(function(f){ return f.q.includes('評鑑'); });
-      if(matched) return '🐾 ' + matched.a;
-    }
+    var f=(faqKB['社團']||[]).find(function(x){return x.q.includes('評鑑');});
+    if(f) return '🐾 ' + f.a;
   }
   if(q.includes('器材') || q.includes('借用') || q.includes('設備')){
-    var eqFaqs = faqKB['器材'];
-    if(eqFaqs) return '🐾 ' + eqFaqs[0].a;
+    var f=faqKB['器材'];
+    if(f) return '🐾 ' + f[0].a;
   }
   if(q.includes('預審') || q.includes('AI')){
-    var aiFaqs = faqKB['活動'];
-    if(aiFaqs){
-      var matched = aiFaqs.find(function(f){ return f.q.includes('預審'); });
-      if(matched) return '🐾 ' + matched.a;
-    }
+    var f=(faqKB['活動']||[]).find(function(x){return x.q.includes('預審');});
+    if(f) return '🐾 ' + f.a;
   }
   if(q.includes('忙碌') || q.includes('拖延')){
-    var busyFaq = (faqKB['衝突']||[]).find(function(f){ return f.q.includes('忙碌'); });
-    if(busyFaq) return '🐾 ' + busyFaq.a;
+    var f=(faqKB['衝突']||[]).find(function(x){return x.q.includes('忙碌');});
+    if(f) return '🐾 ' + f.a;
   }
   if(bestMatch && bestScore >= 3) return '🐾 ' + bestMatch.a;
-  // Default fallback responses with helpful links
   var defaults = [
     '汪！讓我幫你找找看～ 📝\n\n您可以試試以下問題：\n• 場地衝突怎麼處理？\n• 如何申請活動？\n• 社團評鑑規定\n• 器材借用流程\n• 取消預約扣分規則',
     '根據校園法規，場地需要提前 3 天申請喔 🏫\n要我幫你查詢更多資訊嗎？',

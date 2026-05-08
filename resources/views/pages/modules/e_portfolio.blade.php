@@ -11,17 +11,95 @@ $roleLabel = $roleLabels[$role] ?? '一般學生/社員';
   {{-- Header --}}
   <div class="bg-white rounded-fju-lg p-6 shadow-sm border border-gray-100">
     <div class="flex items-center gap-4">
-      <div class="w-16 h-16 rounded-full bg-fju-blue flex items-center justify-center text-white text-2xl font-bold shadow-lg">D</div>
-      <div class="flex-1">
-        <h2 class="font-bold text-fju-blue text-xl">Demo User</h2>
-        <p class="text-sm text-gray-500">{{ $roleLabel }} · 410XXXXXX</p>
+
+      {{-- Avatar (clickable, hover overlay) --}}
+      <div class="relative group cursor-pointer flex-shrink-0" onclick="document.getElementById('avatar-input').click()" title="更換頭貼">
+        <div id="avatar-display" class="w-16 h-16 rounded-full bg-fju-blue flex items-center justify-center text-white text-2xl font-bold shadow-lg overflow-hidden">
+          <img id="avatar-img" src="" alt="" class="hidden w-full h-full object-cover rounded-full">
+          <span id="avatar-initial">D</span>
+        </div>
+        {{-- Hover overlay --}}
+        <div class="absolute inset-0 rounded-full bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+          <i class="fas fa-camera text-white text-sm"></i>
+          <span class="text-white text-[10px] mt-0.5 leading-tight">更換頭貼</span>
+        </div>
+      </div>
+      <input id="avatar-input" type="file" accept="image/*" class="hidden" onchange="handleAvatarChange(event)">
+
+      {{-- Name & info --}}
+      <div class="flex-1 min-w-0">
+        {{-- View mode --}}
+        <div id="name-view" class="flex items-center gap-2 group/name">
+          <h2 id="name-display" class="font-bold text-fju-blue text-xl">Demo User</h2>
+          <button onclick="startNameEdit()" class="opacity-0 group-hover/name:opacity-100 transition-opacity text-gray-300 hover:text-fju-blue p-1" title="編輯名稱">
+            <i class="fas fa-pencil-alt text-xs"></i>
+          </button>
+        </div>
+        {{-- Edit mode --}}
+        <div id="name-edit" class="hidden flex items-center gap-2">
+          <input id="name-input" type="text" value="Demo User"
+            class="font-bold text-fju-blue text-xl border-b-2 border-fju-blue outline-none bg-transparent w-48 px-0 py-0.5"
+            onkeydown="handleNameKey(event)">
+          <button onclick="saveName()" class="px-2 py-0.5 rounded text-xs bg-fju-blue text-white hover:bg-fju-blue/80 transition-colors">儲存</button>
+          <button onclick="cancelNameEdit()" class="px-2 py-0.5 rounded text-xs border border-gray-200 text-gray-400 hover:text-gray-600 transition-colors">取消</button>
+        </div>
+        <p class="text-sm text-gray-500 mt-0.5">{{ $roleLabel }} · 410XXXXXX</p>
         <p class="text-xs text-gray-400 mt-1"><i class="fas fa-envelope mr-1"></i>410xxx@cloud.fju.edu.tw</p>
       </div>
-      <div class="text-right">
+
+      <div class="text-right flex-shrink-0">
         <span class="inline-block px-3 py-1 rounded-full bg-fju-blue/10 text-fju-blue text-xs font-bold"><i class="fas fa-shield-alt mr-1"></i>已驗證</span>
       </div>
     </div>
   </div>
+
+  <script>
+  // ── Avatar ──────────────────────────────────────────────
+  function handleAvatarChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const img = document.getElementById('avatar-img');
+      const initial = document.getElementById('avatar-initial');
+      img.src = ev.target.result;
+      img.classList.remove('hidden');
+      initial.classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+
+  // ── Name edit ───────────────────────────────────────────
+  let _prevName = 'Demo User';
+
+  function startNameEdit() {
+    _prevName = document.getElementById('name-display').textContent;
+    document.getElementById('name-input').value = _prevName;
+    document.getElementById('name-view').classList.add('hidden');
+    document.getElementById('name-edit').classList.remove('hidden');
+    document.getElementById('name-input').focus();
+    document.getElementById('name-input').select();
+  }
+
+  function saveName() {
+    const val = document.getElementById('name-input').value.trim();
+    if (!val) return;
+    document.getElementById('name-display').textContent = val;
+    document.getElementById('name-view').classList.remove('hidden');
+    document.getElementById('name-edit').classList.add('hidden');
+  }
+
+  function cancelNameEdit() {
+    document.getElementById('name-view').classList.remove('hidden');
+    document.getElementById('name-edit').classList.add('hidden');
+  }
+
+  function handleNameKey(e) {
+    if (e.key === 'Enter')  saveName();
+    if (e.key === 'Escape') cancelNameEdit();
+  }
+  </script>
 
   {{-- Tab Navigation --}}
   <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">

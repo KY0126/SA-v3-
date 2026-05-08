@@ -24,6 +24,7 @@
     <button onclick="filterFAQCat('safety')" class="faq-cat px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-cat="safety">安全規範</button>
     <button onclick="filterFAQCat('equipment')" class="faq-cat px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-cat="equipment">器材借用</button>
     <button onclick="filterFAQCat('cadre')" class="faq-cat px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-cat="cadre">幹部交接</button>
+    <button onclick="filterFAQCat('other')" class="faq-cat px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-cat="other">其他問題</button>
   </div>
 
   {{-- FAQ List --}}
@@ -76,6 +77,18 @@ const faqData=[
   // === 幹部交接 ===
   {cat:'cadre',q:'改選交接需要哪些文件？',a:'四大附件：附件1 <b>改選紀錄表</b>（選舉方式、得票數）、附件2 <b>移交清冊總表</b>（宗旨、章程、財務）、附件3 <b>財產清冊</b>（器材逐項清點）、附件4 <b>帳戶印鑑變更</b>（郵局帳戶變更）。',pop:82},
   {cat:'cadre',q:'財務管理的「三人分管」原則？',a:'存摺、團體印鑑、負責人小章須由<b>3名不同專人</b>分別保管，不得集中於同一人。須定時揭露簽章完整的月財務報表進行公開徵信。',pop:78},
+
+  // === 其他問題 ===
+  {cat:'other',q:'場地發生衝突時怎麼處理？',a:'系統採<b>先搶先贏</b>原則：若您選擇的場地、日期與時段已被預約，系統會立即提示衝突並封鎖送出，請直接選擇其他可用時段重新送出申請。',pop:80},
+  {cat:'other',q:'場地預約的完整流程？',a:'<b>三步驟：</b>1. 點選「場地預約」→「新增預約」；2. 選擇場地、日期、時段、預計人數；3. 確認無衝突後送出。系統即時檢查衝突，送出後靜待課指組審核。',pop:78},
+  {cat:'other',q:'預約後若要取消怎麼辦？',a:'請至「場地預約」清單找到對應申請，點選取消。<b>請務必提前取消</b>，未依規定取消者將列入違規記錄，影響次學期電腦預約權利。',pop:75},
+  {cat:'other',q:'如何在系統上申請活動？',a:'<b>四步驟：</b>1. 至「活動申請」點「新增申請」；2. 填寫活動名稱、日期、人數、地點及目的；3. 若涉及酒精/明火/攤位請勾選並提前1個月送件；4. 送出後等待 AI 預審與課指組複審。',pop:82},
+  {cat:'other',q:'AI 預審會檢查哪些項目？',a:'AI 預審會自動檢核：<b>送件時程</b>（是否符合7天/1個月前門檻）、<b>特殊項目風險</b>（酒精/明火/攤位）、<b>資料完整性</b>（必填欄位）、<b>場地衝突</b>。預審結果僅為參考，最終仍由課指組人工審核。',pop:79},
+  {cat:'other',q:'社團評鑑的相關規定是什麼？',a:'評鑑每學年辦理一次，依<b>行政程序(25%)、共同性評分(30%)、活動績效(45%)</b>三大項計分。連續2年不及格將取消社辦使用權並限制借用，連續3年低於60分得申請解散。',pop:72},
+  {cat:'other',q:'如何成立新社團？',a:'每年<b>3月</b>向課外組提出申請，核准後召開成立大會並繳交大會紀錄與章程備查。社團分學術、體能、服務、聯誼、康樂、技藝六大類，成立後須於6月完成年度登記。',pop:70},
+  {cat:'other',q:'器材借用的流程是什麼？',a:'<b>五步驟：</b>1. 考取對應器材認證卡；2. 在系統填寫借用申請；3. 等待課指組核准（核准後需於期限內領取）；4. 持器材證與黃單至現場領取；5. 使用後按時歸還並確認無損。',pop:85},
+  {cat:'other',q:'衝突協商怎麼進行？',a:'本系統採先搶先贏，<b>不提供衝突協商流程</b>。若您的申請因衝突被駁回，請直接選擇其他可用時段重新送出，無需與他方溝通。',pop:68},
+  {cat:'other',q:'「標示忙碌」可以一直使用嗎？',a:'忙碌標示僅為個人行事曆輔助功能，<b>不影響場地或設備的借用申請</b>。場地是否可用以系統預約狀態為準，並非以忙碌標示為依據。',pop:65},
 ];
 
 function filterFAQCat(cat){
@@ -92,8 +105,8 @@ function renderFAQ(){
   if(search) data=data.filter(f=>f.q.toLowerCase().includes(search)||f.a.toLowerCase().includes(search));
   const sort=document.getElementById('faq-sort')?.value||'cat';
   if(sort==='pop') data.sort((a,b)=>b.pop-a.pop);
-  const catLabels={evaluation:'社團評鑑',admin:'行政手續',venue:'場地借用',booth:'攤位申請',subsidy:'補助核銷',safety:'安全規範',equipment:'器材借用',cadre:'幹部交接'};
-  const catColors={evaluation:'fju-blue',admin:'fju-yellow',venue:'fju-green',booth:'purple-600',subsidy:'fju-blue',safety:'fju-red',equipment:'fju-yellow',cadre:'fju-green'};
+  const catLabels={evaluation:'社團評鑑',admin:'行政手續',venue:'場地借用',booth:'攤位申請',subsidy:'補助核銷',safety:'安全規範',equipment:'器材借用',cadre:'幹部交接',other:'其他問題'};
+  const catColors={evaluation:'fju-blue',admin:'fju-yellow',venue:'fju-green',booth:'purple-600',subsidy:'fju-blue',safety:'fju-red',equipment:'fju-yellow',cadre:'fju-green',other:'gray-500'};
 
   document.getElementById('faq-list').innerHTML=data.length===0?'<div class="p-8 text-center text-gray-400">無符合的問題</div>':data.map((f,i)=>`
     <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">

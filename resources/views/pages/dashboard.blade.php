@@ -58,6 +58,7 @@ fetch('/api/dashboard/stats/'+ROLE).then(r=>r.json()).then(d=>{
   if(ROLE==='admin') renderAdminDashboard(el,d);
   else if(ROLE==='officer') renderOfficerDashboard(el,d);
   else if(ROLE==='professor') renderProfessorDashboard(el,d);
+  else if(ROLE==='staff') renderStaffDashboard(el,d);
   else if(ROLE==='it') renderITDashboard(el,d);
   else renderStudentDashboard(el,d);
 });
@@ -165,13 +166,68 @@ function renderStudentDashboard(el,d){
   },50);
 }
 
+function renderStaffDashboard(el,d){
+  el.innerHTML=`
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="flex items-center justify-between mb-2"><span class="text-xs text-gray-400">待確認預約</span><div class="w-8 h-8 rounded-fju bg-fju-yellow flex items-center justify-center"><i class="fas fa-calendar-check text-fju-blue text-xs"></i></div></div><div class="text-2xl font-black text-fju-blue">${d.pending_bookings}</div><div class="text-[10px] text-gray-400 mt-1">場地預約申請</div></div>
+    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="flex items-center justify-between mb-2"><span class="text-xs text-gray-400">場地使用率</span><div class="w-8 h-8 rounded-fju bg-fju-blue flex items-center justify-center"><i class="fas fa-building text-white text-xs"></i></div></div><div class="text-2xl font-black text-fju-blue">${d.venue_usage}%</div><div class="text-[10px] text-gray-400 mt-1">本月平均</div></div>
+    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="flex items-center justify-between mb-2"><span class="text-xs text-gray-400">設備借出中</span><div class="w-8 h-8 rounded-fju bg-fju-yellow flex items-center justify-center"><i class="fas fa-box text-fju-blue text-xs"></i></div></div><div class="text-2xl font-black text-fju-yellow">${d.equipment_on_loan}</div><div class="text-[10px] text-gray-400 mt-1">件設備</div></div>
+    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="flex items-center justify-between mb-2"><span class="text-xs text-gray-400">近期活動</span><div class="w-8 h-8 rounded-fju bg-fju-blue flex items-center justify-center"><i class="fas fa-calendar-alt text-white text-xs"></i></div></div><div class="text-2xl font-black text-fju-green">${d.upcoming_events}</div><div class="text-[10px] text-gray-400 mt-1">近7天</div></div>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100"><h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-chart-line mr-2 text-fju-yellow"></i>本月場地預約量趨勢</h3><canvas id="c-booking-trend" height="200"></canvas></div>
+    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100"><h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-chart-pie mr-2 text-fju-yellow"></i>各場地使用佔比</h3><canvas id="c-dept-usage" height="200"></canvas></div>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100">
+      <h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-calendar-check mr-2 text-fju-yellow"></i>快速操作</h3>
+      <div class="space-y-2">
+        <a href="/module/activity-application?role=staff" class="flex items-center gap-3 p-3 rounded-fju bg-fju-blue/5 hover:bg-fju-blue/10 transition-all cursor-pointer"><i class="fas fa-file-alt text-fju-blue w-5 text-center"></i><span class="text-sm font-medium text-fju-blue">提交活動申請</span><i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i></a>
+        <a href="/module/venue-booking?role=staff" class="flex items-center gap-3 p-3 rounded-fju bg-fju-yellow/5 hover:bg-fju-yellow/10 transition-all cursor-pointer"><i class="fas fa-map-marker-alt text-fju-yellow w-5 text-center"></i><span class="text-sm font-medium text-fju-blue">預約場地</span><i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i></a>
+        <a href="/module/equipment?role=staff" class="flex items-center gap-3 p-3 rounded-fju bg-fju-green/5 hover:bg-fju-green/10 transition-all cursor-pointer"><i class="fas fa-boxes-stacked text-fju-green w-5 text-center"></i><span class="text-sm font-medium text-fju-blue">借用設備</span><i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i></a>
+        <a href="/module/repair?role=staff" class="flex items-center gap-3 p-3 rounded-fju bg-gray-50 hover:bg-gray-100 transition-all cursor-pointer"><i class="fas fa-wrench text-gray-400 w-5 text-center"></i><span class="text-sm font-medium text-fju-blue">提交報修</span><i class="fas fa-chevron-right text-gray-300 ml-auto text-xs"></i></a>
+      </div>
+    </div>
+    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100">
+      <h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-bell mr-2 text-fju-yellow"></i>近期通知</h3>
+      <div class="space-y-2 text-sm">
+        <div class="p-3 rounded-fju bg-fju-yellow/5 border-l-4 border-fju-yellow"><div class="font-medium text-fju-blue text-xs">場地預約核准通知</div><div class="text-[10px] text-gray-400 mt-1">中美堂 2026/05/10 14:00-17:00 已核准</div></div>
+        <div class="p-3 rounded-fju bg-fju-blue/5 border-l-4 border-fju-blue"><div class="font-medium text-fju-blue text-xs">設備歸還提醒</div><div class="text-[10px] text-gray-400 mt-1">音響設備借用期限將於明日到期</div></div>
+        <div class="p-3 rounded-fju bg-fju-green/5 border-l-4 border-fju-green"><div class="font-medium text-fju-blue text-xs">活動申請通過</div><div class="text-[10px] text-gray-400 mt-1">5月份部門茶會活動申請已核備</div></div>
+      </div>
+    </div>
+  </div>`;
+  setTimeout(()=>{
+    new Chart('c-booking-trend',{type:'bar',data:{labels:['5/1','5/2','5/3','5/4','5/5','5/6','5/7','5/8','5/9','5/10','5/11','5/12'],datasets:[{label:'預約數',data:d.booking_data,backgroundColor:'#003153',borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+    new Chart('c-dept-usage',{type:'doughnut',data:{labels:Object.keys(d.dept_usage),datasets:[{data:Object.values(d.dept_usage),backgroundColor:['#003153','#DAA520','#008000','#004070','#999']}]},options:{responsive:true}});
+  },50);
+}
+
 function renderITDashboard(el,d){
   el.innerHTML=`
-  <div class="bg-white rounded-fju-lg p-12 shadow-sm border border-gray-100 text-center">
-    <i class="fas fa-server text-gray-300 text-5xl mb-4"></i>
-    <h3 class="font-bold text-gray-400 text-lg mb-2">資訊中心</h3>
-    <p class="text-sm text-gray-400">此頁面已重置為初始狀態。<br>系統監控與管理功能開發中。</p>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="flex items-center justify-between mb-2"><span class="text-xs text-gray-400">CPU 使用率</span><div class="w-8 h-8 rounded-fju bg-fju-blue flex items-center justify-center"><i class="fas fa-microchip text-white text-xs"></i></div></div><div class="text-2xl font-black ${d.cpu_usage>80?'text-fju-red':d.cpu_usage>60?'text-fju-yellow':'text-fju-green'}">${d.cpu_usage}%</div><div class="w-full bg-gray-100 rounded-full h-1.5 mt-2"><div class="rounded-full h-1.5 ${d.cpu_usage>80?'bg-fju-red':d.cpu_usage>60?'bg-fju-yellow':'bg-fju-green'}" style="width:${d.cpu_usage}%"></div></div></div>
+    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="flex items-center justify-between mb-2"><span class="text-xs text-gray-400">記憶體使用</span><div class="w-8 h-8 rounded-fju bg-fju-yellow flex items-center justify-center"><i class="fas fa-memory text-fju-blue text-xs"></i></div></div><div class="text-2xl font-black text-fju-blue">${d.memory_usage}%</div><div class="w-full bg-gray-100 rounded-full h-1.5 mt-2"><div class="rounded-full h-1.5 bg-fju-yellow" style="width:${d.memory_usage}%"></div></div></div>
+    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="flex items-center justify-between mb-2"><span class="text-xs text-gray-400">API 成功率</span><div class="w-8 h-8 rounded-fju bg-fju-blue flex items-center justify-center"><i class="fas fa-server text-white text-xs"></i></div></div><div class="text-2xl font-black text-fju-green">${d.api_success_rate}%</div><div class="text-[10px] text-gray-400 mt-1">近24小時</div></div>
+    <div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 card-hover"><div class="flex items-center justify-between mb-2"><span class="text-xs text-gray-400">WAF 攔截</span><div class="w-8 h-8 rounded-fju bg-fju-red/20 flex items-center justify-center"><i class="fas fa-shield-alt text-fju-red text-xs"></i></div></div><div class="text-2xl font-black text-fju-red">${d.waf_blocks_today}</div><div class="text-[10px] text-gray-400 mt-1">今日已攔截請求</div></div>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100"><h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-chart-line mr-2 text-fju-yellow"></i>系統負載 (過去12小時)</h3><canvas id="c-load" height="200"></canvas></div>
+    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100"><h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-tachometer-alt mr-2 text-fju-yellow"></i>API 回應延遲 (ms)</h3><canvas id="c-latency" height="200"></canvas></div>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100"><h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-database mr-2 text-fju-yellow"></i>儲存空間使用 (R2)</h3><canvas id="c-r2" height="200"></canvas></div>
+    <div class="bg-white rounded-fju-lg p-5 shadow-sm border border-gray-100">
+      <h3 class="font-bold text-fju-blue text-sm mb-3"><i class="fas fa-heartbeat mr-2 text-fju-yellow"></i>服務健康狀態</h3>
+      <div class="space-y-2">${[['Laravel API','fa-server','ok'],['MySQL 資料庫','fa-database','ok'],['Sanctum Auth','fa-key','ok'],['WAF/DDoS 防護','fa-shield-alt','ok'],['AI RAG 服務','fa-robot','warning'],['R2 物件儲存','fa-cloud','ok']].map(([name,icon,status])=>`<div class="flex items-center justify-between p-2 rounded-fju bg-gray-50"><div class="flex items-center gap-2"><i class="fas ${icon} text-fju-blue text-sm w-5 text-center"></i><span class="text-xs font-medium text-gray-700">${name}</span></div><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${status==='ok'?'bg-fju-green':'bg-fju-yellow'} animate-pulse"></span><span class="text-[10px] ${status==='ok'?'text-fju-green font-bold':'text-fju-yellow font-bold'}">${status==='ok'?'正常運行':'待確認'}</span></div></div>`).join('')}</div>
+    </div>
   </div>`;
+  setTimeout(()=>{
+    const labels=['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00'];
+    new Chart('c-load',{type:'line',data:{labels,datasets:[{label:'負載%',data:d.load_data,borderColor:'#003153',backgroundColor:'rgba(0,49,83,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#DAA520',pointRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100}}}});
+    new Chart('c-latency',{type:'line',data:{labels,datasets:[{label:'延遲 ms',data:d.api_latency,borderColor:'#DAA520',backgroundColor:'rgba(218,165,32,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#003153',pointRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+    new Chart('c-r2',{type:'doughnut',data:{labels:Object.keys(d.r2_usage),datasets:[{data:Object.values(d.r2_usage),backgroundColor:['#003153','#DAA520','#008000','#666']}]},options:{responsive:true}});
+  },50);
 }
 </script>
 

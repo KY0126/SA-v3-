@@ -272,6 +272,7 @@ class CrudController extends Controller
             'professor' => ['supervised_clubs' => 3, 'risk_alerts' => 1, 'review_pending' => 2, 'performance_data' => ['leadership'=>82,'creativity'=>75,'teamwork'=>88,'communication'=>70,'problem_solving'=>85], 'growth_data' => [65,70,72,78,82,85], 'risk_indicators' => ['high'=>0,'medium'=>1,'low'=>2]],
             'student' => ['activities_joined' => 8, 'officer_roles' => 3, 'credit_score' => 85, 'competency_level' => 'A', 'competency_data' => ['leadership'=>80,'creativity'=>70,'teamwork'=>85,'communication'=>75,'digital'=>90], 'portfolio_count' => 12, 'certificates' => 3],
             'it' => ['cpu_usage' => 45, 'memory_usage' => 62, 'api_success_rate' => 99.5, 'waf_blocks_today' => 23, 'load_data' => [32,45,55,62,58,45,38,42,55,65,52,40], 'api_latency' => [120,95,88,105,92,78,85,110,95,82,90,88], 'r2_usage' => ['documents'=>45,'images'=>30,'certificates'=>15,'backups'=>10]],
+            'staff' => ['pending_bookings' => 4, 'venue_usage' => 78, 'equipment_on_loan' => 7, 'upcoming_events' => 5, 'booking_data' => [3,5,8,6,4,7,9,5,6,8,4,3], 'dept_usage' => ['中美堂'=>35,'活動中心'=>28,'SF 134'=>18,'體育館'=>12,'其他'=>7]],
         ];
         return response()->json($stats[$role] ?? $stats['student']);
     }
@@ -377,17 +378,49 @@ class CrudController extends Controller
     }
 
     // ====== Auth: Login / Register / Forgot Password ======
+
+    /**
+     * Infer the appropriate role from an email address.
+     * Rules:
+     *  - @fju.edu.tw (faculty/staff domain) → auto-detect by prefix pattern
+     *    - Prefix matches known dept-code pattern (letters only, e.g. "csie") → staff
+     *    - Otherwise → professor
+     *  - @mail.fju.edu.tw / @cloud.fju.edu.tw → student (幹部身份由課指組後台賦予)
+     */
+    private function inferRoleFromEmail(string $email, string $requestedRole): string
+    {
+        $email = strtolower(trim($email));
+        // Faculty/staff domain — auto override requested role
+        if (str_ends_with($email, '@fju.edu.tw')) {
+            $prefix = explode('@', $email)[0];
+            // Pure alpha prefix (e.g. dept code like "csie", "osa") → staff (處室職員)
+            if (preg_match('/^[a-z]+$/', $prefix)) return 'staff';
+            // Number-containing prefix (e.g. "t1234567") → professor
+            return 'professor';
+        }
+        // Student domain — honour requested role except for admin (must be manually promoted)
+        $allowed = ['student', 'officer', 'professor', 'staff'];
+        return in_array($requestedRole, $allowed) ? $requestedRole : 'student';
+    }
+
     public function authLogin(Request $r) {
-        $uid = $r->uid;
-        $password = $r->password;
-        // Demo: allow any login with uid mapping to role
-        $roleMap = ['admin' => 'admin', 'officer' => 'officer', 'professor' => 'professor', 'student' => 'student'];
+        $uid  = $r->uid;
         $user = User::where('student_id', $uid)->orWhere('email', $uid)->first();
         if ($user) {
+            // Auto-upgrade role if faculty domain detected
+            if ($user->email && str_ends_with(strtolower($user->email), '@fju.edu.tw')) {
+                $detected = $this->inferRoleFromEmail($user->email, $user->role);
+                if ($detected !== $user->role) $user->update(['role' => $detected]);
+            }
             return response()->json(['success' => true, 'role' => $user->role ?? 'student', 'message' => '登入成功']);
         }
-        // Fallback demo login
-        return response()->json(['success' => true, 'role' => 'student', 'message' => '登入成功']);
+        // Fallback demo — derive role from uid prefix
+        $demoRole = 'student';
+        if (str_starts_with($uid, 'admin')) $demoRole = 'admin';
+        elseif (str_starts_with($uid, 'officer') || str_starts_with($uid, 'club')) $demoRole = 'officer';
+        elseif (str_starts_with($uid, 'prof'))  $demoRole = 'professor';
+        elseif (str_starts_with($uid, 'staff')) $demoRole = 'staff';
+        return response()->json(['success' => true, 'role' => $demoRole, 'message' => '登入成功']);
     }
 
     public function authRegister(Request $r) {
@@ -395,14 +428,23 @@ class CrudController extends Controller
         if ($existing) {
             return response()->json(['success' => false, 'message' => '此學號或信箱已被註冊']);
         }
+        // Auto-detect role from email; override user selection for faculty domain
+        $role = $this->inferRoleFromEmail($r->email ?? '', $r->role ?? 'student');
         $user = User::create([
-            'name' => $r->name,
+            'name'       => $r->name,
             'student_id' => $r->uid,
-            'email' => $r->email,
-            'role' => $r->role ?? 'student',
-            'password' => bcrypt($r->password),
+            'email'      => $r->email,
+            'role'       => $role,
+            'password'   => bcrypt($r->password),
         ]);
-        return response()->json(['success' => true, 'message' => '註冊成功，請至信箱確認驗證信', 'user_id' => $user->id]);
+        $msg = '註冊成功，請至信箱確認驗證信';
+        if ($role !== ($r->role ?? 'student')) {
+            $roleNames = ['professor'=>'指導教授','staff'=>'處室職員'];
+            $msg .= '。系統依您的信箱自動判定身份為「'.($roleNames[$role] ?? $role).'」。';
+        } elseif ($role === 'officer') {
+            $msg .= '。社團幹部身份將由課指組確認後正式啟用。';
+        }
+        return response()->json(['success' => true, 'message' => $msg, 'user_id' => $user->id, 'assigned_role' => $role]);
     }
 
     public function authForgotPassword(Request $r) {

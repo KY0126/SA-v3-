@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('email', 191)->unique();
             $table->string('phone', 30)->nullable();
-            $table->enum('role', ['admin', 'officer', 'professor', 'student', 'it'])->default('student');
+            $table->enum('role', ['admin', 'officer', 'professor', 'staff', 'student', 'it'])->default('student');
             $table->string('club_position', 100)->nullable();
             $table->integer('credit_score')->default(100);
             $table->string('google_oauth_id')->nullable();
