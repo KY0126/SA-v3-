@@ -25,3 +25,6 @@ yarn-error.log
 pids/
 logs/
 *.log
+
+composer-setup.php
+composer.phar
