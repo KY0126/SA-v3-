@@ -1,5 +1,39 @@
 # FJU Smart Hub v3.0
 
+## 快速安裝與啟動
+
+> 執行前請確認已安裝 **PHP 8.2** 與 **Composer**
+
+**步驟一：下載專案**
+```bash
+git clone https://github.com/KY0126/SA-v3-.git
+cd SA-v3-
+```
+
+**步驟二：安裝套件**
+```bash
+composer install
+```
+
+**步驟三：設定環境**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+**步驟四：啟動伺服器**
+```bash
+php artisan serve
+```
+
+**步驟五：開啟網頁**
+
+瀏覽器輸入 → `http://localhost:8000`
+
+> 資料庫已內建測試資料，**不需要執行** `php artisan migrate`
+
+---
+
 ## 專案概述
 - **名稱**: FJU Smart Hub — 輔仁大學智慧校園管理平台
 - **技術堆疊**: PHP 8.2 + Laravel 12 + MySQL 8.0 (MariaDB) + Tailwind CSS + Chart.js + Leaflet.js + GSAP + Dify AI
