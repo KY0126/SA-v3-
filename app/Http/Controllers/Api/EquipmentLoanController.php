@@ -40,6 +40,7 @@ class EquipmentLoanController extends Controller
             'items.*.equipment_id'      => 'required|integer|exists:equipment,id',
             'items.*.quantity'          => 'integer|min:1',
             'expected_return_date'      => 'required|date|after:today',
+            'unit_code'                 => 'required|string|max:20',
         ]);
 
         $borrowerId = $r->borrower_id ?? 1;
@@ -80,6 +81,7 @@ class EquipmentLoanController extends Controller
             $loan = EquipmentLoan::create([
                 'serial_no'               => $serial,
                 'borrower_id'             => $borrowerId,
+                'unit_code'               => $r->unit_code,
                 'activity_application_id' => $r->activity_application_id,
                 'borrow_date'             => now()->toDateString(),
                 'expected_return_date'    => $r->expected_return_date,

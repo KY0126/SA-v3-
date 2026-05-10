@@ -35,6 +35,12 @@ class ActivityApplicationController extends Controller
             'start_time'           => 'required',
             'end_time'             => 'required',
             'expected_participants'=> 'integer|min:1',
+            'staff_count'          => 'integer|min:0',
+            'unit_code'            => 'required|string|max:20',
+            'responsible_person'   => 'nullable|string|max:100',
+            'unit_name'            => 'nullable|string|max:100',
+            'department'           => 'nullable|string|max:100',
+            'contact_phone'        => 'nullable|string|max:50',
         ]);
 
         $serial = $this->nextSerial();
@@ -43,6 +49,11 @@ class ActivityApplicationController extends Controller
             'serial_no'             => $serial,
             'applicant_id'          => $r->applicant_id ?? 1,
             'club_id'               => $r->club_id,
+            'unit_code'             => $r->unit_code,
+            'responsible_person'    => $r->responsible_person,
+            'unit_name'             => $r->unit_name,
+            'department'            => $r->department,
+            'contact_phone'         => $r->contact_phone,
             'activity_name'         => $r->activity_name,
             'purpose'               => $r->purpose,
             'event_date'            => $r->event_date,
@@ -50,6 +61,7 @@ class ActivityApplicationController extends Controller
             'end_time'              => $r->end_time,
             'venue_description'     => $r->venue_description,
             'expected_participants' => $r->expected_participants ?? 0,
+            'staff_count'           => $r->staff_count ?? 0,
             'budget_requested'      => $r->budget_requested ?? 0,
             'status'                => 'submitted',
         ]);
@@ -130,6 +142,18 @@ class ActivityApplicationController extends Controller
         $pdf = Pdf::loadView('pdf.activity_application', ['app' => $app])
                   ->setPaper('a4', 'portrait');
         return $pdf->download('活動申請單-' . $app->serial_no . '.pdf');
+    }
+
+    public function word($id)
+    {
+        $app = ActivityApplication::with(['applicant', 'reviewer'])->findOrFail($id);
+        $html = view('word.activity_application', ['app' => $app])->render();
+
+        $fileName = '活動申請單-' . $app->serial_no . '.doc';
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+        ]);
     }
 
     private function nextSerial(): string

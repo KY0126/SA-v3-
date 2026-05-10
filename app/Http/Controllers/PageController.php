@@ -13,7 +13,7 @@ class PageController extends Controller
         $role = $r->query('role', 'student');
         // rag-search merged into ai-overview; activity-wall removed
         if ($name === 'rag-search') return redirect("/module/ai-overview?role={$role}");
-        $validModules = ['activity-application','venue-booking','equipment','calendar','club-info','ai-overview','ai-guide','rag-rental','repair','appeal','reports','e-portfolio','certificate','time-capsule','2fa','conflict-coordination','user-management','faq'];
+        $validModules = ['activity-application','venue-booking','equipment','calendar','club-info','ai-overview','ai-guide','rag-rental','repair','appeal','reports','e-portfolio','certificate','time-capsule','2fa','conflict-coordination','user-management','faq','form-download'];
         if (!in_array($name, $validModules)) return abort(404, 'Module not found');
         return view('pages.modules.' . str_replace('-', '_', $name), ['role' => $role, 'moduleName' => $name]);
     }

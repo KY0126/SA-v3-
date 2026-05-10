@@ -38,8 +38,37 @@
     </div>
     <div class="space-y-3">
       <div>
+        <label class="text-xs text-gray-400">單位代碼 <span class="text-red-400">*</span></label>
+        <div class="relative">
+          <input id="uc-input-aa" type="text" placeholder="輸入代碼或名稱篩選..." autocomplete="off"
+            class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+          <input id="uc-val-aa" type="hidden">
+          <div id="uc-drop-aa" class="hidden absolute z-50 w-full bg-white border border-gray-200 rounded-fju shadow-lg max-h-48 overflow-y-auto"></div>
+        </div>
+      </div>
+      <div>
         <label class="text-xs text-gray-400">活動名稱 <span class="text-red-400">*</span></label>
         <input id="aa-name" type="text" placeholder="例：2026 春季社團博覽會" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-400">活動負責人</label>
+          <input id="aa-responsible" type="text" placeholder="例：王小明" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+        </div>
+        <div>
+          <label class="text-xs text-gray-400">系級</label>
+          <input id="aa-department" type="text" placeholder="例：資工三甲" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-400">聯絡電話</label>
+          <input id="aa-phone" type="text" placeholder="例：0912-345-678" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+        </div>
+        <div>
+          <label class="text-xs text-gray-400">工作人員人數</label>
+          <input id="aa-staff" type="number" value="0" min="0" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+        </div>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
@@ -65,9 +94,15 @@
         <label class="text-xs text-gray-400">預計場地（說明）</label>
         <input id="aa-venue-desc" type="text" placeholder="例：SF134 研討室" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
       </div>
-      <div>
-        <label class="text-xs text-gray-400">申請預算（元）</label>
-        <input id="aa-budget" type="number" value="0" min="0" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-400">申請預算（元）</label>
+          <input id="aa-budget" type="number" value="0" min="0" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+        </div>
+        <div>
+          <label class="text-xs text-gray-400">單位名稱</label>
+          <input id="aa-unit-name" type="text" placeholder="例：XX社" class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+        </div>
       </div>
       <div>
         <label class="text-xs text-gray-400">活動目的</label>
@@ -93,7 +128,7 @@
     <div id="aa-pdf-btn" class="mt-3 hidden">
       <a id="aa-pdf-link" href="#" target="_blank"
          class="flex items-center justify-center gap-2 w-full py-2 rounded-fju border border-fju-blue text-fju-blue text-sm hover:bg-fju-blue hover:text-white transition-all">
-        <i class="fas fa-file-pdf"></i>下載申請單 PDF
+        <i class="fas fa-file-word"></i>下載申請單 Word 黃單
       </a>
     </div>
     <div id="aa-review-actions" class="flex gap-2 mt-4 hidden">
@@ -127,6 +162,7 @@
 </div>
 
 <script>
+const IS_ADMIN = {{ in_array($role ?? 'student', ['admin']) ? 'true' : 'false' }};
 let allApps = [], currentAaFilter = 'all', currentDetailId = null;
 
 // Global status badge helper (used in list and detail)
@@ -163,8 +199,9 @@ function renderApps() {
       <td class="p-4 text-xs">${a.event_date} ${a.start_time}–${a.end_time}</td>
       <td class="p-4 text-xs">${a.expected_participants} 人</td>
       <td class="p-4">${statusBadge(a.status)}</td>
-      <td class="p-4 flex gap-1">
+      <td class="p-4 flex flex-wrap gap-1">
         <button onclick="openDetail(${a.id})" class="btn-blue px-3 py-1 text-xs">詳情</button>
+        <button onclick="downloadAaWord(${a.id})" class="px-3 py-1 rounded-fju border border-gray-200 text-xs text-gray-600 hover:bg-gray-100">下載 Word 黃單</button>
         ${a.status === 'approved' ? `<button onclick="copySerial('${a.serial_no}')" class="btn-yellow px-3 py-1 text-xs" title="複製序號供場地預約/器材借用使用"><i class="fas fa-copy mr-1"></i>複製序號</button>` : ''}
       </td>
     </tr>`).join('') + '</tbody></table>';
@@ -181,16 +218,24 @@ function filterApps(f) {
 }
 
 function openNewForm() {
+  if (IS_ADMIN) return;
   currentDetailId = null;
   document.getElementById('aa-modal-title').innerHTML = '<i class="fas fa-file-alt mr-2 text-fju-yellow"></i>新增活動申請';
   document.getElementById('aa-name').value = '';
+  document.getElementById('aa-responsible').value = '';
+  document.getElementById('aa-department').value = '';
+  document.getElementById('aa-phone').value = '';
+  document.getElementById('aa-staff').value = '0';
   document.getElementById('aa-purpose').value = '';
   document.getElementById('aa-venue-desc').value = '';
   document.getElementById('aa-budget').value = '0';
+  document.getElementById('aa-unit-name').value = '';
   document.getElementById('aa-ppl').value = '30';
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
   document.getElementById('aa-date').value = tomorrow.toISOString().split('T')[0];
   document.getElementById('aa-error').classList.add('hidden');
+  resetUnitCombobox('aa');
+  initUnitCombobox('aa');
   document.getElementById('aa-modal').classList.remove('hidden');
 }
 
@@ -201,18 +246,29 @@ function submitAaForm() {
   const date = document.getElementById('aa-date').value;
   const start = document.getElementById('aa-start').value;
   const end = document.getElementById('aa-end').value;
+  const unitCode = getUnitCode('aa');
+  if (!unitCode) {
+    showAaError('請選擇單位代碼');
+    return;
+  }
   if (!name || !date || !start || !end) {
     showAaError('請填寫必填欄位（活動名稱、日期、時間）');
     return;
   }
   const payload = {
     applicant_id:          1,
+    unit_code:             unitCode,
+    unit_name:             document.getElementById('aa-unit-name').value,
+    responsible_person:    document.getElementById('aa-responsible').value,
+    department:            document.getElementById('aa-department').value,
+    contact_phone:         document.getElementById('aa-phone').value,
     activity_name:         name,
     event_date:            date,
     start_time:            start,
     end_time:              end,
     venue_description:     document.getElementById('aa-venue-desc').value,
     expected_participants: parseInt(document.getElementById('aa-ppl').value) || 0,
+    staff_count:           parseInt(document.getElementById('aa-staff').value) || 0,
     budget_requested:      parseFloat(document.getElementById('aa-budget').value) || 0,
     purpose:               document.getElementById('aa-purpose').value,
   };
@@ -262,7 +318,7 @@ function openDetail(id) {
   // PDF button — opens the static blank form for the user to fill in
   const pdfBtn = document.getElementById('aa-pdf-btn');
   const pdfLink = document.getElementById('aa-pdf-link');
-  pdfLink.href = '/static/forms/活動申請表_黃單.pdf';
+  pdfLink.href = '/activity-applications/' + id + '/word';
   pdfLink.setAttribute('target', '_blank');
   pdfLink.removeAttribute('download');
   pdfBtn.classList.remove('hidden');
@@ -275,6 +331,10 @@ function openDetail(id) {
 }
 
 function closeDetailModal() { document.getElementById('aa-detail-modal').classList.add('hidden'); }
+
+function downloadAaWord(id) {
+  window.open('/activity-applications/' + id + '/word', '_blank');
+}
 
 function doApprove() {
   if (!confirm('確認核准此活動申請？')) return;

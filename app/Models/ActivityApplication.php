@@ -5,13 +5,18 @@ use Illuminate\Database\Eloquent\Model;
 class ActivityApplication extends Model
 {
     protected $fillable = [
-        'serial_no', 'applicant_id', 'club_id', 'activity_name', 'purpose',
+        'serial_no', 'applicant_id', 'club_id', 'unit_code', 'responsible_person',
+        'unit_name', 'department', 'contact_phone', 'activity_name', 'purpose',
         'event_date', 'start_time', 'end_time', 'venue_description',
-        'expected_participants', 'budget_requested', 'status',
+        'expected_participants', 'staff_count', 'budget_requested', 'status',
         'reject_reason', 'reviewed_by', 'reviewed_at',
     ];
 
-    protected $casts = ['reviewed_at' => 'datetime'];
+    protected $casts = [
+        'reviewed_at' => 'datetime',
+        'staff_count' => 'integer',
+        'expected_participants' => 'integer',
+    ];
 
     public function applicant() { return $this->belongsTo(User::class, 'applicant_id'); }
     public function reviewer()  { return $this->belongsTo(User::class, 'reviewed_by'); }

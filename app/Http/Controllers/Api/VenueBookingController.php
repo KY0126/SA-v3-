@@ -39,6 +39,7 @@ class VenueBookingController extends Controller
             'booking_date' => 'required|date|after_or_equal:today',
             'start_time'   => 'required',
             'end_time'     => 'required|after:start_time',
+            'unit_code'    => 'required|string|max:20',
         ]);
 
         $applicantId = $r->applicant_id ?? 1;
@@ -73,6 +74,7 @@ class VenueBookingController extends Controller
                 'serial_no'               => $serial,
                 'venue_id'                => $r->venue_id,
                 'applicant_id'            => $applicantId,
+                'unit_code'               => $r->unit_code,
                 'activity_application_id' => $r->activity_application_id,
                 'booking_date'            => $r->booking_date,
                 'start_time'              => $r->start_time,

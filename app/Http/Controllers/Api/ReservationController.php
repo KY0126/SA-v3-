@@ -60,7 +60,11 @@ class ReservationController extends Controller
             ]);
         }
 
-        $res = Reservation::create($r->only(['user_id','venue_id','activity_id','user_name','club_name','venue_name','reservation_date','start_time','end_time','priority_level','purpose'])
+        if (!$r->unit_code) {
+            return response()->json(['error' => '請選擇單位代碼', 'success' => false], 422);
+        }
+
+        $res = Reservation::create($r->only(['user_id','venue_id','activity_id','user_name','club_name','venue_name','reservation_date','start_time','end_time','priority_level','purpose','unit_code'])
             + ['status' => $priority === 1 ? 'confirmed' : 'pending', 'stage' => $priority === 1 ? 'approved' : 'algorithm']);
         return response()->json([
             'success' => true, 'id' => $res->id,

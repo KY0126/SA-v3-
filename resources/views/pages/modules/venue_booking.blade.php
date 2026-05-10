@@ -17,8 +17,15 @@
   {{-- Stats --}}
   <div class="grid md:grid-cols-4 gap-4" id="venue-stats"><div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin"></i></div></div>
 
+  {{-- View Mode Tabs --}}
+  <div class="flex gap-2">
+    <button onclick="setVbView('list')" id="vb-tab-list" class="vb-tab px-4 py-1.5 rounded-fju text-xs bg-fju-blue text-white font-medium">原始清單</button>
+    <button onclick="setVbView('rank')" id="vb-tab-rank" class="vb-tab px-4 py-1.5 rounded-fju text-xs bg-gray-100 text-gray-500 font-medium"><i class="fas fa-trophy mr-1 text-fju-yellow"></i>熱門借用</button>
+    <button onclick="setVbView('history')" id="vb-tab-history" class="vb-tab px-4 py-1.5 rounded-fju text-xs bg-gray-100 text-gray-500 font-medium"><i class="fas fa-history mr-1"></i>過往紀錄</button>
+  </div>
+
   {{-- Sort/Filter --}}
-  <div class="flex items-center justify-between flex-wrap gap-2">
+  <div id="vb-filter-bar" class="flex items-center justify-between flex-wrap gap-2">
     <div class="flex gap-2">
       <select id="vb-sort" onchange="renderVenues()" class="px-3 py-1.5 rounded-fju border border-gray-200 text-xs">
         <option value="name-asc">名稱 A→Z</option><option value="name-desc">名稱 Z→A</option>
@@ -45,9 +52,21 @@
   </div>
 
   {{-- Venue Table --}}
-  <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
+  <div id="vb-main-list" class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-list mr-2 text-fju-yellow"></i>場地清單</h3></div>
     <div id="venue-table-body"><div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div></div>
+  </div>
+
+  {{-- Ranking View --}}
+  <div id="vb-rank-view" class="hidden bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-trophy mr-2 text-fju-yellow"></i>熱門場地借用排行榜（近 3 個月）</h3></div>
+    <div id="vb-rank-body" class="p-4 space-y-2"></div>
+  </div>
+
+  {{-- History View --}}
+  <div id="vb-history-view" class="hidden bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-history mr-2 text-fju-yellow"></i>過往借用紀錄</h3></div>
+    <div id="vb-history-body"></div>
   </div>
 
   {{-- Conflict Coordination Records --}}
@@ -81,6 +100,15 @@
         <div class="space-y-3">
           <div class="p-3 rounded-fju bg-fju-blue/5 border border-fju-blue/10 text-xs text-gray-600">
             <i class="fas fa-bolt mr-1 text-fju-yellow"></i>先搶先贏：系統以收到請求的時間為準，若時段已被預約將直接拒絕，請另選時段。
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 block mb-1">單位代碼 <span class="text-red-400">*</span></label>
+            <div class="relative">
+              <input id="uc-input-vb" type="text" placeholder="輸入代碼或名稱篩選..." autocomplete="off"
+                class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm">
+              <input id="uc-val-vb" type="hidden">
+              <div id="uc-drop-vb" class="hidden absolute z-50 w-full bg-white border border-gray-200 rounded-fju shadow-lg max-h-48 overflow-y-auto"></div>
+            </div>
           </div>
           {{-- Single preference --}}
           <div>
@@ -223,7 +251,73 @@
 </div>
 
 <script>
+const IS_ADMIN = {{ in_array($role ?? 'student', ['admin']) ? 'true' : 'false' }};
 let allVenues=[],allConflicts=[],allReservations=[],currentConflictId=null,currentFilter='all',timerInterval=null,timerSeconds=0;
+let currentVbView = 'list';
+
+function setVbView(v) {
+  currentVbView = v;
+  document.querySelectorAll('.vb-tab').forEach(b => {
+    b.classList.remove('bg-fju-blue','text-white'); b.classList.add('bg-gray-100','text-gray-500');
+  });
+  const tab = document.getElementById('vb-tab-'+v);
+  tab?.classList.add('bg-fju-blue','text-white'); tab?.classList.remove('bg-gray-100','text-gray-500');
+  document.getElementById('vb-filter-bar')?.classList.toggle('hidden', v !== 'list');
+  document.getElementById('vb-main-list')?.classList.toggle('hidden', v !== 'list');
+  document.getElementById('vb-rank-view')?.classList.toggle('hidden', v !== 'rank');
+  document.getElementById('vb-history-view')?.classList.toggle('hidden', v !== 'history');
+  if (v === 'rank') renderVbRanking();
+  if (v === 'history') renderVbHistory();
+}
+
+function renderVbRanking() {
+  const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth()-3);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const counts = {}, names = {};
+  allReservations.filter(r => (r.reservation_date||'') >= cutoffStr).forEach(r => {
+    const key = r.venue_id || r.venue_name || '?';
+    counts[key] = (counts[key]||0) + 1;
+    names[key] = r.venue_name || '場地 #'+r.venue_id;
+  });
+  const ranked = Object.keys(counts).map(k=>({id:k,name:names[k],count:counts[k]})).sort((a,b)=>b.count-a.count).slice(0,10);
+  const el = document.getElementById('vb-rank-body');
+  if (!ranked.length) { el.innerHTML='<div class="p-8 text-center text-gray-400">近 3 個月內暫無借用紀錄</div>'; return; }
+  const medals=['🥇','🥈','🥉'];
+  const medalBg=['bg-yellow-50 border-yellow-200','bg-gray-50 border-gray-300','bg-orange-50 border-orange-200'];
+  el.innerHTML = ranked.map((item,i)=>{
+    const cls = i<3 ? medalBg[i] : 'bg-white border-gray-100';
+    const rank = i<3 ? `<span class="text-2xl">${medals[i]}</span>` : `<span class="text-xl font-black text-gray-300">#${i+1}</span>`;
+    return `<div class="flex items-center justify-between p-4 border rounded-fju ${cls}">
+      <div class="flex items-center gap-4">
+        <div class="w-12 text-center shrink-0">${rank}</div>
+        <div><div class="font-bold text-fju-blue">${item.name}</div><div class="text-xs text-gray-400">場地編號 ${item.id}</div></div>
+      </div>
+      <div class="text-right shrink-0">
+        <div class="text-2xl font-black text-fju-blue">${item.count}</div>
+        <div class="text-xs text-gray-400">次預約</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderVbHistory() {
+  const sorted = [...allReservations].sort((a,b)=>{
+    const da=a.reservation_date||'', db=b.reservation_date||'';
+    return db.localeCompare(da)||(b.id-a.id);
+  });
+  const el = document.getElementById('vb-history-body');
+  if (!sorted.length) { el.innerHTML='<div class="p-8 text-center text-gray-400">暫無歷史紀錄</div>'; return; }
+  const statusLabel = s=>({pending:'待審核',approved:'已核准',rejected:'已拒絕',cancelled:'已取消',active:'進行中',completed:'已完成'}[s]||s||'—');
+  const statusCls = s=>s==='approved'?'bg-green-100 text-green-700':s==='pending'?'bg-yellow-100 text-yellow-700':s==='rejected'?'bg-red-100 text-red-600':'bg-gray-100 text-gray-500';
+  el.innerHTML = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">借用人</th><th class="p-4">場地</th><th class="p-4">借用日期</th><th class="p-4">時段</th><th class="p-4">狀態</th></tr></thead><tbody>'+
+    sorted.map(r=>`<tr class="border-t border-gray-50 hover:bg-gray-50">
+      <td class="p-4 font-medium text-fju-blue">${r.user_name||r.club_name||'—'}</td>
+      <td class="p-4 text-xs">${r.venue_name||'—'}</td>
+      <td class="p-4 text-xs text-gray-500">${r.reservation_date||'—'}</td>
+      <td class="p-4 text-xs text-gray-400">${r.start_time||'—'}–${r.end_time||'—'}</td>
+      <td class="p-4"><span class="px-2 py-1 rounded-fju text-xs ${statusCls(r.status)}">${statusLabel(r.status)}</span></td>
+    </tr>`).join('')+'</tbody></table>';
+}
 
 (function(){
   Promise.all([
@@ -299,7 +393,11 @@ function renderVenues(){
   else if(sort==='name-desc') data.sort((a,b)=>b.name.localeCompare(a.name));
   else if(sort==='cap-desc') data.sort((a,b)=>b.capacity-a.capacity);
   else if(sort==='cap-asc') data.sort((a,b)=>a.capacity-b.capacity);
-  document.getElementById('venue-table-body').innerHTML='<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">場地</th><th class="p-4">位置</th><th class="p-4">容量</th><th class="p-4">設備</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>'+data.map(v=>'<tr class="border-t border-gray-50 hover:bg-gray-50"><td class="p-4 font-medium text-fju-blue">'+v.name+'</td><td class="p-4 text-gray-500">'+(v.location||'')+'</td><td class="p-4">'+v.capacity+'人</td><td class="p-4 text-xs text-gray-400">'+(v.equipment_list||'-')+'</td><td class="p-4"><span class="px-2 py-1 rounded-fju '+(v.status==='available'?'bg-fju-green/10 text-fju-green':'bg-fju-yellow/20 text-fju-yellow')+' text-xs">'+(v.status==='available'?'可預約':'維護中')+'</span></td><td class="p-4">'+(v.status==='available'?'<button onclick="quickBook(\''+v.name+'\')" class="btn-yellow px-3 py-1 text-xs">預約</button>':'<span class="text-xs text-gray-400">-</span>')+'</td></tr>').join('')+'</tbody></table>';
+  const actionCol = IS_ADMIN ? '' : '<th class="p-4">操作</th>';
+  document.getElementById('venue-table-body').innerHTML='<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">場地</th><th class="p-4">位置</th><th class="p-4">容量</th><th class="p-4">設備</th><th class="p-4">狀態</th>'+actionCol+'</tr></thead><tbody>'+data.map(v=>{
+    const actionCell = IS_ADMIN ? '' : '<td class="p-4">'+(v.status==='available'?'<button onclick="quickBook(\''+v.name+'\')" class="btn-yellow px-3 py-1 text-xs">預約</button>':'<span class="text-xs text-gray-400">-</span>')+'</td>';
+    return '<tr class="border-t border-gray-50 hover:bg-gray-50"><td class="p-4 font-medium text-fju-blue">'+v.name+'</td><td class="p-4 text-gray-500">'+(v.location||'')+'</td><td class="p-4">'+v.capacity+'人</td><td class="p-4 text-xs text-gray-400">'+(v.equipment_list||'-')+'</td><td class="p-4"><span class="px-2 py-1 rounded-fju '+(v.status==='available'?'bg-fju-green/10 text-fju-green':'bg-fju-yellow/20 text-fju-yellow')+' text-xs">'+(v.status==='available'?'可預約':'維護中')+'</span></td>'+actionCell+'</tr>';
+  }).join('')+'</tbody></table>';
 }
 
 function renderActiveConflicts(conflicts){
@@ -462,9 +560,14 @@ function notifyAdmin(){
 }
 
 function closeDetailModal(){document.getElementById('conflict-detail-modal').classList.add('hidden');clearInterval(timerInterval)}
-function openBookingModal(){document.getElementById('booking-modal').classList.remove('hidden')}
+function openBookingModal(){
+  if (IS_ADMIN) return;
+  resetUnitCombobox('vb');
+  initUnitCombobox('vb');
+  document.getElementById('booking-modal').classList.remove('hidden');
+}
 function closeBookingModal(){document.getElementById('booking-modal').classList.add('hidden');document.getElementById('booking-result').classList.add('hidden')}
-function quickBook(n){openBookingModal()}
+function quickBook(n){ if (!IS_ADMIN) openBookingModal(); }
 
 // Task 3: Submit single preference — first-come-first-served
 function submitBooking(e){
@@ -473,11 +576,20 @@ function submitBooking(e){
   if(!document.getElementById('conflict-warn-1').classList.contains('hidden')){
     return;
   }
+  const unitCode = getUnitCode('vb');
+  if (!unitCode) {
+    const b=document.getElementById('booking-result');
+    b.classList.remove('hidden');
+    b.className='mt-3 p-3 rounded-fju text-sm bg-red-50 text-red-600 border border-red-200';
+    b.innerHTML='<i class="fas fa-exclamation-circle mr-1"></i>請選擇單位代碼';
+    return;
+  }
   const channels=[];
   if(document.getElementById('bk-n-outlook').checked) channels.push('outlook');
   if(document.getElementById('bk-n-sms').checked) channels.push('sms');
   if(document.getElementById('bk-n-line').checked) channels.push('line');
   const d={
+    unit_code: unitCode,
     venue_id:               document.getElementById('bk-venue-1').value,
     venue_name:             document.getElementById('bk-venue-1').selectedOptions[0]?.text||'',
     reservation_date:       document.getElementById('bk-date-1').value,

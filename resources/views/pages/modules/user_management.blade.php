@@ -30,7 +30,7 @@
           <div><label class="text-xs text-gray-400 block mb-1">學號/員工編號</label><input type="text" id="u-sid" class="w-full px-3 py-2 rounded-fju border border-gray-200 text-sm" required></div>
           <div><label class="text-xs text-gray-400 block mb-1">Email (Outlook)</label><input type="email" id="u-email" class="w-full px-3 py-2 rounded-fju border border-gray-200 text-sm" placeholder="xxx@cloud.fju.edu.tw" required></div>
           <div><label class="text-xs text-gray-400 block mb-1">手機</label><input type="tel" id="u-phone" class="w-full px-3 py-2 rounded-fju border border-gray-200 text-sm" placeholder="09xx-xxx-xxx"></div>
-          <div><label class="text-xs text-gray-400 block mb-1">角色</label><select id="u-role" class="w-full px-3 py-2 rounded-fju border border-gray-200 text-sm"><option value="student">一般學生</option><option value="officer">社團幹部</option><option value="professor">指導教授</option><option value="staff">處室職員</option><option value="admin">課指組行政</option><option value="it">資訊中心</option></select></div>
+          <div><label class="text-xs text-gray-400 block mb-1">角色</label><select id="u-role" class="w-full px-3 py-2 rounded-fju border border-gray-200 text-sm"><option value="student">一般學生</option><option value="officer">社團幹部</option><option value="professor">指導教授</option><option value="staff">處室職員</option><option value="admin">課指組行政</option></select></div>
           <div><label class="text-xs text-gray-400 block mb-1">社團職位</label><input type="text" id="u-position" class="w-full px-3 py-2 rounded-fju border border-gray-200 text-sm" placeholder="例：社長"></div>
         </div>
         <button type="submit" class="w-full btn-yellow py-2.5 mt-4"><i class="fas fa-save mr-1"></i>建立帳號</button>
@@ -48,16 +48,16 @@ function loadUsers(){
   });
 }
 function renderStats(){
-  const roles={admin:0,officer:0,professor:0,staff:0,student:0,it:0};
+  const roles={admin:0,officer:0,professor:0,staff:0,student:0};
   allUsers.forEach(u=>{if(roles[u.role]!==undefined)roles[u.role]++});
-  const labels={admin:'課指組',officer:'社團幹部',professor:'指導教授',staff:'處室職員',student:'學生',it:'資訊中心'};
-  const colors={admin:'fju-blue',officer:'fju-yellow',professor:'fju-green',staff:'orange-500',student:'fju-blue',it:'purple-500'};
+  const labels={admin:'課指組',officer:'社團幹部',professor:'指導教授',staff:'處室職員',student:'學生'};
+  const colors={admin:'fju-blue',officer:'fju-yellow',professor:'fju-green',staff:'orange-500',student:'fju-blue'};
   document.getElementById('user-stats').innerHTML=Object.entries(labels).map(([k,v])=>`<div class="bg-white rounded-fju-lg p-4 shadow-sm border border-gray-100 text-center card-hover"><div class="text-2xl font-black text-${colors[k]}">${roles[k]}</div><div class="text-xs text-gray-400">${v}</div></div>`).join('');
 }
 function renderUsers(users){
-  const rl={admin:'課指組',officer:'社團幹部',professor:'指導教授',staff:'處室職員',student:'學生',it:'資訊中心'};
-  const rc={admin:'bg-fju-blue/10 text-fju-blue',officer:'bg-fju-yellow/20 text-fju-yellow',professor:'bg-fju-green/10 text-fju-green',staff:'bg-orange-100 text-orange-600',student:'bg-gray-100 text-gray-600',it:'bg-purple-100 text-purple-600'};
-  document.getElementById('user-table').innerHTML=`<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">ID</th><th class="p-4">姓名</th><th class="p-4">學號</th><th class="p-4">Email</th><th class="p-4">角色</th><th class="p-4">信用</th><th class="p-4">2FA</th><th class="p-4">操作</th></tr></thead><tbody>`+users.map(u=>`<tr class="border-t border-gray-50 hover:bg-gray-50"><td class="p-4 text-xs text-gray-400">#${u.id}</td><td class="p-4 font-medium text-fju-blue">${u.name}</td><td class="p-4 text-xs">${u.student_id||'-'}</td><td class="p-4 text-xs text-gray-500">${u.email}</td><td class="p-4"><span class="px-2 py-1 rounded-fju text-xs ${rc[u.role]||'bg-gray-100 text-gray-500'}">${rl[u.role]||u.role}</span></td><td class="p-4"><span class="${(u.credit_score||85)<60?'text-fju-red font-bold':'text-fju-green'}">${u.credit_score||85}</span></td><td class="p-4">${u.two_factor_enabled?'<i class="fas fa-check-circle text-fju-green"></i>':'<i class="fas fa-times-circle text-gray-300"></i>'}</td><td class="p-4 flex gap-1"><button onclick="deleteUser(${u.id})" class="text-xs px-2 py-1 rounded bg-fju-red/10 text-fju-red hover:bg-fju-red/20"><i class="fas fa-trash"></i></button></td></tr>`).join('')+'</tbody></table>';
+  const rl={admin:'課指組',officer:'社團幹部',professor:'指導教授',staff:'處室職員',student:'學生'};
+  const rc={admin:'bg-fju-blue/10 text-fju-blue',officer:'bg-fju-yellow/20 text-fju-yellow',professor:'bg-fju-green/10 text-fju-green',staff:'bg-orange-100 text-orange-600',student:'bg-gray-100 text-gray-600'};
+  document.getElementById('user-table').innerHTML=`<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">ID</th><th class="p-4">姓名</th><th class="p-4">學號</th><th class="p-4">Email</th><th class="p-4">角色</th><th class="p-4">信用</th><th class="p-4">操作</th></tr></thead><tbody>`+users.map(u=>`<tr class="border-t border-gray-50 hover:bg-gray-50"><td class="p-4 text-xs text-gray-400">#${u.id}</td><td class="p-4 font-medium text-fju-blue">${u.name}</td><td class="p-4 text-xs">${u.student_id||'-'}</td><td class="p-4 text-xs text-gray-500">${u.email}</td><td class="p-4"><div class="flex items-center gap-2"><span class="px-2 py-1 rounded-fju text-xs ${rc[u.role]||'bg-gray-100 text-gray-500'}">${rl[u.role]||u.role}</span>${u.role==='officer'&&u.club_position?`<span class="text-xs text-gray-500">${u.club_position}</span>`:''}</div></td><td class="p-4"><span class="${(u.credit_score||85)<60?'text-fju-red font-bold':'text-fju-green'}">${u.credit_score||85}</span></td><td class="p-4 flex gap-1"><button onclick="deleteUser(${u.id})" class="text-xs px-2 py-1 rounded bg-fju-red/10 text-fju-red hover:bg-fju-red/20"><i class="fas fa-trash"></i></button></td></tr>`).join('')+'</tbody></table>';
 }
 function searchUsers(){
   const q=document.getElementById('user-search').value.toLowerCase();
@@ -65,7 +65,7 @@ function searchUsers(){
 }
 function addUser(e){
   e.preventDefault();
-  fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:document.getElementById('u-name').value,student_id:document.getElementById('u-sid').value,email:document.getElementById('u-email').value,phone:document.getElementById('u-phone').value,role:document.getElementById('u-role').value,position:document.getElementById('u-position').value,password:'password123'})}).then(r=>r.json()).then(()=>{document.getElementById('add-user-modal').classList.add('hidden');loadUsers()});
+  fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:document.getElementById('u-name').value,student_id:document.getElementById('u-sid').value,email:document.getElementById('u-email').value,phone:document.getElementById('u-phone').value,role:document.getElementById('u-role').value,club_position:document.getElementById('u-position').value,password:'password123'})}).then(r=>r.json()).then(()=>{document.getElementById('add-user-modal').classList.add('hidden');loadUsers()});
 }
 function deleteUser(id){if(confirm('確定要刪除此使用者？'))fetch('/api/users/'+id,{method:'DELETE',headers:{'Accept':'application/json'}}).then(()=>loadUsers())}
 loadUsers();

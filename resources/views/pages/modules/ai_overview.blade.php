@@ -12,7 +12,6 @@
       <option value="professor" {{ $currentRole === 'professor' ? 'selected' : '' }}>指導教授</option>
       <option value="staff" {{ $currentRole === 'staff' ? 'selected' : '' }}>處室職員</option>
       <option value="student" {{ $currentRole === 'student' ? 'selected' : '' }}>一般學生</option>
-      <option value="it" {{ $currentRole === 'it' ? 'selected' : '' }}>資訊中心</option>
     </select>
   </div>
 
@@ -190,9 +189,9 @@ const aiFeatures={
 };
 
 function switchAIRole(r){
-  const roles=r==='all'?['admin','officer','professor','staff','student','it']:[r];
-  const names={admin:'課指組審核員',officer:'社團幹部',professor:'指導教授',staff:'處室職員',student:'一般學生',it:'資訊中心'};
-  const icons={admin:'fa-user-tie',officer:'fa-user-shield',professor:'fa-chalkboard-teacher',staff:'fa-user-cog',student:'fa-user-graduate',it:'fa-server'};
+  const roles=r==='all'?['admin','officer','professor','staff','student']:[r];
+  const names={admin:'課指組審核員',officer:'社團幹部',professor:'指導教授',staff:'處室職員',student:'一般學生'};
+  const icons={admin:'fa-user-tie',officer:'fa-user-shield',professor:'fa-chalkboard-teacher',staff:'fa-user-cog',student:'fa-user-graduate'};
   let html='';
   roles.forEach(role=>{
     const features=aiFeatures[role]||[];

@@ -58,8 +58,8 @@ class EquipmentController extends Controller
         $b = EquipmentBorrowing::where('equipment_id', $r->equipment_id)->where('status', 'active')->first();
         if ($b) {
             $b->update(['status' => 'returned', 'actual_return_date' => now()->toDateString(), 'return_condition' => $r->condition ?? '良好']);
-            Equipment::where('id', $r->equipment_id)->update(['status' => 'available']);
         }
+        Equipment::where('id', $r->equipment_id)->update(['status' => 'available']);
         return response()->json([
             'success' => true, 'message' => '歸還完成，信用積分 +5',
             'credit_change' => ['points' => 5, 'reason' => '按時歸還器材', 'new_score' => 90]

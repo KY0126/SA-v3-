@@ -98,6 +98,12 @@
           <td class="field-value-bold" colspan="3">{{ $app->activity_name }}</td>
         </tr>
         <tr>
+          <td class="field-label">申請單位</td>
+          <td class="field-value">{{ $app->unit_code ?? '—' }}</td>
+          <td class="field-label">預計人數</td>
+          <td class="field-value">{{ $app->expected_participants }} 人</td>
+        </tr>
+        <tr>
           <td class="field-label">活動日期</td>
           <td class="field-value">{{ $app->event_date }}</td>
           <td class="field-label">活動時間</td>
