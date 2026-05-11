@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -11,18 +12,15 @@ use App\Models\NotificationLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class EquipmentLoanController extends Controller
-{
-    public function index(Request $r)
-    {
+class EquipmentLoanController extends Controller {
+    public function index(Request $r) {
         $q = EquipmentLoan::with(['borrower', 'details.equipment']);
         if ($r->status)      $q->where('status', $r->status);
         if ($r->borrower_id) $q->where('borrower_id', $r->borrower_id);
         return response()->json($q->orderByDesc('created_at')->paginate(20));
     }
 
-    public function show($id)
-    {
+    public function show($id) {
         $loan = EquipmentLoan::with(['borrower', 'activityApplication', 'details.equipment'])->find($id);
         return $loan
             ? response()->json(['data' => $loan])
@@ -33,8 +31,7 @@ class EquipmentLoanController extends Controller
      * Create a multi-item loan application.
      * Body: { borrower_id, activity_application_id?, expected_return_date, purpose, items: [{equipment_id, quantity}] }
      */
-    public function store(Request $r)
-    {
+    public function store(Request $r) {
         $r->validate([
             'items'                     => 'required|array|min:1',
             'items.*.equipment_id'      => 'required|integer|exists:equipment,id',
@@ -121,8 +118,7 @@ class EquipmentLoanController extends Controller
     }
 
     // POST /api/equipment-loans/{id}/pickup  — 取件確認
-    public function pickup(Request $r, $id)
-    {
+    public function pickup(Request $r, $id) {
         $loan = EquipmentLoan::with('details')->findOrFail($id);
         if ($loan->status !== 'pending' && $loan->status !== 'approved') {
             return response()->json(['error' => '狀態不允許取件'], 422);
@@ -135,8 +131,7 @@ class EquipmentLoanController extends Controller
     }
 
     // POST /api/equipment-loans/{id}/return  — 批次歸還
-    public function returnLoan(Request $r, $id)
-    {
+    public function returnLoan(Request $r, $id) {
         $loan = EquipmentLoan::with('details')->findOrFail($id);
         if ($loan->status !== 'picked_up') {
             return response()->json(['error' => '尚未取件，無法歸還'], 422);
@@ -152,7 +147,7 @@ class EquipmentLoanController extends Controller
                 $detail->update([
                     'status'             => 'returned',
                     'returned_at'        => now(),
-                    'condition_on_return'=> $condition['condition'] ?? '良好',
+                    'condition_on_return' => $condition['condition'] ?? '良好',
                 ]);
                 Equipment::where('id', $detail->equipment_id)->update(['status' => 'available']);
             }
@@ -161,25 +156,35 @@ class EquipmentLoanController extends Controller
         return response()->json([
             'success'      => true,
             'message'      => '全部器材歸還完成，信用積分 +5',
-            'credit_change'=> ['points' => 5, 'reason' => '按時歸還器材'],
+            'credit_change' => ['points' => 5, 'reason' => '按時歸還器材'],
         ]);
     }
 
     // POST /api/equipment-loans/{id}/approve
-    public function approve(Request $r, $id)
-    {
+    public function approve(Request $r, $id) {
+        // 只有 admin（課指組）可以審核
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
         $loan = EquipmentLoan::findOrFail($id);
         $loan->update([
             'status'      => 'approved',
-            'approved_by' => $r->reviewer_id ?? 1,
+            'approved_by' => $user->id,
             'approved_at' => now(),
         ]);
         return response()->json(['success' => true, 'message' => '借用申請已核准']);
     }
 
     // POST /api/equipment-loans/{id}/reject
-    public function reject(Request $r, $id)
-    {
+    public function reject(Request $r, $id) {
+        // 只有 admin（課指組）可以審核
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
         $r->validate(['reason' => 'required|string|min:1']);
 
         $loan = EquipmentLoan::with('details')->findOrFail($id);
@@ -196,8 +201,7 @@ class EquipmentLoanController extends Controller
         return response()->json(['success' => true, 'message' => '借用申請已拒絕，器材釋出']);
     }
 
-    private function nextSerial(): string
-    {
+    private function nextSerial(): string {
         $year  = now()->format('Y');
         $count = EquipmentLoan::whereYear('created_at', $year)->count() + 1;
         return 'EL-' . $year . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);

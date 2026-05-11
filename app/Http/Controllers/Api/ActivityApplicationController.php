@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -7,10 +8,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ActivityApplicationController extends Controller
-{
-    public function index(Request $r)
-    {
+class ActivityApplicationController extends Controller {
+    public function index(Request $r) {
         $q = ActivityApplication::query();
         if ($r->status)       $q->where('status', $r->status);
         if ($r->applicant_id) $q->where('applicant_id', $r->applicant_id);
@@ -19,22 +18,20 @@ class ActivityApplicationController extends Controller
         return response()->json($items);
     }
 
-    public function show($id)
-    {
+    public function show($id) {
         $app = ActivityApplication::with(['applicant', 'venueBookings', 'equipmentLoans.details.equipment'])->find($id);
         return $app
             ? response()->json(['data' => $app])
             : response()->json(['error' => '找不到活動申請'], 404);
     }
 
-    public function store(Request $r)
-    {
+    public function store(Request $r) {
         $r->validate([
             'activity_name'        => 'required|string|max:200',
             'event_date'           => 'required|date',
             'start_time'           => 'required',
             'end_time'             => 'required',
-            'expected_participants'=> 'integer|min:1',
+            'expected_participants' => 'integer|min:1',
             'staff_count'          => 'integer|min:0',
             'unit_code'            => 'required|string|max:20',
             'responsible_person'   => 'nullable|string|max:100',
@@ -74,21 +71,25 @@ class ActivityApplicationController extends Controller
         ], 201);
     }
 
-    public function update(Request $r, $id)
-    {
+    public function update(Request $r, $id) {
         $app = ActivityApplication::findOrFail($id);
         if (!in_array($app->status, ['draft', 'returned'])) {
             return response()->json(['error' => '僅 draft / returned 狀態可修改'], 422);
         }
         $app->update($r->only([
-            'activity_name', 'purpose', 'event_date', 'start_time', 'end_time',
-            'venue_description', 'expected_participants', 'budget_requested',
+            'activity_name',
+            'purpose',
+            'event_date',
+            'start_time',
+            'end_time',
+            'venue_description',
+            'expected_participants',
+            'budget_requested',
         ]));
         return response()->json(['success' => true, 'data' => $app]);
     }
 
-    public function destroy($id)
-    {
+    public function destroy($id) {
         $app = ActivityApplication::findOrFail($id);
         if (!in_array($app->status, ['draft', 'returned', 'rejected'])) {
             return response()->json(['error' => '已送出且審核中的申請不可刪除'], 422);
@@ -98,54 +99,67 @@ class ActivityApplicationController extends Controller
     }
 
     // POST /api/activity-applications/{id}/approve
-    public function approve(Request $r, $id)
-    {
+    public function approve(Request $r, $id) {
+        // 只有 admin（課指組）可以審核
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
         $app = ActivityApplication::findOrFail($id);
         $app->update([
             'status'      => 'approved',
-            'reviewed_by' => $r->reviewer_id ?? 1,
+            'reviewed_by' => $user->id,
             'reviewed_at' => now(),
         ]);
         return response()->json(['success' => true, 'message' => '活動申請已核准', 'serial_no' => $app->serial_no]);
     }
 
     // POST /api/activity-applications/{id}/reject
-    public function reject(Request $r, $id)
-    {
+    public function reject(Request $r, $id) {
+        // 只有 admin（課指組）可以審核
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
         $app = ActivityApplication::findOrFail($id);
         $app->update([
             'status'        => 'rejected',
             'reject_reason' => $r->reason ?? '不符合申請條件',
-            'reviewed_by'   => $r->reviewer_id ?? 1,
+            'reviewed_by'   => $user->id,
             'reviewed_at'   => now(),
         ]);
         return response()->json(['success' => true, 'message' => '活動申請已退件']);
     }
 
     // POST /api/activity-applications/{id}/return
-    public function returnApp(Request $r, $id)
-    {
+    public function returnApp(Request $r, $id) {
+        // 只有 admin（課指組）可以審核
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
         $app = ActivityApplication::findOrFail($id);
         $app->update([
             'status'        => 'returned',
             'reject_reason' => $r->reason ?? '請補充資料後重新送出',
-            'reviewed_by'   => $r->reviewer_id ?? 1,
+            'reviewed_by'   => $user->id,
             'reviewed_at'   => now(),
         ]);
         return response()->json(['success' => true, 'message' => '申請已退回，請修改後重送']);
     }
 
     // GET /activity-applications/{id}/pdf  (web route)
-    public function pdf($id)
-    {
+    public function pdf($id) {
         $app = ActivityApplication::with(['applicant', 'reviewer'])->findOrFail($id);
         $pdf = Pdf::loadView('pdf.activity_application', ['app' => $app])
-                  ->setPaper('a4', 'portrait');
+            ->setPaper('a4', 'portrait');
         return $pdf->download('活動申請單-' . $app->serial_no . '.pdf');
     }
 
-    public function word($id)
-    {
+    public function word($id) {
         $app = ActivityApplication::with(['applicant', 'reviewer'])->findOrFail($id);
 
         $tempDir = storage_path('app/temp');
@@ -160,7 +174,7 @@ class ActivityApplicationController extends Controller
             'unit_code'            => $app->unit_code ?? '',
             'unit_name'            => $app->unit_name ?? '',
             'activity_name'        => $app->activity_name ?? '',
-            'expected_participants'=> (string)($app->expected_participants ?? ''),
+            'expected_participants' => (string)($app->expected_participants ?? ''),
             'staff_count'          => (string)($app->staff_count ?? ''),
             'event_date'           => $app->event_date ?? '',
             'start_time'           => $app->start_time ?? '',
@@ -187,8 +201,7 @@ class ActivityApplicationController extends Controller
         return response()->download($outputFile, $fileName)->deleteFileAfterSend(true);
     }
 
-    private function nextSerial(): string
-    {
+    private function nextSerial(): string {
         $year  = now()->format('Y');
         $count = ActivityApplication::whereYear('created_at', $year)->count() + 1;
         return 'AA-' . $year . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);

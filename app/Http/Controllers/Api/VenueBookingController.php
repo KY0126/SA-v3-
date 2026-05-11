@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -8,10 +9,8 @@ use App\Models\ActivityApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class VenueBookingController extends Controller
-{
-    public function index(Request $r)
-    {
+class VenueBookingController extends Controller {
+    public function index(Request $r) {
         $q = VenueBooking::with(['venue', 'applicant']);
         if ($r->venue_id)     $q->where('venue_id', $r->venue_id);
         if ($r->status)       $q->where('status', $r->status);
@@ -20,8 +19,7 @@ class VenueBookingController extends Controller
         return response()->json($q->orderBy('booking_date')->orderBy('start_time')->paginate(20));
     }
 
-    public function show($id)
-    {
+    public function show($id) {
         $b = VenueBooking::with(['venue', 'applicant', 'activityApplication'])->find($id);
         return $b
             ? response()->json(['data' => $b])
@@ -32,8 +30,7 @@ class VenueBookingController extends Controller
      * Create a venue booking with pessimistic locking to prevent double-booking.
      * Body: { venue_id, booking_date, start_time, end_time, purpose, activity_application_id? }
      */
-    public function store(Request $r)
-    {
+    public function store(Request $r) {
         $r->validate([
             'venue_id'     => 'required|integer|exists:venues,id',
             'booking_date' => 'required|date|after_or_equal:today',
@@ -102,8 +99,7 @@ class VenueBookingController extends Controller
         ], 201);
     }
 
-    public function update(Request $r, $id)
-    {
+    public function update(Request $r, $id) {
         $b = VenueBooking::findOrFail($id);
         if (!in_array($b->status, ['pending'])) {
             return response()->json(['error' => '僅待審狀態可修改'], 422);
@@ -112,16 +108,14 @@ class VenueBookingController extends Controller
         return response()->json(['success' => true, 'data' => $b]);
     }
 
-    public function destroy($id)
-    {
+    public function destroy($id) {
         $b = VenueBooking::findOrFail($id);
         $b->update(['status' => 'cancelled']);
         return response()->json(['success' => true, 'message' => '預約已取消']);
     }
 
     // GET /api/venue-bookings/schedule?venue_id=&date=
-    public function schedule(Request $r)
-    {
+    public function schedule(Request $r) {
         $r->validate(['venue_id' => 'required|integer', 'date' => 'required|date']);
         $bookings = VenueBooking::with('applicant')
             ->where('venue_id', $r->venue_id)
@@ -146,32 +140,41 @@ class VenueBookingController extends Controller
     }
 
     // POST /api/venue-bookings/{id}/approve
-    public function approve(Request $r, $id)
-    {
+    public function approve(Request $r, $id) {
+        // 只有 admin（課指組）可以審核
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
         $b = VenueBooking::findOrFail($id);
         $b->update([
             'status'      => 'approved',
-            'reviewed_by' => $r->reviewer_id ?? 1,
+            'reviewed_by' => $user->id,
             'reviewed_at' => now(),
         ]);
         return response()->json(['success' => true, 'message' => '場地預約已核准']);
     }
 
     // POST /api/venue-bookings/{id}/reject
-    public function reject(Request $r, $id)
-    {
+    public function reject(Request $r, $id) {
+        // 只有 admin（課指組）可以審核
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
         $b = VenueBooking::findOrFail($id);
         $b->update([
             'status'        => 'rejected',
             'reject_reason' => $r->reason ?? '場地不符需求',
-            'reviewed_by'   => $r->reviewer_id ?? 1,
+            'reviewed_by'   => $user->id,
             'reviewed_at'   => now(),
         ]);
         return response()->json(['success' => true, 'message' => '場地預約已拒絕']);
     }
 
-    private function nextSerial(): string
-    {
+    private function nextSerial(): string {
         $year  = now()->format('Y');
         $count = VenueBooking::whereYear('created_at', $year)->count() + 1;
         return 'VB-' . $year . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);

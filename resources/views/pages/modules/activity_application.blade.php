@@ -24,7 +24,9 @@
 
   {{-- List --}}
   <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
-    <div id="aa-list"><div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div></div>
+    <div id="aa-list">
+      <div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div>
+    </div>
   </div>
 
 </div>
@@ -127,7 +129,7 @@
     <div id="aa-detail-body" class="space-y-3 text-sm"></div>
     <div id="aa-pdf-btn" class="mt-3 hidden">
       <a id="aa-pdf-link" href="#" target="_blank"
-         class="flex items-center justify-center gap-2 w-full py-2 rounded-fju border border-fju-blue text-fju-blue text-sm hover:bg-fju-blue hover:text-white transition-all">
+        class="flex items-center justify-center gap-2 w-full py-2 rounded-fju border border-fju-blue text-fju-blue text-sm hover:bg-fju-blue hover:text-white transition-all">
         <i class="fas fa-file-word"></i>下載申請單 Word 黃單
       </a>
     </div>
@@ -162,38 +164,44 @@
 </div>
 
 <script>
-const IS_ADMIN = {{ in_array($role ?? 'student', ['admin']) ? 'true' : 'false' }};
-let allApps = [], currentAaFilter = 'all', currentDetailId = null;
+  const IS_ADMIN = {
+    {
+      in_array($role ?? 'student', ['admin']) ? 'true' : 'false'
+    }
+  };
+  let allApps = [],
+    currentAaFilter = 'all',
+    currentDetailId = null;
 
-// Global status badge helper (used in list and detail)
-function statusBadge(s) {
-  return ({
-    draft:     '<span class="px-2 py-1 rounded-fju text-xs bg-gray-100 text-gray-500">草稿</span>',
-    submitted: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fef9c3;color:#a16207;">待審核</span>',
-    approved:  '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#dcfce7;color:#15803d;">已核准</span>',
-    returned:  '<span class="px-2 py-1 rounded-fju text-xs bg-yellow-100 text-yellow-700">已退件</span>',
-    rejected:  '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fee2e2;color:#dc2626;">已拒絕</span>',
-  })[s] || `<span class="text-xs text-gray-400">${s}</span>`;
-}
-
-function loadApps() {
-  fetch('/api/activity-applications').then(r => r.json()).then(res => {
-    allApps = res.data || [];
-    renderApps();
-  });
-}
-
-function renderApps() {
-  let data = currentAaFilter === 'all' ? [...allApps] : allApps.filter(a => a.status === currentAaFilter);
-  if (!data.length) {
-    document.getElementById('aa-list').innerHTML = '<div class="p-8 text-center text-gray-400">目前沒有符合的申請</div>';
-    return;
+  // Global status badge helper (used in list and detail)
+  function statusBadge(s) {
+    return ({
+      draft: '<span class="px-2 py-1 rounded-fju text-xs bg-gray-100 text-gray-500">草稿</span>',
+      submitted: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fef9c3;color:#a16207;">待審核</span>',
+      approved: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#dcfce7;color:#15803d;">已核准</span>',
+      returned: '<span class="px-2 py-1 rounded-fju text-xs bg-yellow-100 text-yellow-700">已退件</span>',
+      rejected: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fee2e2;color:#dc2626;">已拒絕</span>',
+    })[s] || `<span class="text-xs text-gray-400">${s}</span>`;
   }
 
-  document.getElementById('aa-list').innerHTML =
-    '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400">' +
-    '<th class="p-4">序號</th><th class="p-4">活動名稱</th><th class="p-4">日期</th><th class="p-4">人數</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>' +
-    data.map(a => `<tr class="border-t border-gray-50 hover:bg-gray-50">
+  function loadApps() {
+    fetch('/api/activity-applications').then(r => r.json()).then(res => {
+      allApps = res.data || [];
+      renderApps();
+    });
+  }
+
+  function renderApps() {
+    let data = currentAaFilter === 'all' ? [...allApps] : allApps.filter(a => a.status === currentAaFilter);
+    if (!data.length) {
+      document.getElementById('aa-list').innerHTML = '<div class="p-8 text-center text-gray-400">目前沒有符合的申請</div>';
+      return;
+    }
+
+    document.getElementById('aa-list').innerHTML =
+      '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400">' +
+      '<th class="p-4">序號</th><th class="p-4">活動名稱</th><th class="p-4">日期</th><th class="p-4">人數</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>' +
+      data.map(a => `<tr class="border-t border-gray-50 hover:bg-gray-50">
       <td class="p-4 text-xs text-gray-400">${a.serial_no}</td>
       <td class="p-4 font-medium text-fju-blue">${a.activity_name}</td>
       <td class="p-4 text-xs">${a.event_date} ${a.start_time}–${a.end_time}</td>
@@ -205,94 +213,102 @@ function renderApps() {
         ${a.status === 'approved' ? `<button onclick="copySerial('${a.serial_no}')" class="btn-yellow px-3 py-1 text-xs" title="複製序號供場地預約/器材借用使用"><i class="fas fa-copy mr-1"></i>複製序號</button>` : ''}
       </td>
     </tr>`).join('') + '</tbody></table>';
-}
-
-function filterApps(f) {
-  currentAaFilter = f;
-  document.querySelectorAll('.aa-filter').forEach(b => {
-    b.classList.remove('bg-fju-blue','text-white'); b.classList.add('bg-gray-100','text-gray-500');
-  });
-  const btn = document.querySelector(`.aa-filter[data-f="${f}"]`);
-  btn?.classList.add('bg-fju-blue','text-white'); btn?.classList.remove('bg-gray-100','text-gray-500');
-  renderApps();
-}
-
-function openNewForm() {
-  if (IS_ADMIN) return;
-  currentDetailId = null;
-  document.getElementById('aa-modal-title').innerHTML = '<i class="fas fa-file-alt mr-2 text-fju-yellow"></i>新增活動申請';
-  document.getElementById('aa-name').value = '';
-  document.getElementById('aa-responsible').value = '';
-  document.getElementById('aa-department').value = '';
-  document.getElementById('aa-phone').value = '';
-  document.getElementById('aa-staff').value = '0';
-  document.getElementById('aa-purpose').value = '';
-  document.getElementById('aa-venue-desc').value = '';
-  document.getElementById('aa-budget').value = '0';
-  document.getElementById('aa-unit-name').value = '';
-  document.getElementById('aa-ppl').value = '30';
-  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
-  document.getElementById('aa-date').value = tomorrow.toISOString().split('T')[0];
-  document.getElementById('aa-error').classList.add('hidden');
-  resetUnitCombobox('aa');
-  initUnitCombobox('aa', 'aa-unit-name');
-  document.getElementById('aa-modal').classList.remove('hidden');
-}
-
-function closeAaModal() { document.getElementById('aa-modal').classList.add('hidden'); }
-
-function submitAaForm() {
-  const name = document.getElementById('aa-name').value.trim();
-  const date = document.getElementById('aa-date').value;
-  const start = document.getElementById('aa-start').value;
-  const end = document.getElementById('aa-end').value;
-  const unitCode = getUnitCode('aa');
-  if (!unitCode) {
-    showAaError('請選擇單位代碼');
-    return;
   }
-  if (!name || !date || !start || !end) {
-    showAaError('請填寫必填欄位（活動名稱、日期、時間）');
-    return;
+
+  function filterApps(f) {
+    currentAaFilter = f;
+    document.querySelectorAll('.aa-filter').forEach(b => {
+      b.classList.remove('bg-fju-blue', 'text-white');
+      b.classList.add('bg-gray-100', 'text-gray-500');
+    });
+    const btn = document.querySelector(`.aa-filter[data-f="${f}"]`);
+    btn?.classList.add('bg-fju-blue', 'text-white');
+    btn?.classList.remove('bg-gray-100', 'text-gray-500');
+    renderApps();
   }
-  const payload = {
-    applicant_id:          1,
-    unit_code:             unitCode,
-    unit_name:             document.getElementById('aa-unit-name').value,
-    responsible_person:    document.getElementById('aa-responsible').value,
-    department:            document.getElementById('aa-department').value,
-    contact_phone:         document.getElementById('aa-phone').value,
-    activity_name:         name,
-    event_date:            date,
-    start_time:            start,
-    end_time:              end,
-    venue_description:     document.getElementById('aa-venue-desc').value,
-    expected_participants: parseInt(document.getElementById('aa-ppl').value) || 0,
-    staff_count:           parseInt(document.getElementById('aa-staff').value) || 0,
-    budget_requested:      parseFloat(document.getElementById('aa-budget').value) || 0,
-    purpose:               document.getElementById('aa-purpose').value,
-  };
-  fetch('/api/activity-applications', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(payload),
-  }).then(r => r.json()).then(res => {
-    if (res.success) {
-      closeAaModal();
-      loadApps();
-      showToast('活動申請已送出！序號：' + res.serial_no);
-    } else {
-      showAaError(res.message || res.error || '送出失敗');
+
+  function openNewForm() {
+    if (IS_ADMIN) return;
+    currentDetailId = null;
+    document.getElementById('aa-modal-title').innerHTML = '<i class="fas fa-file-alt mr-2 text-fju-yellow"></i>新增活動申請';
+    document.getElementById('aa-name').value = '';
+    document.getElementById('aa-responsible').value = '';
+    document.getElementById('aa-department').value = '';
+    document.getElementById('aa-phone').value = '';
+    document.getElementById('aa-staff').value = '0';
+    document.getElementById('aa-purpose').value = '';
+    document.getElementById('aa-venue-desc').value = '';
+    document.getElementById('aa-budget').value = '0';
+    document.getElementById('aa-unit-name').value = '';
+    document.getElementById('aa-ppl').value = '30';
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('aa-date').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('aa-error').classList.add('hidden');
+    resetUnitCombobox('aa');
+    initUnitCombobox('aa', 'aa-unit-name');
+    document.getElementById('aa-modal').classList.remove('hidden');
+  }
+
+  function closeAaModal() {
+    document.getElementById('aa-modal').classList.add('hidden');
+  }
+
+  function submitAaForm() {
+    const name = document.getElementById('aa-name').value.trim();
+    const date = document.getElementById('aa-date').value;
+    const start = document.getElementById('aa-start').value;
+    const end = document.getElementById('aa-end').value;
+    const unitCode = getUnitCode('aa');
+    if (!unitCode) {
+      showAaError('請選擇單位代碼');
+      return;
     }
-  }).catch(() => showAaError('網路錯誤，請稍後再試'));
-}
+    if (!name || !date || !start || !end) {
+      showAaError('請填寫必填欄位（活動名稱、日期、時間）');
+      return;
+    }
+    const payload = {
+      applicant_id: 1,
+      unit_code: unitCode,
+      unit_name: document.getElementById('aa-unit-name').value,
+      responsible_person: document.getElementById('aa-responsible').value,
+      department: document.getElementById('aa-department').value,
+      contact_phone: document.getElementById('aa-phone').value,
+      activity_name: name,
+      event_date: date,
+      start_time: start,
+      end_time: end,
+      venue_description: document.getElementById('aa-venue-desc').value,
+      expected_participants: parseInt(document.getElementById('aa-ppl').value) || 0,
+      staff_count: parseInt(document.getElementById('aa-staff').value) || 0,
+      budget_requested: parseFloat(document.getElementById('aa-budget').value) || 0,
+      purpose: document.getElementById('aa-purpose').value,
+    };
+    fetch('/api/activity-applications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload),
+    }).then(r => r.json()).then(res => {
+      if (res.success) {
+        closeAaModal();
+        loadApps();
+        showToast('活動申請已送出！序號：' + res.serial_no);
+      } else {
+        showAaError(res.message || res.error || '送出失敗');
+      }
+    }).catch(() => showAaError('網路錯誤，請稍後再試'));
+  }
 
-function openDetail(id) {
-  currentDetailId = id;
-  const a = allApps.find(x => x.id === id);
-  if (!a) return;
+  function openDetail(id) {
+    currentDetailId = id;
+    const a = allApps.find(x => x.id === id);
+    if (!a) return;
 
-  document.getElementById('aa-detail-body').innerHTML = `
+    document.getElementById('aa-detail-body').innerHTML = `
     <div class="p-3 rounded-fju bg-fju-bg space-y-1">
       <div class="flex items-center justify-between">
         <span class="text-xs text-gray-400">序號</span>
@@ -315,95 +331,122 @@ function openDetail(id) {
     ${a.reject_reason ? `<div class="p-3 rounded-fju bg-red-50 border border-red-100"><span class="text-xs text-red-400">退件/拒絕原因</span><div class="text-sm text-red-600">${a.reject_reason}</div></div>` : ''}
   `;
 
-  // PDF button — opens the static blank form for the user to fill in
-  const pdfBtn = document.getElementById('aa-pdf-btn');
-  const pdfLink = document.getElementById('aa-pdf-link');
-  pdfLink.href = '/activity-applications/' + id + '/word';
-  pdfLink.setAttribute('target', '_blank');
-  pdfLink.removeAttribute('download');
-  pdfBtn.classList.remove('hidden');
+    // PDF button — opens the static blank form for the user to fill in
+    const pdfBtn = document.getElementById('aa-pdf-btn');
+    const pdfLink = document.getElementById('aa-pdf-link');
+    pdfLink.href = '/activity-applications/' + id + '/word';
+    pdfLink.setAttribute('target', '_blank');
+    pdfLink.removeAttribute('download');
+    pdfBtn.classList.remove('hidden');
 
-  // Show review actions for admin/officer on submitted applications
-  const role = '{{ $role ?? "student" }}';
-  const canReview = (role === 'admin' || role === 'officer') && a.status === 'submitted';
-  document.getElementById('aa-review-actions').classList.toggle('hidden', !canReview);
-  document.getElementById('aa-detail-modal').classList.remove('hidden');
-}
-
-function closeDetailModal() { document.getElementById('aa-detail-modal').classList.add('hidden'); }
-
-function downloadAaWord(id) {
-  window.open('/activity-applications/' + id + '/word', '_blank');
-}
-
-function doApprove() {
-  if (!confirm('確認核准此活動申請？')) return;
-  fetch(`/api/activity-applications/${currentDetailId}/approve`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ reviewer_id: 1 }),
-  }).then(r => r.json()).then(res => {
-    closeDetailModal(); loadApps(); showToast(res.message || '已核准');
-  });
-}
-
-function doReturn() {
-  const reason = prompt('退件原因（將通知申請人修改）：');
-  if (reason === null) return;
-  fetch(`/api/activity-applications/${currentDetailId}/return`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ reviewer_id: 1, reason }),
-  }).then(r => r.json()).then(res => {
-    closeDetailModal(); loadApps(); showToast(res.message || '已退件');
-  });
-}
-
-// Task 1: Reject now uses a modal requiring non-empty reason
-function doReject() {
-  document.getElementById('aa-reject-reason').value = '';
-  document.getElementById('aa-reject-error').classList.add('hidden');
-  document.getElementById('aa-reject-modal').classList.remove('hidden');
-}
-
-function closeRejectModal() {
-  document.getElementById('aa-reject-modal').classList.add('hidden');
-}
-
-function confirmReject() {
-  const reason = document.getElementById('aa-reject-reason').value.trim();
-  if (!reason) {
-    document.getElementById('aa-reject-error').classList.remove('hidden');
-    document.getElementById('aa-reject-reason').focus();
-    return;
+    // Show review actions for admin only on submitted applications
+    const role = '{{ $role ?? "student" }}';
+    const canReview = (role === 'admin') && a.status === 'submitted';
+    document.getElementById('aa-review-actions').classList.toggle('hidden', !canReview);
+    document.getElementById('aa-detail-modal').classList.remove('hidden');
   }
-  document.getElementById('aa-reject-error').classList.add('hidden');
-  fetch(`/api/activity-applications/${currentDetailId}/reject`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ reviewer_id: 1, reason }),
-  }).then(r => r.json()).then(res => {
-    closeRejectModal();
-    closeDetailModal();
-    loadApps();
-    showToast(res.message || '已拒絕');
-  });
-}
 
-function copySerial(serial) {
-  navigator.clipboard?.writeText(serial).then(() => showToast('已複製序號：' + serial));
-}
+  function closeDetailModal() {
+    document.getElementById('aa-detail-modal').classList.add('hidden');
+  }
 
-function showAaError(msg) {
-  const el = document.getElementById('aa-error');
-  el.textContent = msg; el.classList.remove('hidden');
-}
+  function downloadAaWord(id) {
+    window.open('/activity-applications/' + id + '/word', '_blank');
+  }
 
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.className = 'fixed bottom-6 right-6 bg-fju-blue text-white px-5 py-3 rounded-fju shadow-lg text-sm z-50';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
-}
+  function doApprove() {
+    if (!confirm('確認核准此活動申請？')) return;
+    fetch(`/api/activity-applications/${currentDetailId}/approve`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        reviewer_id: 1
+      }),
+    }).then(r => r.json()).then(res => {
+      closeDetailModal();
+      loadApps();
+      showToast(res.message || '已核准');
+    });
+  }
 
-loadApps();
+  function doReturn() {
+    const reason = prompt('退件原因（將通知申請人修改）：');
+    if (reason === null) return;
+    fetch(`/api/activity-applications/${currentDetailId}/return`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        reviewer_id: 1,
+        reason
+      }),
+    }).then(r => r.json()).then(res => {
+      closeDetailModal();
+      loadApps();
+      showToast(res.message || '已退件');
+    });
+  }
+
+  // Task 1: Reject now uses a modal requiring non-empty reason
+  function doReject() {
+    document.getElementById('aa-reject-reason').value = '';
+    document.getElementById('aa-reject-error').classList.add('hidden');
+    document.getElementById('aa-reject-modal').classList.remove('hidden');
+  }
+
+  function closeRejectModal() {
+    document.getElementById('aa-reject-modal').classList.add('hidden');
+  }
+
+  function confirmReject() {
+    const reason = document.getElementById('aa-reject-reason').value.trim();
+    if (!reason) {
+      document.getElementById('aa-reject-error').classList.remove('hidden');
+      document.getElementById('aa-reject-reason').focus();
+      return;
+    }
+    document.getElementById('aa-reject-error').classList.add('hidden');
+    fetch(`/api/activity-applications/${currentDetailId}/reject`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        reviewer_id: 1,
+        reason
+      }),
+    }).then(r => r.json()).then(res => {
+      closeRejectModal();
+      closeDetailModal();
+      loadApps();
+      showToast(res.message || '已拒絕');
+    });
+  }
+
+  function copySerial(serial) {
+    navigator.clipboard?.writeText(serial).then(() => showToast('已複製序號：' + serial));
+  }
+
+  function showAaError(msg) {
+    const el = document.getElementById('aa-error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'fixed bottom-6 right-6 bg-fju-blue text-white px-5 py-3 rounded-fju shadow-lg text-sm z-50';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  loadApps();
 </script>
 @endsection
