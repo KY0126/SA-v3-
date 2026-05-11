@@ -188,13 +188,29 @@ class ActivityApplicationController extends Controller {
         file_put_contents($inputFile, json_encode($data, JSON_UNESCAPED_UNICODE));
 
         $script  = base_path('scripts/fill_yellow_form.py');
-        $command = 'python "' . $script . '" "' . $inputFile . '" 2>&1';
-        $result  = shell_exec($command);
+
+        // 要嘗試的 python 執行檔順序：env 指定、python、py -3
+        $candidates = [env('WORD_PYTHON_BIN'), 'python', 'py -3'];
+        $lastOutput = '';
+        $usedCmd = null;
+
+        foreach ($candidates as $bin) {
+            if (!$bin) continue;
+            // 組命令並執行
+            $cmd = $bin . ' "' . $script . '" "' . $inputFile . '" 2>&1';
+            $lastOutput = shell_exec($cmd);
+            $usedCmd = $cmd;
+            // 如果腳本產生了輸出檔就停止嘗試
+            if (file_exists($outputFile)) break;
+        }
 
         @unlink($inputFile);
 
         if (!file_exists($outputFile)) {
-            return response()->json(['error' => 'Word 產生失敗: ' . $result], 500);
+            $attempts = array_filter($candidates);
+            $attemptsStr = implode(', ', $attempts ?: []);
+            $msg = "Word 產生失敗: 無法成功執行 python 腳本。嘗試的命令：{$attemptsStr}。最後執行命令：{$usedCmd}。腳本輸出：" . trim($lastOutput);
+            return response()->json(['error' => $msg], 500);
         }
 
         $fileName = '活動申請表_黃單_' . $app->serial_no . '.docx';
