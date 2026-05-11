@@ -497,7 +497,7 @@ const UNIT_CODES = [
 // ─── Unit code searchable combobox helpers ───────────────────────────────
 // Usage: call initUnitCombobox('suffix') after placing HTML with ids:
 //   uc-input-{suffix}, uc-val-{suffix}, uc-drop-{suffix}
-function initUnitCombobox(suffix) {
+function initUnitCombobox(suffix, unitNameInputId) {
   const input = document.getElementById('uc-input-' + suffix);
   const valEl = document.getElementById('uc-val-' + suffix);
   const drop  = document.getElementById('uc-drop-' + suffix);
@@ -521,6 +521,10 @@ function initUnitCombobox(suffix) {
         e.preventDefault();
         input.value  = this.dataset.code + ' — ' + this.dataset.name;
         valEl.value  = this.dataset.code;
+        if (unitNameInputId) {
+          const nameEl = document.getElementById(unitNameInputId);
+          if (nameEl && !nameEl.value) nameEl.value = this.dataset.name;
+        }
         drop.classList.add('hidden');
         input.dispatchEvent(new Event('change'));
       });

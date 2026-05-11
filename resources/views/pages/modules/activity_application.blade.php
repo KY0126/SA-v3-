@@ -235,7 +235,7 @@ function openNewForm() {
   document.getElementById('aa-date').value = tomorrow.toISOString().split('T')[0];
   document.getElementById('aa-error').classList.add('hidden');
   resetUnitCombobox('aa');
-  initUnitCombobox('aa');
+  initUnitCombobox('aa', 'aa-unit-name');
   document.getElementById('aa-modal').classList.remove('hidden');
 }
 

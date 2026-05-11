@@ -147,13 +147,44 @@ class ActivityApplicationController extends Controller
     public function word($id)
     {
         $app = ActivityApplication::with(['applicant', 'reviewer'])->findOrFail($id);
-        $html = view('word.activity_application', ['app' => $app])->render();
 
-        $fileName = '活動申請單-' . $app->serial_no . '.doc';
-        return response($html, 200, [
-            'Content-Type' => 'application/msword; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-        ]);
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) mkdir($tempDir, 0755, true);
+
+        $inputFile  = $tempDir . '/aa_input_'  . $app->serial_no . '.json';
+        $outputFile = $tempDir . '/aa_output_' . $app->serial_no . '.docx';
+
+        $data = [
+            'template_path'        => public_path('downloads/活動申請表_黃單.docx'),
+            'output_path'          => $outputFile,
+            'unit_code'            => $app->unit_code ?? '',
+            'unit_name'            => $app->unit_name ?? '',
+            'activity_name'        => $app->activity_name ?? '',
+            'expected_participants'=> (string)($app->expected_participants ?? ''),
+            'staff_count'          => (string)($app->staff_count ?? ''),
+            'event_date'           => $app->event_date ?? '',
+            'start_time'           => $app->start_time ?? '',
+            'end_time'             => $app->end_time ?? '',
+            'venue_description'    => $app->venue_description ?? '',
+            'responsible_person'   => $app->responsible_person ?? '',
+            'department'           => $app->department ?? '',
+            'contact_phone'        => $app->contact_phone ?? '',
+        ];
+
+        file_put_contents($inputFile, json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        $script  = base_path('scripts/fill_yellow_form.py');
+        $command = 'python "' . $script . '" "' . $inputFile . '" 2>&1';
+        $result  = shell_exec($command);
+
+        @unlink($inputFile);
+
+        if (!file_exists($outputFile)) {
+            return response()->json(['error' => 'Word 產生失敗: ' . $result], 500);
+        }
+
+        $fileName = '活動申請表_黃單_' . $app->serial_no . '.docx';
+        return response()->download($outputFile, $fileName)->deleteFileAfterSend(true);
     }
 
     private function nextSerial(): string
