@@ -329,6 +329,7 @@
     ${a.venue_description ? `<div><span class="text-xs text-gray-400">預計場地</span><div class="text-sm">${a.venue_description}</div></div>` : ''}
     ${a.purpose ? `<div><span class="text-xs text-gray-400">活動目的</span><div class="text-sm">${a.purpose}</div></div>` : ''}
     ${a.reject_reason ? `<div class="p-3 rounded-fju bg-red-50 border border-red-100"><span class="text-xs text-red-400">退件/拒絕原因</span><div class="text-sm text-red-600">${a.reject_reason}</div></div>` : ''}
+    ${a.cancellation_status === 'pending' ? `<div class="p-3 rounded-fju bg-yellow-50 border border-yellow-200"><span class="text-xs text-yellow-600">✉️ 待審核的取消申請</span><div class="text-sm text-yellow-700 mt-1">${a.cancellation_reason || '申請人要求取消'}</div></div>` : ''}
   `;
 
     // PDF button — opens the static blank form for the user to fill in
@@ -342,8 +343,43 @@
     // Show review actions for admin only on submitted applications
     const role = '{{ $role ?? "student" }}';
     const canReview = (role === 'admin') && a.status === 'submitted';
-    document.getElementById('aa-review-actions').classList.toggle('hidden', !canReview);
-    document.getElementById('aa-detail-modal').classList.remove('hidden');
+    const hasCancellationPending = (role === 'admin') && a.status === 'approved' && a.cancellation_status === 'pending';
+    const isApplicant = (a.applicant_id === 1); // 假設目前使用者id是1，實際應由後端提供
+    const canRequestCancel = (role !== 'admin') && (a.status === 'approved' || a.status === 'submitted' || a.status === 'draft') && isApplicant;
+
+    // 處理取消審核狀態
+    if (hasCancellationPending) {
+      document.getElementById('aa-review-actions').innerHTML = `
+        <button onclick="doApproveCancellation()" class="flex-1 py-2.5 rounded-fju bg-green-500 text-white text-sm font-bold hover:bg-green-600"><i class="fas fa-check mr-1"></i>批准取消</button>
+        <button onclick="doRejectCancellation()" class="flex-1 py-2.5 rounded-fju bg-red-500 text-white text-sm font-bold hover:bg-red-600"><i class="fas fa-times mr-1"></i>拒絕取消</button>
+      `;
+      document.getElementById('aa-review-actions').classList.remove('hidden');
+    } else if (canReview) {
+      document.getElementById('aa-review-actions').innerHTML = `
+        <button onclick="doApprove()" class="flex-1 py-2.5 rounded-fju bg-green-500 text-white text-sm font-bold hover:bg-green-600"><i class="fas fa-check mr-1"></i>核准</button>
+        <button onclick="doReturn()" class="flex-1 py-2.5 rounded-fju bg-yellow-400 text-fju-blue text-sm font-bold hover:bg-yellow-500"><i class="fas fa-undo mr-1"></i>退件</button>
+        <button onclick="doReject()" class="flex-1 py-2.5 rounded-fju bg-red-500 text-white text-sm font-bold hover:bg-red-600"><i class="fas fa-times mr-1"></i>拒絕</button>
+      `;
+      document.getElementById('aa-review-actions').classList.remove('hidden');
+    } else if (canRequestCancel) {
+      // 申請人可取消待審核或已核准的申請
+      if (a.status === 'approved' && !a.cancellation_status) {
+        document.getElementById('aa-review-actions').innerHTML = `
+          <button onclick="doRequestCancellation()" class="flex-1 py-2.5 rounded-fju bg-orange-500 text-white text-sm font-bold hover:bg-orange-600"><i class="fas fa-trash mr-1"></i>申請取消</button>
+        `;
+        document.getElementById('aa-review-actions').classList.remove('hidden');
+      } else if (['submitted', 'draft'].includes(a.status)) {
+        // 待審核或草稿可直接取消
+        document.getElementById('aa-review-actions').innerHTML = `
+          <button onclick="doRequestCancellation()" class="flex-1 py-2.5 rounded-fju bg-orange-500 text-white text-sm font-bold hover:bg-orange-600"><i class="fas fa-trash mr-1"></i>取消申請</button>
+        `;
+        document.getElementById('aa-review-actions').classList.remove('hidden');
+      } else {
+        document.getElementById('aa-review-actions').classList.add('hidden');
+      }
+    } else {
+      document.getElementById('aa-review-actions').classList.add('hidden');
+    }
   }
 
   function closeDetailModal() {
@@ -426,6 +462,80 @@
       closeDetailModal();
       loadApps();
       showToast(res.message || '已拒絕');
+    });
+  }
+
+  function doApproveCancellation() {
+    if (!confirm('確認批准此取消申請？')) return;
+    fetch(`/api/activity-applications/${currentDetailId}/approve-cancellation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({})
+    }).then(r => r.json()).then(res => {
+      if (res.success || res.message) {
+        closeDetailModal();
+        loadApps();
+        showToast(res.message || '取消申請已批准');
+      } else {
+        showToast(res.error || '批准失敗');
+      }
+    });
+  }
+
+  function doRejectCancellation() {
+    const reason = prompt('拒絕取消的原因：');
+    if (reason === null) return;
+    fetch(`/api/activity-applications/${currentDetailId}/reject-cancellation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        reason
+      })
+    }).then(r => r.json()).then(res => {
+      if (res.success || res.message) {
+        closeDetailModal();
+        loadApps();
+        showToast(res.message || '取消申請已拒絕');
+      } else {
+        showToast(res.error || '拒絕失敗');
+      }
+    });
+  }
+
+  function doRequestCancellation() {
+    const reason = prompt('申請取消的原因（可選）：') || '申請人要求取消';
+    if (reason === null) return;
+    const a = allApps.find(x => x.id === currentDetailId);
+    if (!a) return;
+
+    // 待審核或草稿 → 直接取消（無需理由）
+    if (['submitted', 'draft'].includes(a.status)) {
+      reason = '';
+    }
+
+    fetch(`/api/activity-applications/${currentDetailId}/request-cancellation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        reason
+      })
+    }).then(r => r.json()).then(res => {
+      if (res.success || res.message) {
+        closeDetailModal();
+        loadApps();
+        showToast(res.message || '取消申請已提交');
+      } else {
+        showToast(res.error || '提交失敗');
+      }
     });
   }
 

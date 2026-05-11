@@ -1,10 +1,18 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
-    UserController, ClubController, VenueController, ActivityController,
-    EquipmentController, ReservationController, CrudController,
-    ActivityApplicationController, EquipmentLoanController,
-    VenueBookingController, MsAuthController,
+    UserController,
+    ClubController,
+    VenueController,
+    ActivityController,
+    EquipmentController,
+    ReservationController,
+    CrudController,
+    ActivityApplicationController,
+    EquipmentLoanController,
+    VenueBookingController,
+    MsAuthController,
 };
 
 // Users CRUD
@@ -103,6 +111,9 @@ Route::get('auth/me', [MsAuthController::class, 'me']);
 Route::post('activity-applications/{id}/approve', [ActivityApplicationController::class, 'approve']);
 Route::post('activity-applications/{id}/reject',  [ActivityApplicationController::class, 'reject']);
 Route::post('activity-applications/{id}/return',  [ActivityApplicationController::class, 'returnApp']);
+Route::post('activity-applications/{id}/request-cancellation',  [ActivityApplicationController::class, 'requestCancellation']);
+Route::post('activity-applications/{id}/approve-cancellation', [ActivityApplicationController::class, 'approveCancellation']);
+Route::post('activity-applications/{id}/reject-cancellation',  [ActivityApplicationController::class, 'rejectCancellation']);
 Route::apiResource('activity-applications', ActivityApplicationController::class);
 
 // Equipment Loans — multi-item (器材借用明細)
@@ -110,10 +121,16 @@ Route::post('equipment-loans/{id}/pickup',  [EquipmentLoanController::class, 'pi
 Route::post('equipment-loans/{id}/return',  [EquipmentLoanController::class, 'returnLoan']);
 Route::post('equipment-loans/{id}/approve', [EquipmentLoanController::class, 'approve']);
 Route::post('equipment-loans/{id}/reject',  [EquipmentLoanController::class, 'reject']);
+Route::post('equipment-loans/{id}/request-cancellation',  [EquipmentLoanController::class, 'requestCancellation']);
+Route::post('equipment-loans/{id}/approve-cancellation', [EquipmentLoanController::class, 'approveCancellation']);
+Route::post('equipment-loans/{id}/reject-cancellation',  [EquipmentLoanController::class, 'rejectCancellation']);
 Route::apiResource('equipment-loans', EquipmentLoanController::class);
 
 // Venue Bookings — with pessimistic lock (場地預約)
 Route::get('venue-bookings/schedule',      [VenueBookingController::class, 'schedule']);
 Route::post('venue-bookings/{id}/approve', [VenueBookingController::class, 'approve']);
 Route::post('venue-bookings/{id}/reject',  [VenueBookingController::class, 'reject']);
+Route::post('venue-bookings/{id}/request-cancellation',  [VenueBookingController::class, 'requestCancellation']);
+Route::post('venue-bookings/{id}/approve-cancellation', [VenueBookingController::class, 'approveCancellation']);
+Route::post('venue-bookings/{id}/reject-cancellation',  [VenueBookingController::class, 'rejectCancellation']);
 Route::apiResource('venue-bookings', VenueBookingController::class);

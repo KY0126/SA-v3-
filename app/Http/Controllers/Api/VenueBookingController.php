@@ -174,6 +174,93 @@ class VenueBookingController extends Controller {
         return response()->json(['success' => true, 'message' => '場地預約已拒絕']);
     }
 
+    // POST /api/venue-bookings/{id}/request-cancellation
+    // 借用者請求取消已核准的預約（待審核的預約可直接取消）
+    public function requestCancellation(Request $r, $id) {
+        $booking = VenueBooking::findOrFail($id);
+        $user = auth()->user();
+
+        // 只有申請人可以請求取消
+        if ($booking->applicant_id !== $user->id) {
+            return response()->json(['error' => '只有申請人可以請求取消'], 403);
+        }
+
+        // 待審核 → 可直接取消
+        if ($booking->status === 'pending') {
+            $booking->update(['status' => 'cancelled']);
+            return response()->json(['success' => true, 'message' => '場地預約已直接取消']);
+        }
+
+        // 已核准 → 提交取消申請待課指組審核
+        if ($booking->status === 'approved') {
+            $booking->update([
+                'cancellation_reason'       => $r->reason ?? '申請人要求取消',
+                'cancellation_status'       => 'pending',
+                'cancellation_requested_at' => now(),
+            ]);
+            return response()->json(['success' => true, 'message' => '取消申請已提交，待課指組審核']);
+        }
+
+        // 已拒絕、已取消、衝突 → 無需取消
+        if (in_array($booking->status, ['rejected', 'cancelled', 'conflicted'])) {
+            return response()->json(['error' => '此預約無法取消'], 400);
+        }
+
+        return response()->json(['error' => '當前狀態無法取消'], 400);
+    }
+
+    // POST /api/venue-bookings/{id}/approve-cancellation
+    // 課指組批准取消已核准的預約
+    public function approveCancellation(Request $r, $id) {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
+        $booking = VenueBooking::findOrFail($id);
+
+        // 只能批准待審核的取消申請
+        if ($booking->status !== 'approved' || $booking->cancellation_status !== 'pending') {
+            return response()->json(['error' => '此預約沒有待審核的取消申請'], 400);
+        }
+
+        $booking->update([
+            'status'                     => 'cancelled',
+            'cancellation_status'        => 'approved',
+            'cancellation_reviewed_by'   => $user->id,
+            'cancellation_reviewed_at'   => now(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => '取消申請已批准']);
+    }
+
+    // POST /api/venue-bookings/{id}/reject-cancellation
+    // 課指組拒絕取消已核准的預約
+    public function rejectCancellation(Request $r, $id) {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
+        $r->validate(['reason' => 'required|string|min:1']);
+
+        $booking = VenueBooking::findOrFail($id);
+
+        // 只能拒絕待審核的取消申請
+        if ($booking->status !== 'approved' || $booking->cancellation_status !== 'pending') {
+            return response()->json(['error' => '此預約沒有待審核的取消申請'], 400);
+        }
+
+        $booking->update([
+            'cancellation_status'        => 'rejected',
+            'cancellation_reason'        => $r->reason,
+            'cancellation_reviewed_by'   => $user->id,
+            'cancellation_reviewed_at'   => now(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => '取消申請已拒絕']);
+    }
+
     private function nextSerial(): string {
         $year  = now()->format('Y');
         $count = VenueBooking::whereYear('created_at', $year)->count() + 1;

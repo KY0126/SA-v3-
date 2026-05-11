@@ -201,6 +201,100 @@ class EquipmentLoanController extends Controller {
         return response()->json(['success' => true, 'message' => '借用申請已拒絕，器材釋出']);
     }
 
+    // POST /api/equipment-loans/{id}/request-cancellation
+    // 借用者請求取消已核准的申請（待審核的申請可直接取消）
+    public function requestCancellation(Request $r, $id) {
+        $loan = EquipmentLoan::findOrFail($id);
+        $user = auth()->user();
+
+        // 只有申請人可以請求取消
+        if ($loan->borrower_id !== $user->id) {
+            return response()->json(['error' => '只有申請人可以請求取消'], 403);
+        }
+
+        // 待審核 → 可直接取消
+        if ($loan->status === 'pending') {
+            $loan->update(['status' => 'rejected']);
+            return response()->json(['success' => true, 'message' => '借用申請已直接取消']);
+        }
+
+        // 已核准 → 提交取消申請待課指組審核
+        if ($loan->status === 'approved') {
+            $loan->update([
+                'cancellation_reason'       => $r->reason ?? '申請人要求取消',
+                'cancellation_status'       => 'pending',
+                'cancellation_requested_at' => now(),
+            ]);
+            return response()->json(['success' => true, 'message' => '取消申請已提交，待課指組審核']);
+        }
+
+        // 已取件、已歸還、已拒絕 → 無需取消
+        if (in_array($loan->status, ['picked_up', 'returned', 'rejected', 'overdue'])) {
+            return response()->json(['error' => '此申請無法取消'], 400);
+        }
+
+        return response()->json(['error' => '當前狀態無法取消'], 400);
+    }
+
+    // POST /api/equipment-loans/{id}/approve-cancellation
+    // 課指組批准取消已核准的申請
+    public function approveCancellation(Request $r, $id) {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
+        $loan = EquipmentLoan::with('details')->findOrFail($id);
+
+        // 只能批准待審核的取消申請
+        if ($loan->status !== 'approved' || $loan->cancellation_status !== 'pending') {
+            return response()->json(['error' => '此申請沒有待審核的取消申請'], 400);
+        }
+
+        DB::transaction(function () use ($loan, $user) {
+            $loan->update([
+                'status'                     => 'rejected',
+                'cancellation_status'        => 'approved',
+                'cancellation_reviewed_by'   => $user->id,
+                'cancellation_reviewed_at'   => now(),
+            ]);
+            // 釋放已核准的器材
+            foreach ($loan->details as $d) {
+                Equipment::where('id', $d->equipment_id)->update(['status' => 'available']);
+            }
+            $loan->details()->update(['status' => 'pending']);
+        });
+
+        return response()->json(['success' => true, 'message' => '取消申請已批准，器材已釋放']);
+    }
+
+    // POST /api/equipment-loans/{id}/reject-cancellation
+    // 課指組拒絕取消已核准的申請
+    public function rejectCancellation(Request $r, $id) {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
+        $r->validate(['reason' => 'required|string|min:1']);
+
+        $loan = EquipmentLoan::findOrFail($id);
+
+        // 只能拒絕待審核的取消申請
+        if ($loan->status !== 'approved' || $loan->cancellation_status !== 'pending') {
+            return response()->json(['error' => '此申請沒有待審核的取消申請'], 400);
+        }
+
+        $loan->update([
+            'cancellation_status'        => 'rejected',
+            'cancellation_reason'        => $r->reason,
+            'cancellation_reviewed_by'   => $user->id,
+            'cancellation_reviewed_at'   => now(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => '取消申請已拒絕']);
+    }
+
     private function nextSerial(): string {
         $year  = now()->format('Y');
         $count = EquipmentLoan::whereYear('created_at', $year)->count() + 1;

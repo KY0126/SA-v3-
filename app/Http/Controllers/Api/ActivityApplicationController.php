@@ -201,6 +201,98 @@ class ActivityApplicationController extends Controller {
         return response()->download($outputFile, $fileName)->deleteFileAfterSend(true);
     }
 
+    // POST /api/activity-applications/{id}/request-cancellation
+    // 借用者請求取消已核准的申請（待審核或審核中的申請可直接取消）
+    public function requestCancellation(Request $r, $id) {
+        $app = ActivityApplication::findOrFail($id);
+        $user = auth()->user();
+
+        // 只有申請人可以請求取消
+        if ($app->applicant_id !== $user->id) {
+            return response()->json(['error' => '只有申請人可以請求取消'], 403);
+        }
+
+        // 待審核、審核中、已退件 → 可直接取消
+        if (in_array($app->status, ['submitted', 'returned', 'draft'])) {
+            $app->update(['status' => 'cancelled']);
+            return response()->json(['success' => true, 'message' => '申請已直接取消']);
+        }
+
+        // 已核准 → 提交取消申請待課指組審核
+        if ($app->status === 'approved') {
+            $app->update([
+                'cancellation_reason'       => $r->reason ?? '申請人要求取消',
+                'cancellation_status'       => 'pending',
+                'cancellation_requested_at' => now(),
+            ]);
+            return response()->json(['success' => true, 'message' => '取消申請已提交，待課指組審核']);
+        }
+
+        // 已拒絕 → 無需取消
+        if ($app->status === 'rejected') {
+            return response()->json(['error' => '申請已拒絕，無需取消'], 400);
+        }
+
+        // 已取消 → 無需重複取消
+        if ($app->status === 'cancelled') {
+            return response()->json(['error' => '申請已取消'], 400);
+        }
+
+        return response()->json(['error' => '當前狀態無法取消'], 400);
+    }
+
+    // POST /api/activity-applications/{id}/approve-cancellation
+    // 課指組批准取消已核准的申請
+    public function approveCancellation(Request $r, $id) {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
+        $app = ActivityApplication::findOrFail($id);
+
+        // 只能批准待審核的取消申請
+        if ($app->status !== 'approved' || $app->cancellation_status !== 'pending') {
+            return response()->json(['error' => '此申請沒有待審核的取消申請'], 400);
+        }
+
+        $app->update([
+            'status'                     => 'cancelled',
+            'cancellation_status'        => 'approved',
+            'cancellation_reviewed_by'   => $user->id,
+            'cancellation_reviewed_at'   => now(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => '取消申請已批准']);
+    }
+
+    // POST /api/activity-applications/{id}/reject-cancellation
+    // 課指組拒絕取消已核准的申請
+    public function rejectCancellation(Request $r, $id) {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+
+        $r->validate(['reason' => 'required|string|min:1']);
+
+        $app = ActivityApplication::findOrFail($id);
+
+        // 只能拒絕待審核的取消申請
+        if ($app->status !== 'approved' || $app->cancellation_status !== 'pending') {
+            return response()->json(['error' => '此申請沒有待審核的取消申請'], 400);
+        }
+
+        $app->update([
+            'cancellation_status'        => 'rejected',
+            'cancellation_reason'        => $r->reason,
+            'cancellation_reviewed_by'   => $user->id,
+            'cancellation_reviewed_at'   => now(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => '取消申請已拒絕']);
+    }
+
     private function nextSerial(): string {
         $year  = now()->format('Y');
         $count = ActivityApplication::whereYear('created_at', $year)->count() + 1;
