@@ -620,6 +620,17 @@ function filterEquipment(f) {
   renderEquipment();
 }
 
+function loanRowBorder(s) {
+  return ({
+    pending:   'border-l-4 border-yellow-400',
+    approved:  'border-l-4 border-green-500',
+    picked_up: 'border-l-4 border-blue-500',
+    returned:  'border-l-4 border-gray-300',
+    rejected:  'border-l-4 border-red-500',
+    overdue:   'border-l-4 border-orange-500',
+  })[s] || '';
+}
+
 // ─── Admin: Loan management ──────────────────────────────────────────────
 function loadAdminLoans() {
   fetch('/api/equipment-loans').then(r => r.json()).then(res => {
@@ -634,19 +645,19 @@ function renderAdminLoans() {
     document.getElementById('loan-admin-list').innerHTML = '<div class="p-8 text-center text-gray-400">目前沒有符合的借用申請</div>';
     return;
   }
-  const statusLabel = s => ({ pending:'待審核', approved:'已核准', picked_up:'使用中', returned:'已歸還', rejected:'已拒絕', overdue:'逾期' }[s] || s);
   document.getElementById('loan-admin-list').innerHTML =
     '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400">' +
     '<th class="p-4">序號</th><th class="p-4">借用人</th><th class="p-4">器材</th><th class="p-4">歸還日</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>' +
     data.map(l => {
       const names = (l.details||[]).map(d => d.equipment?.name || '').filter(Boolean).join('、') || '—';
-      return `<tr class="border-t border-gray-50 hover:bg-gray-50">
+      const actions = `<button onclick="openLoanDetail(${l.id})" class="btn-blue px-3 py-1 text-xs">詳情</button>`;
+      return `<tr class="border-t border-gray-50 hover:bg-gray-50 ${loanRowBorder(l.status)}">
         <td class="p-4 text-xs text-gray-400 font-mono">${l.serial_no}</td>
         <td class="p-4 font-medium text-fju-blue">${l.borrower?.name || l.borrower_id}</td>
         <td class="p-4 text-xs text-gray-600 max-w-[180px] truncate" title="${names}">${names}</td>
         <td class="p-4 text-xs">${l.expected_return_date}</td>
         <td class="p-4">${loanStatusBadge(l.status)}</td>
-        <td class="p-4"><button onclick="openLoanDetail(${l.id})" class="btn-blue px-3 py-1 text-xs">詳情</button></td>
+        <td class="p-4"><div class="flex flex-wrap gap-1">${actions}</div></td>
       </tr>`;
     }).join('') + '</tbody></table>';
 }
@@ -698,7 +709,8 @@ function openLoanDetail(id) {
   if (l.status === 'pending') {
     actEl.innerHTML = `
       <div class="flex gap-2">
-        <button onclick="doLoanApprove()" class="flex-1 py-2.5 rounded-fju bg-green-500 text-white text-sm font-bold hover:bg-green-600"><i class="fas fa-check mr-1"></i>核准借用</button>
+        <button onclick="doLoanApprove()" class="flex-1 py-2.5 rounded-fju bg-green-500 text-white text-sm font-bold hover:bg-green-600"><i class="fas fa-check mr-1"></i>核准</button>
+        <button onclick="doLoanReturnDoc()" class="flex-1 py-2.5 rounded-fju bg-yellow-400 text-fju-blue text-sm font-bold hover:bg-yellow-500"><i class="fas fa-undo mr-1"></i>退件</button>
         <button onclick="doLoanReject()" class="flex-1 py-2.5 rounded-fju bg-red-500 text-white text-sm font-bold hover:bg-red-600"><i class="fas fa-times mr-1"></i>拒絕</button>
       </div>`;
     actEl.classList.remove('hidden');
@@ -717,6 +729,7 @@ function openLoanDetail(id) {
 
 function closeLoanDetailModal() { document.getElementById('loan-detail-modal').classList.add('hidden'); }
 
+
 function doLoanApprove() {
   if (!confirm('確認核准此借用申請？')) return;
   fetch(`/api/equipment-loans/${currentLoanId}/approve`, {
@@ -731,6 +744,17 @@ function doLoanReject() {
   document.getElementById('loan-reject-reason').value = '';
   document.getElementById('loan-reject-error').classList.add('hidden');
   document.getElementById('loan-reject-modal').classList.remove('hidden');
+}
+
+function doLoanReturnDoc() {
+  const reason = prompt('退件原因（將通知申請人修改後重送）：');
+  if (reason === null) return;
+  fetch(`/api/equipment-loans/${currentLoanId}/reject`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ reviewer_id: 1, reason: reason || '請補充資料後重新送出' }),
+  }).then(r => r.json()).then(res => {
+    closeLoanDetailModal(); loadAdminLoans(); showToast(res.message || '已退件');
+  });
 }
 
 function closeLoanRejectModal() { document.getElementById('loan-reject-modal').classList.add('hidden'); }
