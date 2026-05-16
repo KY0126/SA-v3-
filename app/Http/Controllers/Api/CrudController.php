@@ -276,7 +276,10 @@ class CrudController extends Controller
         ]));
         return response()->json(['success' => true, 'data' => $rep]);
     }
-    public function repairDestroy($id) {
+    public function repairDestroy(Request $r, $id) {
+        if ($r->input('role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+        }
         Repair::destroy($id);
         return response()->json(['success' => true]);
     }

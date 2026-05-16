@@ -142,6 +142,8 @@
 </div>
 <script>
 let allRepairs=[];
+const canDeleteRepairs={{ $role === 'admin' ? 'true' : 'false' }};
+const currentRole='{{ $role }}';
 let selectedRepFiles=[];
 let previewUrl='';
 const MAX_REPAIR_FILE_SIZE=10*1024*1024;
@@ -287,7 +289,9 @@ function renderRepairs(){
   if(sort==='newest') data.sort((a,b)=>b.id-a.id);
   else if(sort==='oldest') data.sort((a,b)=>a.id-b.id);
   else if(sort==='status'){const o={pending:0,processing:1,completed:2};data.sort((a,b)=>(o[a.status]||0)-(o[b.status]||0))}
-  document.getElementById('repair-list').innerHTML='<div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden"><table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">編號</th><th class="p-4">對象</th><th class="p-4">描述</th><th class="p-4">狀態</th><th class="p-4">指派</th><th class="p-4">操作</th></tr></thead><tbody>'+data.map(r=>'<tr class="border-t hover:bg-gray-50"><td class="p-4 text-xs text-gray-400">'+r.code+'</td><td class="p-4 font-medium text-fju-blue">'+(r.repair_item||r.target)+'</td><td class="p-4 text-xs text-gray-500">'+(r.damage_description||r.description)+'</td><td class="p-4"><span class="px-2 py-1 rounded-fju text-xs '+(r.status==='completed'?'bg-fju-green/10 text-fju-green':r.status==='processing'?'bg-fju-yellow/20 text-fju-yellow':'bg-gray-100 text-gray-500')+'">'+r.status+'</span></td><td class="p-4 text-xs">'+(r.assignee||'未指派')+'</td><td class="p-4"><button onclick="delRepair('+r.id+')" class="text-fju-red text-xs"><i class="fas fa-trash"></i></button></td></tr>').join('')+'</tbody></table></div>';
+  const actionHeader=canDeleteRepairs?'<th class="p-4">操作</th>':'';
+  const actionCell=canDeleteRepairs?'<td class="p-4"><button onclick="delRepair('+"'+"+'r.id'+"'+"+')" class="text-fju-red text-xs"><i class="fas fa-trash"></i></button></td>':'';
+  document.getElementById('repair-list').innerHTML='<div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden"><table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">編號</th><th class="p-4">對象</th><th class="p-4">描述</th><th class="p-4">狀態</th><th class="p-4">指派</th>'+actionHeader+'</tr></thead><tbody>'+data.map(r=>'<tr class="border-t hover:bg-gray-50"><td class="p-4 text-xs text-gray-400">'+r.code+'</td><td class="p-4 font-medium text-fju-blue">'+(r.repair_item||r.target)+'</td><td class="p-4 text-xs text-gray-500">'+(r.damage_description||r.description)+'</td><td class="p-4"><span class="px-2 py-1 rounded-fju text-xs '+(r.status==='completed'?'bg-fju-green/10 text-fju-green':r.status==='processing'?'bg-fju-yellow/20 text-fju-yellow':'bg-gray-100 text-gray-500')+'">'+r.status+'</span></td><td class="p-4 text-xs">'+(r.assignee||'未指派')+'</td>'+(canDeleteRepairs?'<td class="p-4"><button onclick="delRepair('+r.id+')" class="text-fju-red text-xs"><i class="fas fa-trash"></i></button></td>':'')+'</tr>').join('')+'</tbody></table></div>';
 }
 loadRepairs();
 function toggleCategoryOther(){
@@ -348,6 +352,10 @@ repForm.addEventListener('submit', (e)=>{
   e.preventDefault();
   addRepair();
 });
-function delRepair(id){if(!confirm('確定刪除？'))return;fetch('/api/repairs/'+id,{method:'DELETE',headers:{'Accept':'application/json'}}).then(()=>loadRepairs())}
+function delRepair(id){
+  if(!confirm('確定刪除？'))return;
+  const url='/api/repairs/'+id+'?role='+encodeURIComponent(currentRole);
+  fetch(url,{method:'DELETE',headers:{'Accept':'application/json'}}).then(()=>loadRepairs());
+}
 </script>
 @endsection
