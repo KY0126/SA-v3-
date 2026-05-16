@@ -177,6 +177,27 @@ class EquipmentLoanController extends Controller {
         return response()->json(['success' => true, 'message' => '借用申請已核准']);
     }
 
+    // POST /api/equipment-loans/{id}/return-review  — 管理員退件（不同於借用人實際歸還）
+    public function returnReview(Request $r, $id) {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+        $r->validate(['reason' => 'required|string|min:1']);
+        $loan = EquipmentLoan::with('details')->findOrFail($id);
+        DB::transaction(function () use ($loan, $r) {
+            $loan->update([
+                'status'        => 'returned_review',
+                'reject_reason' => $r->reason,
+            ]);
+            foreach ($loan->details as $d) {
+                Equipment::where('id', $d->equipment_id)->update(['status' => 'available']);
+            }
+            $loan->details()->update(['status' => 'pending']);
+        });
+        return response()->json(['success' => true, 'message' => '借用申請已退件，器材已釋出，請申請人修改後重新送出']);
+    }
+
     // POST /api/equipment-loans/{id}/reject
     public function reject(Request $r, $id) {
         // 只有 admin（課指組）可以審核

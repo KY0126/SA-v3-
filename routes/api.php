@@ -106,14 +106,16 @@ Route::post('activity-applications/{id}/return',  [ActivityApplicationController
 Route::apiResource('activity-applications', ActivityApplicationController::class);
 
 // Equipment Loans — multi-item (器材借用明細)
-Route::post('equipment-loans/{id}/pickup',  [EquipmentLoanController::class, 'pickup']);
-Route::post('equipment-loans/{id}/return',  [EquipmentLoanController::class, 'returnLoan']);
-Route::post('equipment-loans/{id}/approve', [EquipmentLoanController::class, 'approve']);
-Route::post('equipment-loans/{id}/reject',  [EquipmentLoanController::class, 'reject']);
+Route::post('equipment-loans/{id}/pickup',        [EquipmentLoanController::class, 'pickup']);
+Route::post('equipment-loans/{id}/return',        [EquipmentLoanController::class, 'returnLoan']);
+Route::post('equipment-loans/{id}/return-review', [EquipmentLoanController::class, 'returnReview']);
+Route::post('equipment-loans/{id}/approve',       [EquipmentLoanController::class, 'approve']);
+Route::post('equipment-loans/{id}/reject',        [EquipmentLoanController::class, 'reject']);
 Route::apiResource('equipment-loans', EquipmentLoanController::class);
 
 // Venue Bookings — with pessimistic lock (場地預約)
-Route::get('venue-bookings/schedule',      [VenueBookingController::class, 'schedule']);
-Route::post('venue-bookings/{id}/approve', [VenueBookingController::class, 'approve']);
-Route::post('venue-bookings/{id}/reject',  [VenueBookingController::class, 'reject']);
+Route::get('venue-bookings/schedule',       [VenueBookingController::class, 'schedule']);
+Route::post('venue-bookings/{id}/approve',  [VenueBookingController::class, 'approve']);
+Route::post('venue-bookings/{id}/return',   [VenueBookingController::class, 'returnBooking']);
+Route::post('venue-bookings/{id}/reject',   [VenueBookingController::class, 'reject']);
 Route::apiResource('venue-bookings', VenueBookingController::class);

@@ -123,10 +123,12 @@ class ActivityApplicationController extends Controller {
             return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
         }
 
+        $r->validate(['reason' => 'required|string|min:1']);
+
         $app = ActivityApplication::findOrFail($id);
         $app->update([
             'status'        => 'rejected',
-            'reject_reason' => $r->reason ?? '不符合申請條件',
+            'reject_reason' => $r->reason,
             'reviewed_by'   => $user->id,
             'reviewed_at'   => now(),
         ]);
@@ -141,10 +143,12 @@ class ActivityApplicationController extends Controller {
             return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
         }
 
+        $r->validate(['reason' => 'required|string|min:1']);
+
         $app = ActivityApplication::findOrFail($id);
         $app->update([
             'status'        => 'returned',
-            'reject_reason' => $r->reason ?? '請補充資料後重新送出',
+            'reject_reason' => $r->reason,
             'reviewed_by'   => $user->id,
             'reviewed_at'   => now(),
         ]);

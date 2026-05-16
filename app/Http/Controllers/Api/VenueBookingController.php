@@ -156,6 +156,23 @@ class VenueBookingController extends Controller {
         return response()->json(['success' => true, 'message' => '場地預約已核准']);
     }
 
+    // POST /api/venue-bookings/{id}/return
+    public function returnBooking(Request $r, $id) {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
+        }
+        $r->validate(['reason' => 'required|string|min:1']);
+        $b = VenueBooking::findOrFail($id);
+        $b->update([
+            'status'        => 'returned',
+            'reject_reason' => $r->reason,
+            'reviewed_by'   => $user->id,
+            'reviewed_at'   => now(),
+        ]);
+        return response()->json(['success' => true, 'message' => '場地預約已退件，請申請人修改後重新送出']);
+    }
+
     // POST /api/venue-bookings/{id}/reject
     public function reject(Request $r, $id) {
         // 只有 admin（課指組）可以審核
@@ -164,10 +181,12 @@ class VenueBookingController extends Controller {
             return response()->json(['error' => '無權進行此操作，只有課指組可以審核'], 403);
         }
 
+        $r->validate(['reason' => 'required|string|min:1']);
+
         $b = VenueBooking::findOrFail($id);
         $b->update([
             'status'        => 'rejected',
-            'reject_reason' => $r->reason ?? '場地不符需求',
+            'reject_reason' => $r->reason,
             'reviewed_by'   => $user->id,
             'reviewed_at'   => now(),
         ]);

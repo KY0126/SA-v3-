@@ -5,9 +5,9 @@ use Illuminate\Database\Eloquent\Model;
 class EquipmentLoan extends Model
 {
     protected $fillable = [
-        'serial_no', 'borrower_id', 'activity_application_id',
+        'serial_no', 'borrower_id', 'unit_code', 'activity_application_id',
         'borrow_date', 'expected_return_date', 'actual_return_date',
-        'status', 'purpose', 'approved_by', 'approved_at',
+        'status', 'purpose', 'reject_reason', 'approved_by', 'approved_at',
     ];
 
     protected $casts = ['approved_at' => 'datetime'];

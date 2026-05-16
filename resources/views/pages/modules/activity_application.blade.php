@@ -141,7 +141,29 @@
   </div>
 </div>
 
-{{-- Reject reason modal (Task 1: forced non-empty input) --}}
+{{-- Return reason modal (forced non-empty input) --}}
+<div id="aa-return-modal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center">
+  <div class="bg-white rounded-fju-lg p-6 w-full max-w-md mx-4 shadow-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-yellow-600 text-lg"><i class="fas fa-undo-alt mr-2"></i>退件活動申請</h3>
+      <button onclick="closeReturnModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <p class="text-sm text-gray-500 mb-3">退件原因為必填，申請人將收到通知並可修改後重新送出。</p>
+    <textarea id="aa-return-reason" rows="4" placeholder="請輸入退件原因..."
+      class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm resize-none focus:border-yellow-400 outline-none"></textarea>
+    <div id="aa-return-error" class="hidden mt-2 text-red-500 text-xs">
+      <i class="fas fa-exclamation-circle mr-1"></i>退件原因不可空白
+    </div>
+    <div class="flex gap-2 mt-4">
+      <button onclick="confirmReturn()" class="flex-1 py-2.5 rounded-fju bg-yellow-400 text-fju-blue text-sm font-bold hover:bg-yellow-500">
+        <i class="fas fa-undo mr-1"></i>確認退件
+      </button>
+      <button onclick="closeReturnModal()" class="flex-1 py-2.5 rounded-fju border border-gray-200 text-sm text-gray-500">取消</button>
+    </div>
+  </div>
+</div>
+
+{{-- Reject reason modal (forced non-empty input) --}}
 <div id="aa-reject-modal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center">
   <div class="bg-white rounded-fju-lg p-6 w-full max-w-md mx-4 shadow-2xl">
     <div class="flex items-center justify-between mb-4">
@@ -164,7 +186,10 @@
 </div>
 
 <script>
-  const IS_ADMIN = '{{ $role ?? "student" }}' === 'admin';
+  const SERVER_ROLE = '{{ $role ?? "student" }}';
+  const URL_PARAMS = new URLSearchParams(window.location.search || '');
+  const ROLE = URL_PARAMS.get('role') || SERVER_ROLE;
+  const IS_ADMIN = ROLE === 'admin';
   let allApps = [],
     currentAaFilter = 'all',
     currentDetailId = null;
@@ -340,7 +365,7 @@
     pdfBtn.classList.remove('hidden');
 
     // Show review actions for admin only on submitted applications
-    const role = '{{ $role ?? "student" }}';
+    const role = ROLE;
     const canReview = (role === 'admin') && a.status === 'submitted';
     const hasCancellationPending = (role === 'admin') && a.status === 'approved' && a.cancellation_status === 'pending';
     const isApplicant = (a.applicant_id === 1); // 假設目前使用者id是1，實際應由後端提供
@@ -379,6 +404,8 @@
     } else {
       document.getElementById('aa-review-actions').classList.add('hidden');
     }
+
+    document.getElementById('aa-detail-modal').classList.remove('hidden');
   }
 
   function closeDetailModal() {
@@ -408,19 +435,32 @@
   }
 
   function doReturn() {
-    const reason = prompt('退件原因（將通知申請人修改）：');
-    if (reason === null) return;
+    document.getElementById('aa-return-reason').value = '';
+    document.getElementById('aa-return-error').classList.add('hidden');
+    document.getElementById('aa-return-modal').classList.remove('hidden');
+  }
+
+  function closeReturnModal() {
+    document.getElementById('aa-return-modal').classList.add('hidden');
+  }
+
+  function confirmReturn() {
+    const reason = document.getElementById('aa-return-reason').value.trim();
+    if (!reason) {
+      document.getElementById('aa-return-error').classList.remove('hidden');
+      document.getElementById('aa-return-reason').focus();
+      return;
+    }
+    document.getElementById('aa-return-error').classList.add('hidden');
     fetch(`/api/activity-applications/${currentDetailId}/return`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        reviewer_id: 1,
-        reason
-      }),
+      body: JSON.stringify({ reviewer_id: 1, reason }),
     }).then(r => r.json()).then(res => {
+      closeReturnModal();
       closeDetailModal();
       loadApps();
       showToast(res.message || '已退件');
@@ -485,8 +525,17 @@
   }
 
   function doRejectCancellation() {
-    const reason = prompt('拒絕取消的原因：');
-    if (reason === null) return;
+    let reason = '';
+    while (true) {
+      reason = prompt('拒絕取消的原因（必填）：');
+      if (reason === null) return;
+      reason = reason.trim();
+      if (!reason) {
+        alert('拒絕原因為必填');
+        continue;
+      }
+      break;
+    }
     fetch(`/api/activity-applications/${currentDetailId}/reject-cancellation`, {
       method: 'POST',
       headers: {

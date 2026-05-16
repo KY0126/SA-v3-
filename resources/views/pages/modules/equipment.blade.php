@@ -38,25 +38,31 @@
   {{-- Status filter tabs for loans --}}
   <div id="adm-loan-section">
     <div class="flex gap-2 flex-wrap">
-      @foreach(['all'=>'全部','pending'=>'待審核','approved'=>'已核准','picked_up'=>'使用中','returned'=>'已歸還','rejected'=>'已拒絕'] as $k=>$v)
+      @foreach(['all'=>'全部','pending'=>'待審核','approved'=>'已核准','picked_up'=>'使用中','returned'=>'已歸還','returned_review'=>'已退件','rejected'=>'已拒絕'] as $k=>$v)
       <button onclick="filterLoans('{{$k}}')" class="loan-filter px-4 py-2 rounded-fju text-sm {{ $k==='all'?'bg-fju-blue text-white':'bg-gray-100 text-gray-500' }}" data-f="{{$k}}">{{$v}}</button>
       @endforeach
     </div>
     {{-- Loan list table --}}
     <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
-      <div id="loan-admin-list"><div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div></div>
+      <div id="loan-admin-list">
+        <div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div>
+      </div>
     </div>
   </div>
 
   {{-- Admin Ranking View --}}
   <div id="adm-rank-view" class="hidden bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-trophy mr-2 text-fju-yellow"></i>熱門器材借用排行榜（近 3 個月）</h3></div>
+    <div class="px-5 py-3 border-b border-gray-100">
+      <h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-trophy mr-2 text-fju-yellow"></i>熱門器材借用排行榜（近 3 個月）</h3>
+    </div>
     <div id="adm-rank-body" class="p-4 space-y-2"></div>
   </div>
 
   {{-- Admin History View --}}
   <div id="adm-history-view" class="hidden bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-history mr-2 text-fju-yellow"></i>過往借用紀錄</h3></div>
+    <div class="px-5 py-3 border-b border-gray-100">
+      <h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-history mr-2 text-fju-yellow"></i>過往借用紀錄</h3>
+    </div>
     <div id="adm-history-body"></div>
   </div>
 
@@ -70,7 +76,9 @@
         @endforeach
         <input id="eq-search" oninput="renderEquipment()" type="text" placeholder="搜尋器材..." class="ml-auto pl-4 pr-4 py-1.5 rounded-fju border border-gray-200 text-xs w-44 focus:border-fju-blue outline-none">
       </div>
-      <div id="equipment-table"><div class="p-6 text-center text-gray-400">載入中...</div></div>
+      <div id="equipment-table">
+        <div class="p-6 text-center text-gray-400">載入中...</div>
+      </div>
     </div>
   </div>
 
@@ -101,18 +109,26 @@
   </div>
 
   <div id="eq-main-list" class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
-    <div id="equipment-table"><div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div></div>
+    <div id="equipment-table">
+      <div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div>
+    </div>
   </div>
 
   {{-- Ranking View --}}
   <div id="eq-rank-view" class="hidden bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-trophy mr-2 text-fju-yellow"></i>熱門器材借用排行榜（近 3 個月）</h3></div>
-    <div id="eq-rank-body" class="p-4 space-y-2"><div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div></div>
+    <div class="px-5 py-3 border-b border-gray-100">
+      <h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-trophy mr-2 text-fju-yellow"></i>熱門器材借用排行榜（近 3 個月）</h3>
+    </div>
+    <div id="eq-rank-body" class="p-4 space-y-2">
+      <div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div>
+    </div>
   </div>
 
   {{-- History View --}}
   <div id="eq-history-view" class="hidden bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-100"><h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-history mr-2 text-fju-yellow"></i>過往借用紀錄</h3></div>
+    <div class="px-5 py-3 border-b border-gray-100">
+      <h3 class="font-bold text-fju-blue text-sm"><i class="fas fa-history mr-2 text-fju-yellow"></i>過往借用紀錄</h3>
+    </div>
     <div id="eq-history-body"></div>
   </div>
 
@@ -120,7 +136,9 @@
   <div>
     <button onclick="toggleMyLoans()" class="text-sm text-fju-blue underline"><i class="fas fa-history mr-1"></i>我的借用紀錄</button>
     <div id="my-loans-panel" class="hidden mt-3 bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
-      <div id="my-loans-table"><div class="p-6 text-center text-gray-400">載入中...</div></div>
+      <div id="my-loans-table">
+        <div class="p-6 text-center text-gray-400">載入中...</div>
+      </div>
     </div>
   </div>
   @endif
@@ -132,12 +150,12 @@
   <div class="bg-white rounded-fju-lg p-6 w-full max-w-lg mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
     <h3 class="font-bold text-fju-blue text-lg mb-4"><i class="fas fa-cart-plus mr-2 text-fju-yellow"></i>批次借用申請</h3>
     <div id="borrow-cart" class="space-y-2 mb-4"></div>
-  <div class="text-xs text-gray-500 mb-4">
-    <span class="font-semibold">提醒：</span>批次借用前請先閱讀
-    <button type="button" onclick="openFlowModal()" class="underline text-fju-blue">借用流程</button>
-    及
-    <button type="button" onclick="openPenaltyModal()" class="underline text-fju-blue">違規記點</button>。
-  </div>
+    <div class="text-xs text-gray-500 mb-4">
+      <span class="font-semibold">提醒：</span>批次借用前請先閱讀
+      <button type="button" onclick="openFlowModal()" class="underline text-fju-blue">借用流程</button>
+      及
+      <button type="button" onclick="openPenaltyModal()" class="underline text-fju-blue">違規記點</button>。
+    </div>
     <div class="space-y-3">
       <div>
         <label class="text-xs text-gray-400">單位代碼 <span class="text-red-400">*</span></label>
@@ -182,6 +200,24 @@
     </div>
     <div id="loan-detail-body" class="space-y-3 text-sm"></div>
     <div id="loan-review-actions" class="hidden mt-4 space-y-2"></div>
+  </div>
+</div>
+
+{{-- Return loan modal (admin, forced non-empty reason) --}}
+<div id="loan-return-modal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center">
+  <div class="bg-white rounded-fju-lg p-6 w-full max-w-md mx-4 shadow-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-yellow-600 text-lg"><i class="fas fa-undo-alt mr-2"></i>退件借用申請</h3>
+      <button onclick="closeLoanReturnModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <p class="text-sm text-gray-500 mb-3">退件原因為必填，申請人將收到通知並可修改後重新送出，器材將自動釋出。</p>
+    <textarea id="loan-return-reason" rows="3" placeholder="請輸入退件原因..."
+      class="w-full px-4 py-2 rounded-fju border border-gray-200 text-sm resize-none focus:border-yellow-400 outline-none"></textarea>
+    <div id="loan-return-error" class="hidden mt-2 text-red-500 text-xs"><i class="fas fa-exclamation-circle mr-1"></i>退件原因不可空白</div>
+    <div class="flex gap-2 mt-4">
+      <button onclick="confirmLoanAdminReturn()" class="flex-1 py-2.5 rounded-fju bg-yellow-400 text-fju-blue text-sm font-bold hover:bg-yellow-500"><i class="fas fa-undo mr-1"></i>確認退件</button>
+      <button onclick="closeLoanReturnModal()" class="flex-1 py-2.5 rounded-fju border border-gray-200 text-sm text-gray-500">取消</button>
+    </div>
   </div>
 </div>
 
@@ -388,27 +424,51 @@
       <div id="guide-page-1" class="space-y-4">
         <div class="flex gap-4 p-4 rounded-fju-lg border border-gray-100 bg-fju-bg">
           <div class="shrink-0 w-9 h-9 rounded-full bg-fju-blue flex items-center justify-center text-white font-black text-sm">1</div>
-          <div><div class="font-bold text-fju-blue text-sm mb-1">考取器材證</div><div class="text-xs text-gray-500">・社團學會：<b class="text-fju-blue">一年</b>　・行政單位：<b class="text-fju-blue">兩年</b></div></div>
+          <div>
+            <div class="font-bold text-fju-blue text-sm mb-1">考取器材證</div>
+            <div class="text-xs text-gray-500">・社團學會：<b class="text-fju-blue">一年</b>　・行政單位：<b class="text-fju-blue">兩年</b></div>
+          </div>
         </div>
         <div class="flex justify-center text-gray-300"><i class="fas fa-chevron-down"></i></div>
         <div class="flex gap-4 p-4 rounded-fju-lg border border-gray-100 bg-fju-bg">
           <div class="shrink-0 w-9 h-9 rounded-full bg-fju-blue flex items-center justify-center text-white font-black text-sm">2</div>
-          <div><div class="font-bold text-fju-blue text-sm mb-1">填寫器材申請表</div><div class="text-xs text-gray-500 space-y-0.5"><div>・至課指組網站下載器材借用申請表</div><div>・由 <b class="text-fju-blue">【輔導助教】</b> 或 <b class="text-fju-blue">【行政單位主管】</b> 蓋章核可</div></div></div>
+          <div>
+            <div class="font-bold text-fju-blue text-sm mb-1">填寫器材申請表</div>
+            <div class="text-xs text-gray-500 space-y-0.5">
+              <div>・至課指組網站下載器材借用申請表</div>
+              <div>・由 <b class="text-fju-blue">【輔導助教】</b> 或 <b class="text-fju-blue">【行政單位主管】</b> 蓋章核可</div>
+            </div>
+          </div>
         </div>
         <div class="flex justify-center text-gray-300"><i class="fas fa-chevron-down"></i></div>
         <div class="flex gap-4 p-4 rounded-fju-lg border border-gray-100 bg-fju-bg">
           <div class="shrink-0 w-9 h-9 rounded-full bg-fju-blue flex items-center justify-center text-white font-black text-sm">3</div>
-          <div><div class="font-bold text-fju-blue text-sm mb-1">至課指組預約</div><div class="text-xs text-gray-500 space-y-0.5"><div>・最早領取前 <b class="text-fju-blue">30 日</b>，最晚領取前 <b class="text-fju-blue">4 個工作天</b></div><div class="text-gray-400">※ 星期五領：星期一最後預約　※ 星期一領：上週二最後預約</div></div></div>
+          <div>
+            <div class="font-bold text-fju-blue text-sm mb-1">至課指組預約</div>
+            <div class="text-xs text-gray-500 space-y-0.5">
+              <div>・最早領取前 <b class="text-fju-blue">30 日</b>，最晚領取前 <b class="text-fju-blue">4 個工作天</b></div>
+              <div class="text-gray-400">※ 星期五領：星期一最後預約　※ 星期一領：上週二最後預約</div>
+            </div>
+          </div>
         </div>
         <div class="flex justify-center text-gray-300"><i class="fas fa-chevron-down"></i></div>
         <div class="flex gap-4 p-4 rounded-fju-lg border border-gray-100 bg-fju-bg">
           <div class="shrink-0 w-9 h-9 rounded-full bg-fju-blue flex items-center justify-center text-white font-black text-sm">4</div>
-          <div><div class="font-bold text-fju-blue text-sm mb-1">領取器材</div><div class="text-xs text-gray-500 space-y-0.5"><div>・攜帶 <b class="text-fju-blue">器材證（限本人）</b> 及 <b class="text-fju-blue">器材申請表（黃單）</b></div><div class="text-fju-green font-medium">確認品項、數量、狀況無問題後即可領取</div></div></div>
+          <div>
+            <div class="font-bold text-fju-blue text-sm mb-1">領取器材</div>
+            <div class="text-xs text-gray-500 space-y-0.5">
+              <div>・攜帶 <b class="text-fju-blue">器材證（限本人）</b> 及 <b class="text-fju-blue">器材申請表（黃單）</b></div>
+              <div class="text-fju-green font-medium">確認品項、數量、狀況無問題後即可領取</div>
+            </div>
+          </div>
         </div>
         <div class="flex justify-center text-gray-300"><i class="fas fa-chevron-down"></i></div>
         <div class="flex gap-4 p-4 rounded-fju-lg border border-gray-100 bg-fju-bg">
           <div class="shrink-0 w-9 h-9 rounded-full bg-fju-yellow flex items-center justify-center text-fju-blue font-black text-sm">5</div>
-          <div><div class="font-bold text-fju-blue text-sm mb-1">歸還器材</div><div class="text-xs text-gray-500">・工讀生確認品項、數量、狀況無問題後歸還，並取回 <b class="text-fju-blue">器材證</b> 與 <b class="text-fju-blue">申請表</b></div></div>
+          <div>
+            <div class="font-bold text-fju-blue text-sm mb-1">歸還器材</div>
+            <div class="text-xs text-gray-500">・工讀生確認品項、數量、狀況無問題後歸還，並取回 <b class="text-fju-blue">器材證</b> 與 <b class="text-fju-blue">申請表</b></div>
+          </div>
         </div>
       </div>
       {{-- Page 2: Penalty --}}
@@ -425,10 +485,22 @@
           <div class="text-xs text-gray-500 space-y-1">
             <div>・1 點 = 4 小時勞動服務，須一次完成，不得分次進行</div>
             <div class="grid grid-cols-4 gap-1 mt-1.5">
-              <div class="text-center bg-white rounded-fju border border-gray-100 p-1.5"><div class="font-bold text-fju-blue">1人</div><div class="text-gray-400">4h/人</div></div>
-              <div class="text-center bg-white rounded-fju border border-gray-100 p-1.5"><div class="font-bold text-fju-blue">2人</div><div class="text-gray-400">2h/人</div></div>
-              <div class="text-center bg-white rounded-fju border border-gray-100 p-1.5"><div class="font-bold text-fju-blue">4人</div><div class="text-gray-400">1h/人</div></div>
-              <div class="text-center bg-white rounded-fju border border-gray-100 p-1.5"><div class="font-bold text-fju-blue">8人</div><div class="text-gray-400">0.5h/人</div></div>
+              <div class="text-center bg-white rounded-fju border border-gray-100 p-1.5">
+                <div class="font-bold text-fju-blue">1人</div>
+                <div class="text-gray-400">4h/人</div>
+              </div>
+              <div class="text-center bg-white rounded-fju border border-gray-100 p-1.5">
+                <div class="font-bold text-fju-blue">2人</div>
+                <div class="text-gray-400">2h/人</div>
+              </div>
+              <div class="text-center bg-white rounded-fju border border-gray-100 p-1.5">
+                <div class="font-bold text-fju-blue">4人</div>
+                <div class="text-gray-400">1h/人</div>
+              </div>
+              <div class="text-center bg-white rounded-fju border border-gray-100 p-1.5">
+                <div class="font-bold text-fju-blue">8人</div>
+                <div class="text-gray-400">0.5h/人</div>
+              </div>
             </div>
           </div>
         </div>
@@ -463,55 +535,83 @@
 </div>
 
 <script>
-const IS_ADMIN = {{ in_array($role ?? 'student', ['admin']) ? 'true' : 'false' }};
-let allEquipment = [], currentFilter = 'all', cart = {};
-let allLoans = [], currentLoanFilter = 'all', currentLoanId = null;
-let currentEqView = 'list', allLoansPublic = null;
+  const SERVER_ROLE = '{{ $role ?? "student" }}';
+  const URL_PARAMS = new URLSearchParams(window.location.search || '');
+  const ROLE = URL_PARAMS.get('role') || SERVER_ROLE;
+  const IS_ADMIN = ROLE === 'admin';
+  let allEquipment = [],
+    currentFilter = 'all',
+    cart = {};
+  let allLoans = [],
+    currentLoanFilter = 'all',
+    currentLoanId = null;
+  let currentEqView = 'list',
+    allLoansPublic = null;
 
-function setEqView(v) {
-  currentEqView = v;
-  document.querySelectorAll('.eq-tab').forEach(b => {
-    b.classList.remove('bg-fju-blue','text-white'); b.classList.add('bg-gray-100','text-gray-500');
-  });
-  const tab = document.getElementById('eq-tab-'+v);
-  tab?.classList.add('bg-fju-blue','text-white'); tab?.classList.remove('bg-gray-100','text-gray-500');
-  document.getElementById('eq-filter-bar')?.classList.toggle('hidden', v !== 'list');
-  document.getElementById('eq-main-list')?.classList.toggle('hidden', v !== 'list');
-  document.getElementById('eq-rank-view')?.classList.toggle('hidden', v !== 'rank');
-  document.getElementById('eq-history-view')?.classList.toggle('hidden', v !== 'history');
-  if (v === 'rank' || v === 'history') {
-    loadAllLoansIfNeeded(() => { if (v==='rank') renderEqRanking(); else renderEqHistory(); });
-  }
-}
-
-function loadAllLoansIfNeeded(cb) {
-  if (allLoansPublic !== null) { cb(); return; }
-  fetch('/api/equipment-loans').then(r=>r.json()).then(res => { allLoansPublic = res.data||[]; cb(); });
-}
-
-function renderEqRanking() {
-  const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth()-3);
-  const cutoffStr = cutoff.toISOString().split('T')[0];
-  const counts = {}, eqNames = {};
-  allLoansPublic.forEach(loan => {
-    const d = loan.borrow_date || (loan.created_at||'').split('T')[0] || '';
-    if (d && d < cutoffStr) return;
-    (loan.details||[]).forEach(detail => {
-      const id = detail.equipment_id;
-      const name = detail.equipment?.name || '設備 #'+id;
-      counts[id] = (counts[id]||0) + (detail.quantity||1);
-      eqNames[id] = name;
+  function setEqView(v) {
+    currentEqView = v;
+    document.querySelectorAll('.eq-tab').forEach(b => {
+      b.classList.remove('bg-fju-blue', 'text-white');
+      b.classList.add('bg-gray-100', 'text-gray-500');
     });
-  });
-  const ranked = Object.keys(counts).map(k=>({id:k,name:eqNames[k],count:counts[k]})).sort((a,b)=>b.count-a.count).slice(0,10);
-  const el = document.getElementById('eq-rank-body');
-  if (!ranked.length) { el.innerHTML='<div class="p-8 text-center text-gray-400">近 3 個月內暫無借用紀錄</div>'; return; }
-  const medals=['🥇','🥈','🥉'];
-  const medalBg=['bg-yellow-50 border-yellow-200','bg-gray-50 border-gray-300','bg-orange-50 border-orange-200'];
-  el.innerHTML = ranked.map((item,i)=>{
-    const cls = i<3 ? medalBg[i] : 'bg-white border-gray-100';
-    const rank = i<3 ? `<span class="text-2xl">${medals[i]}</span>` : `<span class="text-xl font-black text-gray-300">#${i+1}</span>`;
-    return `<div class="flex items-center justify-between p-4 border rounded-fju ${cls}">
+    const tab = document.getElementById('eq-tab-' + v);
+    tab?.classList.add('bg-fju-blue', 'text-white');
+    tab?.classList.remove('bg-gray-100', 'text-gray-500');
+    document.getElementById('eq-filter-bar')?.classList.toggle('hidden', v !== 'list');
+    document.getElementById('eq-main-list')?.classList.toggle('hidden', v !== 'list');
+    document.getElementById('eq-rank-view')?.classList.toggle('hidden', v !== 'rank');
+    document.getElementById('eq-history-view')?.classList.toggle('hidden', v !== 'history');
+    if (v === 'rank' || v === 'history') {
+      loadAllLoansIfNeeded(() => {
+        if (v === 'rank') renderEqRanking();
+        else renderEqHistory();
+      });
+    }
+  }
+
+  function loadAllLoansIfNeeded(cb) {
+    if (allLoansPublic !== null) {
+      cb();
+      return;
+    }
+    fetch('/api/equipment-loans').then(r => r.json()).then(res => {
+      allLoansPublic = res.data || [];
+      cb();
+    });
+  }
+
+  function renderEqRanking() {
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - 3);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    const counts = {},
+      eqNames = {};
+    allLoansPublic.forEach(loan => {
+      const d = loan.borrow_date || (loan.created_at || '').split('T')[0] || '';
+      if (d && d < cutoffStr) return;
+      (loan.details || []).forEach(detail => {
+        const id = detail.equipment_id;
+        const name = detail.equipment?.name || '設備 #' + id;
+        counts[id] = (counts[id] || 0) + (detail.quantity || 1);
+        eqNames[id] = name;
+      });
+    });
+    const ranked = Object.keys(counts).map(k => ({
+      id: k,
+      name: eqNames[k],
+      count: counts[k]
+    })).sort((a, b) => b.count - a.count).slice(0, 10);
+    const el = document.getElementById('eq-rank-body');
+    if (!ranked.length) {
+      el.innerHTML = '<div class="p-8 text-center text-gray-400">近 3 個月內暫無借用紀錄</div>';
+      return;
+    }
+    const medals = ['🥇', '🥈', '🥉'];
+    const medalBg = ['bg-yellow-50 border-yellow-200', 'bg-gray-50 border-gray-300', 'bg-orange-50 border-orange-200'];
+    el.innerHTML = ranked.map((item, i) => {
+      const cls = i < 3 ? medalBg[i] : 'bg-white border-gray-100';
+      const rank = i < 3 ? `<span class="text-2xl">${medals[i]}</span>` : `<span class="text-xl font-black text-gray-300">#${i+1}</span>`;
+      return `<div class="flex items-center justify-between p-4 border rounded-fju ${cls}">
       <div class="flex items-center gap-4">
         <div class="w-12 text-center shrink-0">${rank}</div>
         <div><div class="font-bold text-fju-blue">${item.name}</div><div class="text-xs text-gray-400">設備 ID ${item.id}</div></div>
@@ -521,72 +621,79 @@ function renderEqRanking() {
         <div class="text-xs text-gray-400">次借用</div>
       </div>
     </div>`;
-  }).join('');
-}
+    }).join('');
+  }
 
-function renderEqHistory() {
-  const sorted = [...allLoansPublic].sort((a,b)=>{
-    const da=a.borrow_date||(a.created_at||'').split('T')[0]||'';
-    const db=b.borrow_date||(b.created_at||'').split('T')[0]||'';
-    return db.localeCompare(da)||(b.id-a.id);
-  });
-  const el = document.getElementById('eq-history-body');
-  if (!sorted.length) { el.innerHTML='<div class="p-8 text-center text-gray-400">暫無歷史紀錄</div>'; return; }
-  el.innerHTML = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">借用人</th><th class="p-4">器材</th><th class="p-4">借用日期</th><th class="p-4">狀態</th></tr></thead><tbody>'+
-    sorted.map(l=>{
-      const names = (l.details||[]).map(d=>d.equipment?.name||'').filter(Boolean).join('、')||'—';
-      return `<tr class="border-t border-gray-50 hover:bg-gray-50">
+  function renderEqHistory() {
+    const sorted = [...allLoansPublic].sort((a, b) => {
+      const da = a.borrow_date || (a.created_at || '').split('T')[0] || '';
+      const db = b.borrow_date || (b.created_at || '').split('T')[0] || '';
+      return db.localeCompare(da) || (b.id - a.id);
+    });
+    const el = document.getElementById('eq-history-body');
+    if (!sorted.length) {
+      el.innerHTML = '<div class="p-8 text-center text-gray-400">暫無歷史紀錄</div>';
+      return;
+    }
+    el.innerHTML = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">借用人</th><th class="p-4">器材</th><th class="p-4">借用日期</th><th class="p-4">狀態</th></tr></thead><tbody>' +
+      sorted.map(l => {
+        const names = (l.details || []).map(d => d.equipment?.name || '').filter(Boolean).join('、') || '—';
+        return `<tr class="border-t border-gray-50 hover:bg-gray-50">
         <td class="p-4 font-medium text-fju-blue">${l.borrower?.name||l.borrower_id||'—'}</td>
         <td class="p-4 text-xs text-gray-600 max-w-[200px] truncate" title="${names}">${names}</td>
         <td class="p-4 text-xs text-gray-500">${l.borrow_date||'—'}</td>
         <td class="p-4">${loanStatusBadge(l.status)}</td>
       </tr>`;
-    }).join('')+'</tbody></table>';
-}
+      }).join('') + '</tbody></table>';
+  }
 
-// ─── Equipment helpers ───────────────────────────────────────────────────
-function loanStatusBadge(s) {
-  return ({
-    pending:   '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fef9c3;color:#a16207;">待審核</span>',
-    approved:  '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#dcfce7;color:#15803d;">已核准</span>',
-    picked_up: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#dbeafe;color:#1d4ed8;">使用中</span>',
-    returned:  '<span class="px-2 py-1 rounded-fju text-xs bg-gray-100 text-gray-500">已歸還</span>',
-    rejected:  '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fee2e2;color:#dc2626;">已拒絕</span>',
-    overdue:   '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fde8d8;color:#c2410c;">逾期</span>',
-  })[s] || `<span class="text-xs text-gray-400">${s}</span>`;
-}
+  // ─── Equipment helpers ───────────────────────────────────────────────────
+  function loanStatusBadge(s) {
+    return ({
+      pending: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fef9c3;color:#a16207;">待審核</span>',
+      approved: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#dcfce7;color:#15803d;">已核准</span>',
+      picked_up: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#dbeafe;color:#1d4ed8;">使用中</span>',
+      returned: '<span class="px-2 py-1 rounded-fju text-xs bg-gray-100 text-gray-500">已歸還</span>',
+      returned_review: '<span class="px-2 py-1 rounded-fju text-xs bg-yellow-100 text-yellow-700">已退件</span>',
+      rejected: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fee2e2;color:#dc2626;">已拒絕</span>',
+      overdue: '<span class="px-2 py-1 rounded-fju text-xs font-bold" style="background:#fde8d8;color:#c2410c;">逾期</span>',
+    })[s] || `<span class="text-xs text-gray-400">${s}</span>`;
+  }
 
-function eqStatusBadge(s) {
-  return s === 'available'
-    ? '<span class="px-2 py-1 rounded-fju text-xs bg-green-100 text-green-700">可借用</span>'
-    : s === 'borrowed'
-    ? '<span class="px-2 py-1 rounded-fju text-xs bg-yellow-100 text-yellow-700">已借出</span>'
-    : '<span class="px-2 py-1 rounded-fju text-xs bg-red-100 text-red-600">維修中</span>';
-}
+  function eqStatusBadge(s) {
+    return s === 'available' ?
+      '<span class="px-2 py-1 rounded-fju text-xs bg-green-100 text-green-700">可借用</span>' :
+      s === 'borrowed' ?
+      '<span class="px-2 py-1 rounded-fju text-xs bg-yellow-100 text-yellow-700">已借出</span>' :
+      '<span class="px-2 py-1 rounded-fju text-xs bg-red-100 text-red-600">維修中</span>';
+  }
 
-// ─── Equipment list (shared) ─────────────────────────────────────────────
-function loadEquipment() {
-  fetch('/api/equipment').then(r => r.json()).then(res => { allEquipment = res.data; renderEquipment(); });
-}
+  // ─── Equipment list (shared) ─────────────────────────────────────────────
+  function loadEquipment() {
+    fetch('/api/equipment').then(r => r.json()).then(res => {
+      allEquipment = res.data;
+      renderEquipment();
+    });
+  }
 
-function renderEquipment() {
-  const s    = document.getElementById('eq-search')?.value.toLowerCase() || '';
-  const sort = document.getElementById('eq-sort')?.value || 'code-asc';
-  let data = [...allEquipment];
-  if (currentFilter !== 'all') data = data.filter(e => e.status === currentFilter);
-  if (s) data = data.filter(e =>
-    e.name.toLowerCase().includes(s) || e.code.toLowerCase().includes(s) || (e.category||'').toLowerCase().includes(s)
-  );
-  if (sort === 'name-asc') data.sort((a,b) => a.name.localeCompare(b.name));
-  else if (sort === 'cat') data.sort((a,b) => (a.category||'').localeCompare(b.category||''));
-  else data.sort((a,b) => a.code.localeCompare(b.code));
+  function renderEquipment() {
+    const s = document.getElementById('eq-search')?.value.toLowerCase() || '';
+    const sort = document.getElementById('eq-sort')?.value || 'code-asc';
+    let data = [...allEquipment];
+    if (currentFilter !== 'all') data = data.filter(e => e.status === currentFilter);
+    if (s) data = data.filter(e =>
+      e.name.toLowerCase().includes(s) || e.code.toLowerCase().includes(s) || (e.category || '').toLowerCase().includes(s)
+    );
+    if (sort === 'name-asc') data.sort((a, b) => a.name.localeCompare(b.name));
+    else if (sort === 'cat') data.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+    else data.sort((a, b) => a.code.localeCompare(b.code));
 
-  const actionCol = IS_ADMIN ? '' : '<th class="p-4">操作</th>';
-  document.getElementById('equipment-table').innerHTML =
-    '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400">' +
-    '<th class="p-4">編號</th><th class="p-4">名稱</th><th class="p-4">分類</th><th class="p-4">狀態</th><th class="p-4">借用人</th>' + actionCol + '</tr></thead><tbody>' +
-    data.map(e =>
-      `<tr class="border-t border-gray-50 hover:bg-gray-50">
+    const actionCol = IS_ADMIN ? '' : '<th class="p-4">操作</th>';
+    document.getElementById('equipment-table').innerHTML =
+      '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400">' +
+      '<th class="p-4">編號</th><th class="p-4">名稱</th><th class="p-4">分類</th><th class="p-4">狀態</th><th class="p-4">借用人</th>' + actionCol + '</tr></thead><tbody>' +
+      data.map(e =>
+        `<tr class="border-t border-gray-50 hover:bg-gray-50">
         <td class="p-4 text-xs text-gray-400">${e.code}</td>
         <td class="p-4 font-medium text-fju-blue">${e.name}${e.cert_type_id ? ' <span class="text-xs text-orange-500 bg-orange-50 px-1 rounded">需證照</span>' : ''}</td>
         <td class="p-4 text-xs">${e.category}</td>
@@ -594,53 +701,63 @@ function renderEquipment() {
         <td class="p-4 text-xs text-gray-500">${e.borrower||'-'}</td>
         ${IS_ADMIN ? '' : `<td class="p-4">${borrowerActionBtn(e)}</td>`}
       </tr>`
-    ).join('') + '</tbody></table>';
-}
+      ).join('') + '</tbody></table>';
+  }
 
-function borrowerActionBtn(e) {
-  if (e.status === 'available') {
-    const inCart = !!cart[e.id];
-    const safeName = e.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-    return `<button onclick="toggleCart(${e.id},'${safeName}',${e.cert_type_id||'null'})"
+  function borrowerActionBtn(e) {
+    if (e.status === 'available') {
+      const inCart = !!cart[e.id];
+      const safeName = e.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      return `<button onclick="toggleCart(${e.id},'${safeName}',${e.cert_type_id||'null'})"
       class="${inCart ? 'btn-blue' : 'btn-yellow'} px-3 py-1 text-xs cart-btn-${e.id}">
       ${inCart ? '<i class="fas fa-minus mr-1"></i>移除' : '<i class="fas fa-plus mr-1"></i>加入'}
     </button>`;
+    }
+    if (e.status === 'borrowed') return `<button onclick="returnSingleEq(${e.id})" class="btn-blue px-3 py-1 text-xs">歸還</button>`;
+    return '-';
   }
-  if (e.status === 'borrowed') return `<button onclick="returnSingleEq(${e.id})" class="btn-blue px-3 py-1 text-xs">歸還</button>`;
-  return '-';
-}
 
-function filterEquipment(f) {
-  if (f) currentFilter = f;
-  document.querySelectorAll('.eq-filter').forEach(b => {
-    b.classList.remove('bg-fju-blue','text-white'); b.classList.add('bg-gray-100','text-gray-500');
-  });
-  const active = document.querySelector(`.eq-filter[data-filter="${currentFilter}"]`);
-  active?.classList.add('bg-fju-blue','text-white'); active?.classList.remove('bg-gray-100','text-gray-500');
-  renderEquipment();
-}
-
-// ─── Admin: Loan management ──────────────────────────────────────────────
-function loadAdminLoans() {
-  fetch('/api/equipment-loans').then(r => r.json()).then(res => {
-    allLoans = res.data || [];
-    renderAdminLoans();
-  });
-}
-
-function renderAdminLoans() {
-  const data = currentLoanFilter === 'all' ? [...allLoans] : allLoans.filter(l => l.status === currentLoanFilter);
-  if (!data.length) {
-    document.getElementById('loan-admin-list').innerHTML = '<div class="p-8 text-center text-gray-400">目前沒有符合的借用申請</div>';
-    return;
+  function filterEquipment(f) {
+    if (f) currentFilter = f;
+    document.querySelectorAll('.eq-filter').forEach(b => {
+      b.classList.remove('bg-fju-blue', 'text-white');
+      b.classList.add('bg-gray-100', 'text-gray-500');
+    });
+    const active = document.querySelector(`.eq-filter[data-filter="${currentFilter}"]`);
+    active?.classList.add('bg-fju-blue', 'text-white');
+    active?.classList.remove('bg-gray-100', 'text-gray-500');
+    renderEquipment();
   }
-  const statusLabel = s => ({ pending:'待審核', approved:'已核准', picked_up:'使用中', returned:'已歸還', rejected:'已拒絕', overdue:'逾期' }[s] || s);
-  document.getElementById('loan-admin-list').innerHTML =
-    '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400">' +
-    '<th class="p-4">序號</th><th class="p-4">借用人</th><th class="p-4">器材</th><th class="p-4">歸還日</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>' +
-    data.map(l => {
-      const names = (l.details||[]).map(d => d.equipment?.name || '').filter(Boolean).join('、') || '—';
-      return `<tr class="border-t border-gray-50 hover:bg-gray-50">
+
+  // ─── Admin: Loan management ──────────────────────────────────────────────
+  function loadAdminLoans() {
+    fetch('/api/equipment-loans').then(r => r.json()).then(res => {
+      allLoans = res.data || [];
+      renderAdminLoans();
+    });
+  }
+
+  function renderAdminLoans() {
+    const data = currentLoanFilter === 'all' ? [...allLoans] : allLoans.filter(l => l.status === currentLoanFilter);
+    if (!data.length) {
+      document.getElementById('loan-admin-list').innerHTML = '<div class="p-8 text-center text-gray-400">目前沒有符合的借用申請</div>';
+      return;
+    }
+    const statusLabel = s => ({
+      pending: '待審核',
+      approved: '已核准',
+      picked_up: '使用中',
+      returned: '已歸還',
+      returned_review: '已退件',
+      rejected: '已拒絕',
+      overdue: '逾期'
+    } [s] || s);
+    document.getElementById('loan-admin-list').innerHTML =
+      '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400">' +
+      '<th class="p-4">序號</th><th class="p-4">借用人</th><th class="p-4">器材</th><th class="p-4">歸還日</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>' +
+      data.map(l => {
+        const names = (l.details || []).map(d => d.equipment?.name || '').filter(Boolean).join('、') || '—';
+        return `<tr class="border-t border-gray-50 hover:bg-gray-50">
         <td class="p-4 text-xs text-gray-400 font-mono">${l.serial_no}</td>
         <td class="p-4 font-medium text-fju-blue">${l.borrower?.name || l.borrower_id}</td>
         <td class="p-4 text-xs text-gray-600 max-w-[180px] truncate" title="${names}">${names}</td>
@@ -648,25 +765,27 @@ function renderAdminLoans() {
         <td class="p-4">${loanStatusBadge(l.status)}</td>
         <td class="p-4"><button onclick="openLoanDetail(${l.id})" class="btn-blue px-3 py-1 text-xs">詳情</button></td>
       </tr>`;
-    }).join('') + '</tbody></table>';
-}
+      }).join('') + '</tbody></table>';
+  }
 
-function filterLoans(f) {
-  currentLoanFilter = f;
-  document.querySelectorAll('.loan-filter').forEach(b => {
-    b.classList.remove('bg-fju-blue','text-white'); b.classList.add('bg-gray-100','text-gray-500');
-  });
-  const btn = document.querySelector(`.loan-filter[data-f="${f}"]`);
-  btn?.classList.add('bg-fju-blue','text-white'); btn?.classList.remove('bg-gray-100','text-gray-500');
-  renderAdminLoans();
-}
+  function filterLoans(f) {
+    currentLoanFilter = f;
+    document.querySelectorAll('.loan-filter').forEach(b => {
+      b.classList.remove('bg-fju-blue', 'text-white');
+      b.classList.add('bg-gray-100', 'text-gray-500');
+    });
+    const btn = document.querySelector(`.loan-filter[data-f="${f}"]`);
+    btn?.classList.add('bg-fju-blue', 'text-white');
+    btn?.classList.remove('bg-gray-100', 'text-gray-500');
+    renderAdminLoans();
+  }
 
-function openLoanDetail(id) {
-  currentLoanId = id;
-  const l = allLoans.find(x => x.id === id);
-  if (!l) return;
-  const names = (l.details||[]).map(d => `<li>${d.equipment?.name || '—'} × ${d.quantity}</li>`).join('');
-  document.getElementById('loan-detail-body').innerHTML = `
+  function openLoanDetail(id) {
+    currentLoanId = id;
+    const l = allLoans.find(x => x.id === id);
+    if (!l) return;
+    const names = (l.details || []).map(d => `<li>${d.equipment?.name || '—'} × ${d.quantity}</li>`).join('');
+    document.getElementById('loan-detail-body').innerHTML = `
     <div class="p-3 rounded-fju bg-fju-bg space-y-1">
       <div class="flex items-center justify-between">
         <span class="text-xs text-gray-400">序號</span>
@@ -691,368 +810,525 @@ function openLoanDetail(id) {
     ${l.reject_reason ? `<div class="p-3 rounded-fju bg-red-50 border border-red-100"><span class="text-xs text-red-400">拒絕原因</span><div class="text-sm text-red-600">${l.reject_reason}</div></div>` : ''}
   `;
 
-  // Review action buttons depending on status
-  const actEl = document.getElementById('loan-review-actions');
-  actEl.innerHTML = '';
-  actEl.classList.add('hidden');
-  if (l.status === 'pending') {
-    actEl.innerHTML = `
+    // Review action buttons depending on status
+    const actEl = document.getElementById('loan-review-actions');
+    actEl.innerHTML = '';
+    actEl.classList.add('hidden');
+    if (l.status === 'pending') {
+      actEl.innerHTML = `
       <div class="flex gap-2">
         <button onclick="doLoanApprove()" class="flex-1 py-2.5 rounded-fju bg-green-500 text-white text-sm font-bold hover:bg-green-600"><i class="fas fa-check mr-1"></i>核准借用</button>
+        <button onclick="doLoanAdminReturn()" class="flex-1 py-2.5 rounded-fju bg-yellow-400 text-fju-blue text-sm font-bold hover:bg-yellow-500"><i class="fas fa-undo mr-1"></i>退件</button>
         <button onclick="doLoanReject()" class="flex-1 py-2.5 rounded-fju bg-red-500 text-white text-sm font-bold hover:bg-red-600"><i class="fas fa-times mr-1"></i>拒絕</button>
       </div>`;
-    actEl.classList.remove('hidden');
-  } else if (l.status === 'approved') {
-    actEl.innerHTML = `
+      actEl.classList.remove('hidden');
+    } else if (l.status === 'approved') {
+      actEl.innerHTML = `
       <button onclick="doLoanPickup()" class="w-full py-2.5 rounded-fju bg-fju-blue text-white text-sm font-bold hover:bg-fju-blue/90"><i class="fas fa-box-open mr-1"></i>確認取件</button>`;
-    actEl.classList.remove('hidden');
-  } else if (l.status === 'picked_up') {
-    actEl.innerHTML = `
+      actEl.classList.remove('hidden');
+    } else if (l.status === 'picked_up') {
+      actEl.innerHTML = `
       <button onclick="doLoanReturn()" class="w-full py-2.5 rounded-fju bg-yellow-400 text-fju-blue text-sm font-bold hover:bg-yellow-500"><i class="fas fa-undo mr-1"></i>確認歸還</button>`;
-    actEl.classList.remove('hidden');
+      actEl.classList.remove('hidden');
+    }
+
+    document.getElementById('loan-detail-modal').classList.remove('hidden');
   }
 
-  document.getElementById('loan-detail-modal').classList.remove('hidden');
-}
-
-function closeLoanDetailModal() { document.getElementById('loan-detail-modal').classList.add('hidden'); }
-
-function doLoanApprove() {
-  if (!confirm('確認核准此借用申請？')) return;
-  fetch(`/api/equipment-loans/${currentLoanId}/approve`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ reviewer_id: 1 }),
-  }).then(r => r.json()).then(res => {
-    closeLoanDetailModal(); loadAdminLoans(); showToast(res.message || '已核准借用申請');
-  });
-}
-
-function doLoanReject() {
-  document.getElementById('loan-reject-reason').value = '';
-  document.getElementById('loan-reject-error').classList.add('hidden');
-  document.getElementById('loan-reject-modal').classList.remove('hidden');
-}
-
-function closeLoanRejectModal() { document.getElementById('loan-reject-modal').classList.add('hidden'); }
-
-function confirmLoanReject() {
-  const reason = document.getElementById('loan-reject-reason').value.trim();
-  if (!reason) {
-    document.getElementById('loan-reject-error').classList.remove('hidden');
-    document.getElementById('loan-reject-reason').focus();
-    return;
+  function closeLoanDetailModal() {
+    document.getElementById('loan-detail-modal').classList.add('hidden');
   }
-  fetch(`/api/equipment-loans/${currentLoanId}/reject`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ reviewer_id: 1, reason }),
-  }).then(r => r.json()).then(res => {
-    closeLoanRejectModal(); closeLoanDetailModal(); loadAdminLoans(); showToast(res.message || '已拒絕');
-  });
-}
 
-function doLoanPickup() {
-  if (!confirm('確認借用人已完成取件？')) return;
-  fetch(`/api/equipment-loans/${currentLoanId}/pickup`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({}),
-  }).then(r => r.json()).then(res => {
-    closeLoanDetailModal(); loadAdminLoans(); showToast(res.message || '取件完成');
-  });
-}
-
-function doLoanReturn() {
-  if (!confirm('確認全部器材已歸還？')) return;
-  fetch(`/api/equipment-loans/${currentLoanId}/return`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({}),
-  }).then(r => r.json()).then(res => {
-    closeLoanDetailModal(); loadAdminLoans(); showToast(res.message || '歸還完成');
-  });
-}
-
-let inventoryLoaded = false;
-function toggleInventory() {
-  const panel = document.getElementById('inventory-panel');
-  panel.classList.toggle('hidden');
-  if (!inventoryLoaded) { loadEquipment(); inventoryLoaded = true; }
-}
-
-// ─── Borrower cart & loan ────────────────────────────────────────────────
-function toggleCart(id, name, certTypeId) {
-  if (!cart[id] && !localStorage.getItem('eq_guide_done')) {
-    openGuideModal({ id, name, certTypeId });
-    return;
+  function doLoanApprove() {
+    if (!confirm('確認核准此借用申請？')) return;
+    fetch(`/api/equipment-loans/${currentLoanId}/approve`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        reviewer_id: 1
+      }),
+    }).then(r => r.json()).then(res => {
+      closeLoanDetailModal();
+      loadAdminLoans();
+      showToast(res.message || '已核准借用申請');
+    });
   }
-  if (cart[id]) { delete cart[id]; } else { cart[id] = { id, name, certTypeId }; }
-  updateCartBadge();
-  renderEquipment();
-}
 
-function updateCartBadge() {
-  const count = Object.keys(cart).length;
-  const el = document.getElementById('cart-count');
-  const btn = document.getElementById('multi-borrow-btn');
-  if (el) el.textContent = count;
-  if (btn) count > 0 ? btn.classList.remove('hidden') : btn.classList.add('hidden');
-}
+  function doLoanAdminReturn() {
+    document.getElementById('loan-return-reason').value = '';
+    document.getElementById('loan-return-error').classList.add('hidden');
+    document.getElementById('loan-return-modal').classList.remove('hidden');
+  }
 
-function openMultiBorrow() {
-  const items = Object.values(cart);
-  if (!items.length) return;
-  _pendingBorrowModal = true;
-  openGuideModal();
-}
+  function closeLoanReturnModal() {
+    document.getElementById('loan-return-modal').classList.add('hidden');
+  }
 
-function showBorrowModal() {
-  const items = Object.values(cart);
-  document.getElementById('borrow-cart').innerHTML = items.map(i =>
-    `<div class="flex items-center justify-between p-2 bg-fju-bg rounded-fju text-sm">
+  function confirmLoanAdminReturn() {
+    const reason = document.getElementById('loan-return-reason').value.trim();
+    if (!reason) {
+      document.getElementById('loan-return-error').classList.remove('hidden');
+      document.getElementById('loan-return-reason').focus();
+      return;
+    }
+    document.getElementById('loan-return-error').classList.add('hidden');
+    fetch(`/api/equipment-loans/${currentLoanId}/return-review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ reviewer_id: 1, reason }),
+    }).then(r => r.json()).then(res => {
+      closeLoanReturnModal();
+      closeLoanDetailModal();
+      loadAdminLoans();
+      showToast(res.message || '已退件');
+    });
+  }
+
+  function doLoanReject() {
+    document.getElementById('loan-reject-reason').value = '';
+    document.getElementById('loan-reject-error').classList.add('hidden');
+    document.getElementById('loan-reject-modal').classList.remove('hidden');
+  }
+
+  function closeLoanRejectModal() {
+    document.getElementById('loan-reject-modal').classList.add('hidden');
+  }
+
+  function confirmLoanReject() {
+    const reason = document.getElementById('loan-reject-reason').value.trim();
+    if (!reason) {
+      document.getElementById('loan-reject-error').classList.remove('hidden');
+      document.getElementById('loan-reject-reason').focus();
+      return;
+    }
+    fetch(`/api/equipment-loans/${currentLoanId}/reject`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        reviewer_id: 1,
+        reason
+      }),
+    }).then(r => r.json()).then(res => {
+      closeLoanRejectModal();
+      closeLoanDetailModal();
+      loadAdminLoans();
+      showToast(res.message || '已拒絕');
+    });
+  }
+
+  function doLoanPickup() {
+    if (!confirm('確認借用人已完成取件？')) return;
+    fetch(`/api/equipment-loans/${currentLoanId}/pickup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({}),
+    }).then(r => r.json()).then(res => {
+      closeLoanDetailModal();
+      loadAdminLoans();
+      showToast(res.message || '取件完成');
+    });
+  }
+
+  function doLoanReturn() {
+    if (!confirm('確認全部器材已歸還？')) return;
+    fetch(`/api/equipment-loans/${currentLoanId}/return`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({}),
+    }).then(r => r.json()).then(res => {
+      closeLoanDetailModal();
+      loadAdminLoans();
+      showToast(res.message || '歸還完成');
+    });
+  }
+
+  let inventoryLoaded = false;
+
+  function toggleInventory() {
+    const panel = document.getElementById('inventory-panel');
+    panel.classList.toggle('hidden');
+    if (!inventoryLoaded) {
+      loadEquipment();
+      inventoryLoaded = true;
+    }
+  }
+
+  // ─── Borrower cart & loan ────────────────────────────────────────────────
+  function toggleCart(id, name, certTypeId) {
+    if (!cart[id] && !localStorage.getItem('eq_guide_done')) {
+      openGuideModal({
+        id,
+        name,
+        certTypeId
+      });
+      return;
+    }
+    if (cart[id]) {
+      delete cart[id];
+    } else {
+      cart[id] = {
+        id,
+        name,
+        certTypeId
+      };
+    }
+    updateCartBadge();
+    renderEquipment();
+  }
+
+  function updateCartBadge() {
+    const count = Object.keys(cart).length;
+    const el = document.getElementById('cart-count');
+    const btn = document.getElementById('multi-borrow-btn');
+    if (el) el.textContent = count;
+    if (btn) count > 0 ? btn.classList.remove('hidden') : btn.classList.add('hidden');
+  }
+
+  function openMultiBorrow() {
+    const items = Object.values(cart);
+    if (!items.length) return;
+    _pendingBorrowModal = true;
+    openGuideModal();
+  }
+
+  function showBorrowModal() {
+    const items = Object.values(cart);
+    document.getElementById('borrow-cart').innerHTML = items.map(i =>
+      `<div class="flex items-center justify-between p-2 bg-fju-bg rounded-fju text-sm">
       <span class="font-medium text-fju-blue">${i.name}</span>
       ${i.certTypeId ? '<span class="text-xs text-orange-500">需證照</span>' : ''}
       <button onclick="toggleCart(${i.id},'${i.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',${i.certTypeId||'null'})" class="text-red-400 text-xs">移除</button>
     </div>`
-  ).join('');
-  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
-  document.getElementById('bw-return').value = tomorrow.toISOString().split('T')[0];
-  document.getElementById('borrow-error').classList.add('hidden');
-  resetUnitCombobox('bw');
-  initUnitCombobox('bw');
-  document.getElementById('borrow-modal').classList.remove('hidden');
-}
-
-function closeBorrowModal() { document.getElementById('borrow-modal').classList.add('hidden'); }
-
-function confirmBorrow() {
-  const items = Object.values(cart);
-  if (!items.length) return;
-  const unitCode = getUnitCode('bw');
-  if (!unitCode) { showBorrowError('請選擇單位代碼'); return; }
-  const returnDate = document.getElementById('bw-return').value;
-  if (!returnDate) { showBorrowError('請填寫預計歸還日'); return; }
-
-  const payload = {
-    borrower_id:          1,
-    unit_code:            unitCode,
-    borrower_name:        document.getElementById('bw-name').value,
-    expected_return_date: returnDate,
-    purpose:              document.getElementById('bw-purpose').value,
-    items:                items.map(i => ({ equipment_id: i.id, quantity: 1 })),
-  };
-
-  const aaSerial = document.getElementById('bw-aa-serial').value.trim();
-  if (aaSerial) {
-    fetch('/api/activity-applications?serial_no=' + encodeURIComponent(aaSerial))
-      .then(r => r.json()).then(res => {
-        const aa = res.data?.find?.(a => a.serial_no === aaSerial);
-        if (aa) payload.activity_application_id = aa.id;
-        submitLoan(payload);
-      });
-  } else {
-    submitLoan(payload);
+    ).join('');
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('bw-return').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('borrow-error').classList.add('hidden');
+    resetUnitCombobox('bw');
+    initUnitCombobox('bw');
+    document.getElementById('borrow-modal').classList.remove('hidden');
   }
-}
 
-function submitLoan(payload) {
-  fetch('/api/equipment-loans', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(payload),
-  }).then(r => r.json()).then(res => {
-    if (res.success) {
-      closeBorrowModal();
-      cart = {};
-      updateCartBadge();
-      loadEquipment();
-      showToast('借用申請已送出！序號：' + res.serial_no);
-    } else {
-      showBorrowError(res.error || '送出失敗，請再試一次');
-    }
-  }).catch(() => showBorrowError('網路錯誤，請稍後再試'));
-}
+  function closeBorrowModal() {
+    document.getElementById('borrow-modal').classList.add('hidden');
+  }
 
-function returnSingleEq(id) {
-  if (!confirm('確認歸還此器材？')) return;
-  fetch('/api/equipment/return', {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ equipment_id: id }),
-  }).then(r => r.json()).then(res => { showToast(res.message); loadEquipment(); });
-}
-
-function showBorrowError(msg) {
-  const el = document.getElementById('borrow-error');
-  el.textContent = msg; el.classList.remove('hidden');
-}
-
-// ─── Borrower: My loans ──────────────────────────────────────────────────
-let myLoansLoaded = false;
-function toggleMyLoans() {
-  const panel = document.getElementById('my-loans-panel');
-  panel.classList.toggle('hidden');
-  if (!myLoansLoaded) { loadMyLoans(); myLoansLoaded = true; }
-}
-
-function loadMyLoans() {
-  fetch('/api/equipment-loans?borrower_id=1').then(r => r.json()).then(res => {
-    const loans = res.data || [];
-    if (!loans.length) {
-      document.getElementById('my-loans-table').innerHTML = '<div class="p-6 text-center text-gray-400">尚無借用紀錄</div>';
+  function confirmBorrow() {
+    const items = Object.values(cart);
+    if (!items.length) return;
+    const unitCode = getUnitCode('bw');
+    if (!unitCode) {
+      showBorrowError('請選擇單位代碼');
       return;
     }
-    const statusLabel = s => ({ pending:'待審核', approved:'已核准', picked_up:'使用中', returned:'已歸還', rejected:'已拒絕', overdue:'逾期' }[s] || s);
-    document.getElementById('my-loans-table').innerHTML =
-      '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">序號</th><th class="p-4">器材清單</th><th class="p-4">歸還日</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>' +
-      loans.map(l => {
-        const names = (l.details||[]).map(d => d.equipment?.name || '').join('、') || '-';
-        const canReturn = l.status === 'picked_up';
-        return `<tr class="border-t border-gray-50 hover:bg-gray-50">
+    const returnDate = document.getElementById('bw-return').value;
+    if (!returnDate) {
+      showBorrowError('請填寫預計歸還日');
+      return;
+    }
+
+    const payload = {
+      borrower_id: 1,
+      unit_code: unitCode,
+      borrower_name: document.getElementById('bw-name').value,
+      expected_return_date: returnDate,
+      purpose: document.getElementById('bw-purpose').value,
+      items: items.map(i => ({
+        equipment_id: i.id,
+        quantity: 1
+      })),
+    };
+
+    const aaSerial = document.getElementById('bw-aa-serial').value.trim();
+    if (aaSerial) {
+      fetch('/api/activity-applications?serial_no=' + encodeURIComponent(aaSerial))
+        .then(r => r.json()).then(res => {
+          const aa = res.data?.find?.(a => a.serial_no === aaSerial);
+          if (aa) payload.activity_application_id = aa.id;
+          submitLoan(payload);
+        });
+    } else {
+      submitLoan(payload);
+    }
+  }
+
+  function submitLoan(payload) {
+    fetch('/api/equipment-loans', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload),
+    }).then(r => r.json()).then(res => {
+      if (res.success) {
+        closeBorrowModal();
+        cart = {};
+        updateCartBadge();
+        loadEquipment();
+        showToast('借用申請已送出！序號：' + res.serial_no);
+      } else {
+        showBorrowError(res.error || '送出失敗，請再試一次');
+      }
+    }).catch(() => showBorrowError('網路錯誤，請稍後再試'));
+  }
+
+  function returnSingleEq(id) {
+    if (!confirm('確認歸還此器材？')) return;
+    fetch('/api/equipment/return', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        equipment_id: id
+      }),
+    }).then(r => r.json()).then(res => {
+      showToast(res.message);
+      loadEquipment();
+    });
+  }
+
+  function showBorrowError(msg) {
+    const el = document.getElementById('borrow-error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  // ─── Borrower: My loans ──────────────────────────────────────────────────
+  let myLoansLoaded = false;
+
+  function toggleMyLoans() {
+    const panel = document.getElementById('my-loans-panel');
+    panel.classList.toggle('hidden');
+    if (!myLoansLoaded) {
+      loadMyLoans();
+      myLoansLoaded = true;
+    }
+  }
+
+  function loadMyLoans() {
+    fetch('/api/equipment-loans?borrower_id=1').then(r => r.json()).then(res => {
+      const loans = res.data || [];
+      if (!loans.length) {
+        document.getElementById('my-loans-table').innerHTML = '<div class="p-6 text-center text-gray-400">尚無借用紀錄</div>';
+        return;
+      }
+      const statusLabel = s => ({
+        pending: '待審核',
+        approved: '已核准',
+        picked_up: '使用中',
+        returned: '已歸還',
+        returned_review: '已退件',
+        rejected: '已拒絕',
+        overdue: '逾期'
+      } [s] || s);
+      document.getElementById('my-loans-table').innerHTML =
+        '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">序號</th><th class="p-4">器材清單</th><th class="p-4">歸還日</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>' +
+        loans.map(l => {
+          const names = (l.details || []).map(d => d.equipment?.name || '').join('、') || '-';
+          const canReturn = l.status === 'picked_up';
+          return `<tr class="border-t border-gray-50 hover:bg-gray-50">
           <td class="p-4 text-xs text-gray-400 font-mono">${l.serial_no}</td>
           <td class="p-4 text-fju-blue font-medium">${names}</td>
           <td class="p-4 text-xs">${l.expected_return_date}</td>
           <td class="p-4">${loanStatusBadge(l.status)}</td>
           <td class="p-4">${canReturn ? `<button onclick="returnLoan(${l.id})" class="btn-blue px-3 py-1 text-xs">批次歸還</button>` : '-'}</td>
         </tr>`;
-      }).join('') + '</tbody></table>';
-  });
-}
+        }).join('') + '</tbody></table>';
+    });
+  }
 
-function returnLoan(id) {
-  if (!confirm('確認批次歸還此申請的所有器材？')) return;
-  fetch(`/api/equipment-loans/${id}/return`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({}),
-  }).then(r => r.json()).then(res => {
-    showToast(res.message);
-    myLoansLoaded = false;
-    loadEquipment();
-    loadMyLoans();
-  });
-}
+  function returnLoan(id) {
+    if (!confirm('確認批次歸還此申請的所有器材？')) return;
+    fetch(`/api/equipment-loans/${id}/return`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({}),
+    }).then(r => r.json()).then(res => {
+      showToast(res.message);
+      myLoansLoaded = false;
+      loadEquipment();
+      loadMyLoans();
+    });
+  }
 
-// ─── Flow / Penalty / Guide Modals ───────────────────────────────────────
-function openFlowModal() { document.getElementById('flow-modal').classList.remove('hidden'); }
-function closeFlowModal() { document.getElementById('flow-modal').classList.add('hidden'); }
-function openPenaltyModal() { document.getElementById('penalty-modal').classList.remove('hidden'); }
-function closePenaltyModal() { document.getElementById('penalty-modal').classList.add('hidden'); }
+  // ─── Flow / Penalty / Guide Modals ───────────────────────────────────────
+  function openFlowModal() {
+    document.getElementById('flow-modal').classList.remove('hidden');
+  }
 
-let _pendingCartAction = null, _pendingBorrowModal = false, _guidePage = 1;
+  function closeFlowModal() {
+    document.getElementById('flow-modal').classList.add('hidden');
+  }
 
-function openGuideModal(pendingAction) {
-  _pendingCartAction = pendingAction;
-  _pendingBorrowModal = pendingAction === undefined ? _pendingBorrowModal : false;
-  _guidePage = 1;
-  document.getElementById('guide-page-1').classList.remove('hidden');
-  document.getElementById('guide-page-2').classList.add('hidden');
-  document.getElementById('guide-title').textContent = '借用流程';
-  document.getElementById('guide-dot-1').className = 'w-2 h-2 rounded-full bg-white transition-all';
-  document.getElementById('guide-dot-2').className = 'w-2 h-2 rounded-full bg-white/30 transition-all';
-  document.getElementById('guide-prev-btn').classList.add('hidden');
-  document.getElementById('guide-next-btn').classList.remove('hidden');
-  document.getElementById('guide-done-btn').classList.add('hidden');
-  document.getElementById('guide-modal').classList.remove('hidden');
-}
+  function openPenaltyModal() {
+    document.getElementById('penalty-modal').classList.remove('hidden');
+  }
 
-function showBorrowModal() {
-  const items = Object.values(cart);
-  document.getElementById('borrow-cart').innerHTML = items.map(i =>
-    `<div class="flex items-center justify-between p-2 bg-fju-bg rounded-fju text-sm">
-      <span class="font-medium text-fju-blue">${i.name}</span>
-      ${i.certTypeId ? '<span class="text-xs text-orange-500">需證照</span>' : ''}
-      <button onclick="toggleCart(${i.id},'${i.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',${i.certTypeId||'null'})" class="text-red-400 text-xs">移除</button>
-    </div>`
-  ).join('');
-  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
-  document.getElementById('bw-return').value = tomorrow.toISOString().split('T')[0];
-  document.getElementById('borrow-error').classList.add('hidden');
-  resetUnitCombobox('bw');
-  initUnitCombobox('bw');
-  document.getElementById('borrow-modal').classList.remove('hidden');
-}
+  function closePenaltyModal() {
+    document.getElementById('penalty-modal').classList.add('hidden');
+  }
 
-function guideNav(dir) {
-  _guidePage += dir;
-  const p1 = document.getElementById('guide-page-1');
-  const p2 = document.getElementById('guide-page-2');
-  if (_guidePage === 1) {
-    p1.classList.remove('hidden'); p2.classList.add('hidden');
+  let _pendingCartAction = null,
+    _pendingBorrowModal = false,
+    _guidePage = 1;
+
+  function openGuideModal(pendingAction) {
+    _pendingCartAction = pendingAction;
+    _pendingBorrowModal = pendingAction === undefined ? _pendingBorrowModal : false;
+    _guidePage = 1;
+    document.getElementById('guide-page-1').classList.remove('hidden');
+    document.getElementById('guide-page-2').classList.add('hidden');
     document.getElementById('guide-title').textContent = '借用流程';
     document.getElementById('guide-dot-1').className = 'w-2 h-2 rounded-full bg-white transition-all';
     document.getElementById('guide-dot-2').className = 'w-2 h-2 rounded-full bg-white/30 transition-all';
     document.getElementById('guide-prev-btn').classList.add('hidden');
     document.getElementById('guide-next-btn').classList.remove('hidden');
     document.getElementById('guide-done-btn').classList.add('hidden');
-  } else {
-    p1.classList.add('hidden'); p2.classList.remove('hidden');
-    document.getElementById('guide-title').textContent = '違規記點規則';
-    document.getElementById('guide-dot-1').className = 'w-2 h-2 rounded-full bg-white/30 transition-all';
-    document.getElementById('guide-dot-2').className = 'w-2 h-2 rounded-full bg-white transition-all';
-    document.getElementById('guide-prev-btn').classList.remove('hidden');
-    document.getElementById('guide-next-btn').classList.add('hidden');
-    document.getElementById('guide-done-btn').classList.remove('hidden');
+    document.getElementById('guide-modal').classList.remove('hidden');
   }
-}
 
-function completeGuide() {
-  localStorage.setItem('eq_guide_done', '1');
-  document.getElementById('guide-modal').classList.add('hidden');
-  if (_pendingCartAction) {
-    const { id, name, certTypeId } = _pendingCartAction;
-    cart[id] = { id, name, certTypeId };
-    _pendingCartAction = null;
-    updateCartBadge();
-    renderEquipment();
+  function showBorrowModal() {
+    const items = Object.values(cart);
+    document.getElementById('borrow-cart').innerHTML = items.map(i =>
+      `<div class="flex items-center justify-between p-2 bg-fju-bg rounded-fju text-sm">
+      <span class="font-medium text-fju-blue">${i.name}</span>
+      ${i.certTypeId ? '<span class="text-xs text-orange-500">需證照</span>' : ''}
+      <button onclick="toggleCart(${i.id},'${i.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',${i.certTypeId||'null'})" class="text-red-400 text-xs">移除</button>
+    </div>`
+    ).join('');
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('bw-return').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('borrow-error').classList.add('hidden');
+    resetUnitCombobox('bw');
+    initUnitCombobox('bw');
+    document.getElementById('borrow-modal').classList.remove('hidden');
   }
-  if (_pendingBorrowModal) {
-    _pendingBorrowModal = false;
-    showBorrowModal();
+
+  function guideNav(dir) {
+    _guidePage += dir;
+    const p1 = document.getElementById('guide-page-1');
+    const p2 = document.getElementById('guide-page-2');
+    if (_guidePage === 1) {
+      p1.classList.remove('hidden');
+      p2.classList.add('hidden');
+      document.getElementById('guide-title').textContent = '借用流程';
+      document.getElementById('guide-dot-1').className = 'w-2 h-2 rounded-full bg-white transition-all';
+      document.getElementById('guide-dot-2').className = 'w-2 h-2 rounded-full bg-white/30 transition-all';
+      document.getElementById('guide-prev-btn').classList.add('hidden');
+      document.getElementById('guide-next-btn').classList.remove('hidden');
+      document.getElementById('guide-done-btn').classList.add('hidden');
+    } else {
+      p1.classList.add('hidden');
+      p2.classList.remove('hidden');
+      document.getElementById('guide-title').textContent = '違規記點規則';
+      document.getElementById('guide-dot-1').className = 'w-2 h-2 rounded-full bg-white/30 transition-all';
+      document.getElementById('guide-dot-2').className = 'w-2 h-2 rounded-full bg-white transition-all';
+      document.getElementById('guide-prev-btn').classList.remove('hidden');
+      document.getElementById('guide-next-btn').classList.add('hidden');
+      document.getElementById('guide-done-btn').classList.remove('hidden');
+    }
   }
-}
 
-// ─── Toast ───────────────────────────────────────────────────────────────
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.className = 'fixed bottom-6 right-6 bg-fju-blue text-white px-5 py-3 rounded-fju shadow-lg text-sm z-50';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
-}
+  function completeGuide() {
+    localStorage.setItem('eq_guide_done', '1');
+    document.getElementById('guide-modal').classList.add('hidden');
+    if (_pendingCartAction) {
+      const {
+        id,
+        name,
+        certTypeId
+      } = _pendingCartAction;
+      cart[id] = {
+        id,
+        name,
+        certTypeId
+      };
+      _pendingCartAction = null;
+      updateCartBadge();
+      renderEquipment();
+    }
+    if (_pendingBorrowModal) {
+      _pendingBorrowModal = false;
+      showBorrowModal();
+    }
+  }
 
-// ─── Admin view tabs ─────────────────────────────────────────────────────
-function setAdminView(v) {
-  document.querySelectorAll('.adm-tab').forEach(b => {
-    b.classList.remove('bg-fju-blue','text-white'); b.classList.add('bg-gray-100','text-gray-500');
-  });
-  const tab = document.getElementById('adm-tab-'+v);
-  tab?.classList.add('bg-fju-blue','text-white'); tab?.classList.remove('bg-gray-100','text-gray-500');
-  document.getElementById('adm-loan-section')?.classList.toggle('hidden', v !== 'list');
-  document.getElementById('adm-rank-view')?.classList.toggle('hidden', v !== 'rank');
-  document.getElementById('adm-history-view')?.classList.toggle('hidden', v !== 'history');
-  if (v === 'rank') renderAdminRanking();
-  if (v === 'history') renderAdminHistory();
-}
+  // ─── Toast ───────────────────────────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'fixed bottom-6 right-6 bg-fju-blue text-white px-5 py-3 rounded-fju shadow-lg text-sm z-50';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
 
-function renderAdminRanking() {
-  const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth()-3);
-  const cutoffStr = cutoff.toISOString().split('T')[0];
-  const counts = {}, eqNames = {};
-  allLoans.forEach(loan => {
-    const d = loan.borrow_date || (loan.created_at||'').split('T')[0] || '';
-    if (d && d < cutoffStr) return;
-    (loan.details||[]).forEach(detail => {
-      const id = detail.equipment_id;
-      const name = detail.equipment?.name || '設備 #'+id;
-      counts[id] = (counts[id]||0) + (detail.quantity||1);
-      eqNames[id] = name;
+  // ─── Admin view tabs ─────────────────────────────────────────────────────
+  function setAdminView(v) {
+    document.querySelectorAll('.adm-tab').forEach(b => {
+      b.classList.remove('bg-fju-blue', 'text-white');
+      b.classList.add('bg-gray-100', 'text-gray-500');
     });
-  });
-  const ranked = Object.keys(counts).map(k=>({id:k,name:eqNames[k],count:counts[k]})).sort((a,b)=>b.count-a.count).slice(0,10);
-  const el = document.getElementById('adm-rank-body');
-  if (!ranked.length) { el.innerHTML='<div class="p-8 text-center text-gray-400">近 3 個月內暫無借用紀錄</div>'; return; }
-  const medals=['🥇','🥈','🥉'];
-  const medalBg=['bg-yellow-50 border-yellow-200','bg-gray-50 border-gray-300','bg-orange-50 border-orange-200'];
-  el.innerHTML = ranked.map((item,i)=>{
-    const cls = i<3 ? medalBg[i] : 'bg-white border-gray-100';
-    const rank = i<3 ? `<span class="text-2xl">${medals[i]}</span>` : `<span class="text-xl font-black text-gray-300">#${i+1}</span>`;
-    return `<div class="flex items-center justify-between p-4 border rounded-fju ${cls}">
+    const tab = document.getElementById('adm-tab-' + v);
+    tab?.classList.add('bg-fju-blue', 'text-white');
+    tab?.classList.remove('bg-gray-100', 'text-gray-500');
+    document.getElementById('adm-loan-section')?.classList.toggle('hidden', v !== 'list');
+    document.getElementById('adm-rank-view')?.classList.toggle('hidden', v !== 'rank');
+    document.getElementById('adm-history-view')?.classList.toggle('hidden', v !== 'history');
+    if (v === 'rank') renderAdminRanking();
+    if (v === 'history') renderAdminHistory();
+  }
+
+  function renderAdminRanking() {
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - 3);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    const counts = {},
+      eqNames = {};
+    allLoans.forEach(loan => {
+      const d = loan.borrow_date || (loan.created_at || '').split('T')[0] || '';
+      if (d && d < cutoffStr) return;
+      (loan.details || []).forEach(detail => {
+        const id = detail.equipment_id;
+        const name = detail.equipment?.name || '設備 #' + id;
+        counts[id] = (counts[id] || 0) + (detail.quantity || 1);
+        eqNames[id] = name;
+      });
+    });
+    const ranked = Object.keys(counts).map(k => ({
+      id: k,
+      name: eqNames[k],
+      count: counts[k]
+    })).sort((a, b) => b.count - a.count).slice(0, 10);
+    const el = document.getElementById('adm-rank-body');
+    if (!ranked.length) {
+      el.innerHTML = '<div class="p-8 text-center text-gray-400">近 3 個月內暫無借用紀錄</div>';
+      return;
+    }
+    const medals = ['🥇', '🥈', '🥉'];
+    const medalBg = ['bg-yellow-50 border-yellow-200', 'bg-gray-50 border-gray-300', 'bg-orange-50 border-orange-200'];
+    el.innerHTML = ranked.map((item, i) => {
+      const cls = i < 3 ? medalBg[i] : 'bg-white border-gray-100';
+      const rank = i < 3 ? `<span class="text-2xl">${medals[i]}</span>` : `<span class="text-xl font-black text-gray-300">#${i+1}</span>`;
+      return `<div class="flex items-center justify-between p-4 border rounded-fju ${cls}">
       <div class="flex items-center gap-4">
         <div class="w-12 text-center shrink-0">${rank}</div>
         <div><div class="font-bold text-fju-blue">${item.name}</div><div class="text-xs text-gray-400">設備 ID ${item.id}</div></div>
@@ -1062,35 +1338,38 @@ function renderAdminRanking() {
         <div class="text-xs text-gray-400">次借用</div>
       </div>
     </div>`;
-  }).join('');
-}
+    }).join('');
+  }
 
-function renderAdminHistory() {
-  const sorted = [...allLoans].sort((a,b)=>{
-    const da=a.borrow_date||(a.created_at||'').split('T')[0]||'';
-    const db=b.borrow_date||(b.created_at||'').split('T')[0]||'';
-    return db.localeCompare(da)||(b.id-a.id);
-  });
-  const el = document.getElementById('adm-history-body');
-  if (!sorted.length) { el.innerHTML='<div class="p-8 text-center text-gray-400">暫無歷史紀錄</div>'; return; }
-  el.innerHTML = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">借用人</th><th class="p-4">器材</th><th class="p-4">借用日期</th><th class="p-4">預計還</th><th class="p-4">狀態</th></tr></thead><tbody>'+
-    sorted.map(l=>{
-      const names = (l.details||[]).map(d=>d.equipment?.name||'').filter(Boolean).join('、')||'—';
-      return `<tr class="border-t border-gray-50 hover:bg-gray-50">
+  function renderAdminHistory() {
+    const sorted = [...allLoans].sort((a, b) => {
+      const da = a.borrow_date || (a.created_at || '').split('T')[0] || '';
+      const db = b.borrow_date || (b.created_at || '').split('T')[0] || '';
+      return db.localeCompare(da) || (b.id - a.id);
+    });
+    const el = document.getElementById('adm-history-body');
+    if (!sorted.length) {
+      el.innerHTML = '<div class="p-8 text-center text-gray-400">暫無歷史紀錄</div>';
+      return;
+    }
+    el.innerHTML = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">借用人</th><th class="p-4">器材</th><th class="p-4">借用日期</th><th class="p-4">預計還</th><th class="p-4">狀態</th></tr></thead><tbody>' +
+      sorted.map(l => {
+        const names = (l.details || []).map(d => d.equipment?.name || '').filter(Boolean).join('、') || '—';
+        return `<tr class="border-t border-gray-50 hover:bg-gray-50">
         <td class="p-4 font-medium text-fju-blue">${l.borrower?.name||l.borrower_id||'—'}</td>
         <td class="p-4 text-xs text-gray-600 max-w-[200px] truncate" title="${names}">${names}</td>
         <td class="p-4 text-xs text-gray-500">${l.borrow_date||'—'}</td>
         <td class="p-4 text-xs text-gray-500">${l.expected_return_date||'—'}</td>
         <td class="p-4">${loanStatusBadge(l.status)}</td>
       </tr>`;
-    }).join('')+'</tbody></table>';
-}
+      }).join('') + '</tbody></table>';
+  }
 
-// ─── Init ────────────────────────────────────────────────────────────────
-if (IS_ADMIN) {
-  loadAdminLoans();
-} else {
-  loadEquipment();
-}
+  // ─── Init ────────────────────────────────────────────────────────────────
+  if (IS_ADMIN) {
+    loadAdminLoans();
+  } else {
+    loadEquipment();
+  }
 </script>
 @endsection

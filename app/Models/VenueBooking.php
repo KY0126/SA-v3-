@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 class VenueBooking extends Model
 {
     protected $fillable = [
-        'serial_no', 'venue_id', 'applicant_id', 'activity_application_id',
+        'serial_no', 'venue_id', 'applicant_id', 'unit_code', 'activity_application_id',
         'booking_date', 'start_time', 'end_time', 'expected_participants',
         'purpose', 'status', 'reviewed_by', 'reviewed_at', 'reject_reason',
     ];
