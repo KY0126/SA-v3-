@@ -18,7 +18,7 @@
         <option value="completed">已完成</option>
       </select>
       <input id="rep-search" oninput="renderRepairs()" placeholder="搜尋..." class="px-3 py-1.5 rounded-fju border border-gray-200 text-xs w-32">
-      <button onclick="document.getElementById('rep-modal').classList.remove('hidden')" class="btn-yellow px-4 py-2 text-sm"><i class="fas fa-plus mr-1"></i>新增報修</button>
+      <button onclick="openRepairModal()" class="btn-yellow px-4 py-2 text-sm"><i class="fas fa-plus mr-1"></i>新增報修</button>
     </div>
   </div>
   <div id="repair-list"><div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin"></i></div></div>
@@ -58,7 +58,7 @@
             <p>附註：若有緊急修繕／特殊需求／報修逾五日未處理等問題，可聯絡各家輔導助教。</p>
           </div>
         </div>
-        <form id="rep-form" class="space-y-3 px-5 pb-5">
+        <form id="rep-form" class="space-y-3 px-5 pb-5" novalidate>
         <div class="space-y-2">
           <p class="text-xs text-gray-400">基本資料（* 必填）</p>
           <label class="block text-xs text-gray-500">電子郵件*</label>
@@ -110,7 +110,9 @@
                 選擇檔案
               </label>
               <span id="rp-attachments-name" class="text-xs text-gray-400">尚未選擇檔案</span>
+              <button id="rp-attachments-clear" type="button" class="text-xs text-fju-red hidden">清除檔案</button>
             </div>
+            <div id="rp-attachments-list" class="space-y-2"></div>
             <input id="rp-attachments" name="attachments[]" type="file" multiple accept=".pdf,image/*" required class="sr-only">
           </div>
         </div>
@@ -126,9 +128,154 @@
       </div>
     </div>
   </div>
+  <div id="rp-preview-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-fju-lg w-full max-w-3xl mx-4 shadow-xl">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+        <h3 id="rp-preview-title" class="font-bold text-fju-blue text-sm">檔案預覽</h3>
+        <button type="button" id="rp-preview-close" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="p-5">
+        <div id="rp-preview-body" class="w-full max-h-[70vh] overflow-auto"></div>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
 let allRepairs=[];
+let selectedRepFiles=[];
+let previewUrl='';
+const MAX_REPAIR_FILE_SIZE=10*1024*1024;
+function updateAttachmentUI(files){
+  const label=document.getElementById('rp-attachments-name');
+  const clearBtn=document.getElementById('rp-attachments-clear');
+  label.textContent=files.length?files.map(f=>f.name).join(', '):'尚未選擇檔案';
+  clearBtn.classList.toggle('hidden', files.length===0);
+}
+function syncAttachmentInput(){
+  const input=document.getElementById('rp-attachments');
+  const dataTransfer=new DataTransfer();
+  selectedRepFiles.forEach(file=>dataTransfer.items.add(file));
+  input.files=dataTransfer.files;
+}
+function isSameFile(a,b){
+  return a.name===b.name && a.size===b.size && a.lastModified===b.lastModified;
+}
+function mergeSelectedFiles(files){
+  files.forEach(file=>{
+    if(!selectedRepFiles.some(existing=>isSameFile(existing, file))){
+      selectedRepFiles.push(file);
+    }
+  });
+}
+function closePreview(){
+  const modal=document.getElementById('rp-preview-modal');
+  const body=document.getElementById('rp-preview-body');
+  if(previewUrl){
+    URL.revokeObjectURL(previewUrl);
+    previewUrl='';
+  }
+  body.innerHTML='';
+  modal.classList.add('hidden');
+}
+function openPreview(file){
+  const modal=document.getElementById('rp-preview-modal');
+  const body=document.getElementById('rp-preview-body');
+  const title=document.getElementById('rp-preview-title');
+  closePreview();
+  previewUrl=URL.createObjectURL(file);
+  title.textContent=file.name;
+  if(file.type.startsWith('image/')){
+    const img=document.createElement('img');
+    img.className='max-w-full h-auto rounded-fju border border-gray-100';
+    img.src=previewUrl;
+    body.appendChild(img);
+  }else if(file.type==='application/pdf' || file.name.toLowerCase().endsWith('.pdf')){
+    const obj=document.createElement('object');
+    obj.data=previewUrl;
+    obj.type='application/pdf';
+    obj.className='w-full h-[65vh] rounded-fju border border-gray-100';
+    const fallback=document.createElement('div');
+    fallback.className='text-sm text-gray-500';
+    fallback.textContent='此瀏覽器不支援 PDF 內嵌預覽，請下載檔案查看。';
+    obj.appendChild(fallback);
+    body.appendChild(obj);
+  }else{
+    const fallback=document.createElement('a');
+    fallback.href=previewUrl;
+    fallback.target='_blank';
+    fallback.rel='noopener';
+    fallback.className='text-fju-blue text-sm';
+    fallback.textContent='此檔案無法直接預覽，點此下載檔案。';
+    body.appendChild(fallback);
+  }
+  modal.classList.remove('hidden');
+}
+function renderAttachmentList(){
+  const list=document.getElementById('rp-attachments-list');
+  list.innerHTML='';
+  if(!selectedRepFiles.length){
+    return;
+  }
+  selectedRepFiles.forEach((file,index)=>{
+    const item=document.createElement('div');
+    item.className='flex items-center justify-between gap-2 rounded-fju border border-gray-100 px-3 py-2 text-xs';
+
+    const info=document.createElement('div');
+    info.className='flex items-center gap-2 text-gray-600';
+
+    const name=document.createElement('span');
+    name.textContent=file.name;
+    info.appendChild(name);
+
+    if(file.type.startsWith('image/')){
+      const img=document.createElement('img');
+      img.className='h-8 w-8 rounded-fju object-cover border border-gray-100';
+      img.src=URL.createObjectURL(file);
+      img.onload=()=>URL.revokeObjectURL(img.src);
+      info.prepend(img);
+    }
+
+    const actions=document.createElement('div');
+    actions.className='flex items-center gap-2';
+
+    const preview=document.createElement('button');
+    preview.type='button';
+    preview.className='text-fju-blue';
+    preview.textContent='預覽';
+    preview.addEventListener('click', ()=>openPreview(file));
+
+    const remove=document.createElement('button');
+    remove.type='button';
+    remove.className='text-fju-red';
+    remove.innerHTML='<i class="fas fa-times"></i>';
+    remove.addEventListener('click', ()=>{
+      selectedRepFiles.splice(index, 1);
+      syncAttachmentInput();
+      updateAttachmentUI(selectedRepFiles);
+      renderAttachmentList();
+    });
+
+    actions.appendChild(preview);
+    actions.appendChild(remove);
+    item.appendChild(info);
+    item.appendChild(actions);
+    list.appendChild(item);
+  });
+}
+function resetAttachmentUI(){
+  const input=document.getElementById('rp-attachments');
+  selectedRepFiles=[];
+  input.value='';
+  updateAttachmentUI([]);
+  document.getElementById('rp-attachments-list').innerHTML='';
+}
+function openRepairModal(){
+  const form=document.getElementById('rep-form');
+  form.reset();
+  resetAttachmentUI();
+  toggleCategoryOther();
+  document.getElementById('rep-modal').classList.remove('hidden');
+}
 function loadRepairs(){fetch('/api/repairs').then(r=>r.json()).then(res=>{allRepairs=res.data;renderRepairs()})}
 function renderRepairs(){
   let data=[...allRepairs];
@@ -152,19 +299,33 @@ function toggleCategoryOther(){
 }
 document.querySelectorAll('input[name="category"]').forEach(el=>el.addEventListener('change', toggleCategoryOther));
 document.getElementById('rp-attachments').addEventListener('change', (e)=>{
-  const files=[...e.target.files].map(f=>f.name);
-  const label=document.getElementById('rp-attachments-name');
-  label.textContent=files.length?files.join(', '):'尚未選擇檔案';
+  const incoming=[...e.target.files];
+  const oversize=incoming.filter(file=>file.size>MAX_REPAIR_FILE_SIZE);
+  if(oversize.length){
+    alert('單檔大小不得超過 10MB');
+  }
+  mergeSelectedFiles(incoming.filter(file=>file.size<=MAX_REPAIR_FILE_SIZE));
+  syncAttachmentInput();
+  updateAttachmentUI(selectedRepFiles);
+  renderAttachmentList();
+});
+document.getElementById('rp-attachments-clear').addEventListener('click', ()=>{
+  resetAttachmentUI();
+});
+document.getElementById('rp-preview-close').addEventListener('click', closePreview);
+document.getElementById('rp-preview-modal').addEventListener('click', (e)=>{
+  if(e.target.id==='rp-preview-modal') closePreview();
 });
 function addRepair(){
   const form=document.getElementById('rep-form');
   const data=new FormData(form);
-  const files=document.getElementById('rp-attachments').files;
+  const files=selectedRepFiles;
+  if(files.length<1){alert('請先選擇檔案');return;}
   if(!form.reportValidity()) return;
   if(!document.getElementById('rp-consent').checked){alert('請勾選同意個資蒐集聲明');return;}
-  if(files.length<1||files.length>5){alert('請上傳 1-5 個檔案');return;}
+  if(files.length>5){alert('請上傳 1-5 個檔案');return;}
   for(const file of files){
-    if(file.size>10*1024*1024){alert('單檔大小不得超過 10MB');return;}
+    if(file.size>MAX_REPAIR_FILE_SIZE){alert('單檔大小不得超過 10MB');return;}
   }
   fetch('/api/repairs',{method:'POST',headers:{'Accept':'application/json'},body:data}).then(async r=>{
     const res=await r.json();
@@ -175,12 +336,14 @@ function addRepair(){
     }
     alert('報修單 '+res.tracking_code+' 已建立');
     form.reset();
+    resetAttachmentUI();
     toggleCategoryOther();
     document.getElementById('rep-modal').classList.add('hidden');
     loadRepairs();
   });
 }
 const repForm=document.getElementById('rep-form');
+repForm.noValidate=true;
 repForm.addEventListener('submit', (e)=>{
   e.preventDefault();
   addRepair();
