@@ -223,13 +223,57 @@ class CrudController extends Controller
         return response()->json(['data' => Repair::orderBy('created_at', 'desc')->get()]);
     }
     public function repairStore(Request $r) {
+        $validated = $r->validate([
+            'email' => ['required', 'email', 'max:120'],
+            'consent' => ['accepted'],
+            'reporter_name' => ['required', 'string', 'max:100'],
+            'reporter_identifier' => ['required', 'string', 'max:50'],
+            'phone' => ['required', 'string', 'max:50'],
+            'unit' => ['required', 'string', 'max:120'],
+            'category' => ['required', 'string', 'in:建築（壁癌）,建築（木作）,建築（天花板）,建築（窗戶）,電器（插座）,電器（電燈）,電器（冷氣）,電器（音響／投影機）,水類（飲水機）,水類（給水／排水／積水／漏水）,水類（馬桶／洗手台／水龍頭）,其他'],
+            'category_other' => ['nullable', 'string', 'max:100', 'required_if:category,其他'],
+            'repair_item' => ['required', 'string', 'max:200'],
+            'damage_description' => ['required', 'string'],
+            'location' => ['required', 'string'],
+            'attachments' => ['required', 'array', 'min:1', 'max:5'],
+            'attachments.*' => ['file', 'mimes:pdf,jpg,jpeg,png,webp,gif', 'max:10240'],
+            'other_notes' => ['nullable', 'string'],
+        ]);
         $code = 'RP-' . str_pad(Repair::count() + 1, 3, '0', STR_PAD_LEFT);
-        $rep = Repair::create($r->only(['target','description','assignee']) + ['code' => $code, 'status' => 'pending']);
+        $paths = [];
+        foreach ($r->file('attachments', []) as $file) {
+            $paths[] = $file->store('repairs', 'public');
+        }
+        $rep = Repair::create([
+            'code' => $code,
+            'status' => 'pending',
+            'email' => $validated['email'],
+            'consent' => (bool) ($validated['consent'] ?? false),
+            'reporter_name' => $validated['reporter_name'],
+            'reporter_identifier' => $validated['reporter_identifier'],
+            'phone' => $validated['phone'],
+            'unit' => $validated['unit'],
+            'category' => $validated['category'],
+            'category_other' => $validated['category_other'] ?? null,
+            'repair_item' => $validated['repair_item'],
+            'damage_description' => $validated['damage_description'],
+            'location' => $validated['location'],
+            'attachment_paths' => json_encode($paths, JSON_UNESCAPED_SLASHES),
+            'other_notes' => $validated['other_notes'] ?? null,
+            'target' => $validated['repair_item'],
+            'description' => $validated['damage_description'],
+            'assignee' => $r->input('assignee'),
+        ]);
         return response()->json(['success' => true, 'id' => $rep->id, 'data' => $rep, 'tracking_code' => $code], 201);
     }
     public function repairUpdate(Request $r, $id) {
         $rep = Repair::findOrFail($id);
-        $rep->update($r->only(['target','description','status','assignee']));
+        $rep->update($r->only([
+            'target', 'description', 'status', 'assignee',
+            'email', 'reporter_name', 'reporter_identifier', 'phone',
+            'unit', 'category', 'category_other', 'repair_item',
+            'damage_description', 'location', 'other_notes',
+        ]));
         return response()->json(['success' => true, 'data' => $rep]);
     }
     public function repairDestroy($id) {
