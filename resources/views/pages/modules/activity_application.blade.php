@@ -139,7 +139,7 @@
   </div>
 </div>
 
-{{-- Reject reason modal (Task 1: forced non-empty input) --}}
+{{-- Reject reason modal --}}
 <div id="aa-reject-modal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center">
   <div class="bg-white rounded-fju-lg p-6 w-full max-w-md mx-4 shadow-2xl">
     <div class="flex items-center justify-between mb-4">
@@ -160,6 +160,7 @@
     </div>
   </div>
 </div>
+
 
 <script>
 const IS_ADMIN = {{ in_array($role ?? 'student', ['admin']) ? 'true' : 'false' }};
@@ -183,6 +184,16 @@ function loadApps() {
   });
 }
 
+function statusRowBorder(s) {
+  return ({
+    submitted: 'border-l-4 border-yellow-400',
+    approved:  'border-l-4 border-green-500',
+    rejected:  'border-l-4 border-red-500',
+    returned:  'border-l-4 border-orange-400',
+    draft:     'border-l-4 border-gray-300',
+  })[s] || '';
+}
+
 function renderApps() {
   let data = currentAaFilter === 'all' ? [...allApps] : allApps.filter(a => a.status === currentAaFilter);
   if (!data.length) {
@@ -190,21 +201,25 @@ function renderApps() {
     return;
   }
 
+  const role = '{{ $role ?? "student" }}';
   document.getElementById('aa-list').innerHTML =
     '<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400">' +
     '<th class="p-4">序號</th><th class="p-4">活動名稱</th><th class="p-4">日期</th><th class="p-4">人數</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>' +
-    data.map(a => `<tr class="border-t border-gray-50 hover:bg-gray-50">
-      <td class="p-4 text-xs text-gray-400">${a.serial_no}</td>
-      <td class="p-4 font-medium text-fju-blue">${a.activity_name}</td>
-      <td class="p-4 text-xs">${a.event_date} ${a.start_time}–${a.end_time}</td>
-      <td class="p-4 text-xs">${a.expected_participants} 人</td>
-      <td class="p-4">${statusBadge(a.status)}</td>
-      <td class="p-4 flex flex-wrap gap-1">
+    data.map(a => {
+      const actions = `
         <button onclick="openDetail(${a.id})" class="btn-blue px-3 py-1 text-xs">詳情</button>
-        <button onclick="downloadAaWord(${a.id})" class="px-3 py-1 rounded-fju border border-gray-200 text-xs text-gray-600 hover:bg-gray-100">下載 Word 黃單</button>
-        ${a.status === 'approved' ? `<button onclick="copySerial('${a.serial_no}')" class="btn-yellow px-3 py-1 text-xs" title="複製序號供場地預約/器材借用使用"><i class="fas fa-copy mr-1"></i>複製序號</button>` : ''}
-      </td>
-    </tr>`).join('') + '</tbody></table>';
+        <button onclick="downloadAaWord(${a.id})" class="px-3 py-1 rounded-fju border border-gray-200 text-xs text-gray-600 hover:bg-gray-100">黃單</button>
+        ${a.status === 'approved' ? `<button onclick="copySerial('${a.serial_no}')" class="btn-yellow px-3 py-1 text-xs"><i class="fas fa-copy mr-1"></i>複製序號</button>` : ''}
+      `;
+      return `<tr class="border-t border-gray-50 hover:bg-gray-50 ${statusRowBorder(a.status)}">
+        <td class="p-4 text-xs text-gray-400 font-mono">${a.serial_no}</td>
+        <td class="p-4 font-medium text-fju-blue">${a.activity_name}</td>
+        <td class="p-4 text-xs">${a.event_date} ${a.start_time}–${a.end_time}</td>
+        <td class="p-4 text-xs">${a.expected_participants} 人</td>
+        <td class="p-4">${statusBadge(a.status)}</td>
+        <td class="p-4"><div class="flex flex-wrap gap-1">${actions}</div></td>
+      </tr>`;
+    }).join('') + '</tbody></table>';
 }
 
 function filterApps(f) {
@@ -323,9 +338,8 @@ function openDetail(id) {
   pdfLink.removeAttribute('download');
   pdfBtn.classList.remove('hidden');
 
-  // Show review actions for admin/officer on submitted applications
   const role = '{{ $role ?? "student" }}';
-  const canReview = (role === 'admin' || role === 'officer') && a.status === 'submitted';
+  const canReview = role === 'admin' && a.status === 'submitted';
   document.getElementById('aa-review-actions').classList.toggle('hidden', !canReview);
   document.getElementById('aa-detail-modal').classList.remove('hidden');
 }
@@ -357,7 +371,6 @@ function doReturn() {
   });
 }
 
-// Task 1: Reject now uses a modal requiring non-empty reason
 function doReject() {
   document.getElementById('aa-reject-reason').value = '';
   document.getElementById('aa-reject-error').classList.add('hidden');
@@ -386,6 +399,7 @@ function confirmReject() {
     showToast(res.message || '已拒絕');
   });
 }
+
 
 function copySerial(serial) {
   navigator.clipboard?.writeText(serial).then(() => showToast('已複製序號：' + serial));

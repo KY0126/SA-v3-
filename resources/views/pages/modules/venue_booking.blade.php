@@ -69,6 +69,23 @@
     <div id="vb-history-body"></div>
   </div>
 
+  {{-- Admin Review Panel (課指組審核場地預約) --}}
+  <div id="admin-vb-panel" class="hidden space-y-4">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <h3 class="font-bold text-fju-blue text-lg"><i class="fas fa-clipboard-check mr-2 text-fju-yellow"></i>場地預約申請審核</h3>
+      <div class="flex gap-1 flex-wrap">
+        <button onclick="filterVbAdmin('all')"       class="vba-f px-3 py-1 rounded-fju bg-fju-blue text-white text-xs" data-f="all">全部</button>
+        <button onclick="filterVbAdmin('pending')"   class="vba-f px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-f="pending">待審核</button>
+        <button onclick="filterVbAdmin('approved')"  class="vba-f px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-f="approved">已核准</button>
+        <button onclick="filterVbAdmin('rejected')"  class="vba-f px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-f="rejected">已拒絕</button>
+        <button onclick="filterVbAdmin('cancelled')" class="vba-f px-3 py-1 rounded-fju bg-gray-100 text-gray-500 text-xs" data-f="cancelled">已取消</button>
+      </div>
+    </div>
+    <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
+      <div id="admin-vb-table"><div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div></div>
+    </div>
+  </div>
+
   {{-- Conflict Coordination Records --}}
   <div id="conflict-section" class="hidden space-y-4">
     <div class="flex items-center justify-between flex-wrap gap-2">
@@ -86,6 +103,18 @@
     <div class="grid md:grid-cols-4 gap-4" id="conflict-stats"></div>
     <div class="bg-white rounded-fju-lg shadow-sm border border-gray-100 overflow-hidden">
       <div id="conflict-list"></div>
+    </div>
+  </div>
+
+  {{-- Admin Venue Booking Review Modal --}}
+  <div id="vb-review-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-fju-lg p-6 w-full max-w-lg mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-fju-blue text-lg"><i class="fas fa-map-marker-alt mr-2 text-fju-yellow"></i>場地預約詳情</h3>
+        <button onclick="closeVbReviewModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="vb-review-detail" class="space-y-3 text-sm"></div>
+      <div id="vb-review-actions" class="mt-4 space-y-2"></div>
     </div>
   </div>
 
@@ -254,6 +283,7 @@
 const IS_ADMIN = {{ in_array($role ?? 'student', ['admin']) ? 'true' : 'false' }};
 let allVenues=[],allConflicts=[],allReservations=[],currentConflictId=null,currentFilter='all',timerInterval=null,timerSeconds=0;
 let currentVbView = 'list';
+let allVbBookings=[], currentVbAdminFilter='all', currentVbReviewId=null;
 
 function setVbView(v) {
   currentVbView = v;
@@ -342,6 +372,7 @@ function renderVbHistory() {
       renderConflictStats();
       renderConflicts();
     }
+    if(IS_ADMIN) loadVbBookings();
   });
 })();
 
@@ -568,6 +599,100 @@ function openBookingModal(){
 }
 function closeBookingModal(){document.getElementById('booking-modal').classList.add('hidden');document.getElementById('booking-result').classList.add('hidden')}
 function quickBook(n){ if (!IS_ADMIN) openBookingModal(); }
+
+// Task 3: Submit single preference — first-come-first-served
+// Admin venue booking review
+function loadVbBookings(){
+  fetch('/api/venue-bookings?per_page=100').then(r=>r.json()).then(res=>{
+    allVbBookings=res.data||[];
+    renderAdminVbPanel();
+    document.getElementById('admin-vb-panel').classList.remove('hidden');
+  });
+}
+
+function filterVbAdmin(f){
+  currentVbAdminFilter=f;
+  document.querySelectorAll('.vba-f').forEach(b=>{b.classList.remove('bg-fju-blue','text-white');b.classList.add('bg-gray-100','text-gray-500')});
+  document.querySelector(`.vba-f[data-f="${f}"]`)?.classList.add('bg-fju-blue','text-white');
+  document.querySelector(`.vba-f[data-f="${f}"]`)?.classList.remove('bg-gray-100','text-gray-500');
+  renderAdminVbPanel();
+}
+
+function renderAdminVbPanel(){
+  const data=currentVbAdminFilter==='all'?allVbBookings:allVbBookings.filter(b=>b.status===currentVbAdminFilter);
+  const el=document.getElementById('admin-vb-table');
+  if(!data.length){el.innerHTML='<div class="p-8 text-center text-gray-400"><i class="fas fa-inbox mr-2"></i>目前無申請紀錄</div>';return}
+  const sLabel=s=>({pending:'待審核',approved:'已核准',rejected:'已拒絕',cancelled:'已取消',conflicted:'衝突'}[s]||s);
+  const sCls=s=>s==='approved'?'bg-green-100 text-green-700':s==='pending'?'bg-yellow-100 text-yellow-700':s==='rejected'?'bg-red-100 text-red-600':'bg-gray-100 text-gray-500';
+  el.innerHTML='<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-xs text-gray-400"><th class="p-4">序號</th><th class="p-4">申請人</th><th class="p-4">場地</th><th class="p-4">日期</th><th class="p-4">時段</th><th class="p-4">狀態</th><th class="p-4">操作</th></tr></thead><tbody>'+
+    data.map(b=>`<tr class="border-t border-gray-50 hover:bg-gray-50">
+      <td class="p-4 text-xs text-gray-400 font-mono">${b.serial_no||'#'+b.id}</td>
+      <td class="p-4 font-medium text-fju-blue">${(b.applicant&&b.applicant.name)||'—'}<div class="text-xs text-gray-400">${b.unit_code||''}</div></td>
+      <td class="p-4 text-xs">${(b.venue&&b.venue.name)||'—'}</td>
+      <td class="p-4 text-xs text-gray-500">${b.booking_date||'—'}</td>
+      <td class="p-4 text-xs text-gray-400">${b.start_time||'—'}–${b.end_time||'—'}</td>
+      <td class="p-4"><span class="px-2 py-1 rounded-fju text-xs ${sCls(b.status)}">${sLabel(b.status)}</span></td>
+      <td class="p-4"><button onclick="openVbReview(${b.id})" class="btn-yellow px-3 py-1 text-xs"><i class="fas fa-search mr-1"></i>詳情</button></td>
+    </tr>`).join('')+'</tbody></table>';
+}
+
+function openVbReview(id){
+  if(!IS_ADMIN)return;
+  fetch(`/api/venue-bookings/${id}`).then(r=>r.json()).then(res=>{
+    const b=res.data;
+    currentVbReviewId=id;
+    const sLabel=s=>({pending:'待審核',approved:'已核准',rejected:'已拒絕',cancelled:'已取消',conflicted:'衝突'}[s]||s);
+    const sCls=s=>s==='approved'?'bg-green-100 text-green-700':s==='pending'?'bg-yellow-100 text-yellow-700':s==='rejected'?'bg-red-100 text-red-600':'bg-gray-100 text-gray-500';
+    document.getElementById('vb-review-detail').innerHTML=`
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-gray-50 rounded-fju p-3"><div class="text-xs text-gray-400 mb-1">序號</div><div class="font-mono text-xs font-bold text-fju-blue">${b.serial_no||'#'+b.id}</div></div>
+        <div class="bg-gray-50 rounded-fju p-3"><div class="text-xs text-gray-400 mb-1">狀態</div><span class="px-2 py-1 rounded-fju text-xs ${sCls(b.status)}">${sLabel(b.status)}</span></div>
+      </div>
+      <div class="bg-gray-50 rounded-fju p-3"><div class="text-xs text-gray-400 mb-1">申請人</div><div class="font-medium">${(b.applicant&&b.applicant.name)||'—'}</div><div class="text-xs text-gray-400">${b.unit_code||''}</div></div>
+      <div class="bg-gray-50 rounded-fju p-3"><div class="text-xs text-gray-400 mb-1">場地</div><div class="font-medium">${(b.venue&&b.venue.name)||'—'}</div></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-gray-50 rounded-fju p-3"><div class="text-xs text-gray-400 mb-1">預約日期</div><div>${b.booking_date||'—'}</div></div>
+        <div class="bg-gray-50 rounded-fju p-3"><div class="text-xs text-gray-400 mb-1">時段</div><div>${b.start_time||'—'} – ${b.end_time||'—'}</div></div>
+      </div>
+      <div class="bg-gray-50 rounded-fju p-3"><div class="text-xs text-gray-400 mb-1">預估人數</div><div>${b.expected_participants||'—'} 人</div></div>
+      ${b.purpose?`<div class="bg-gray-50 rounded-fju p-3"><div class="text-xs text-gray-400 mb-1">用途說明</div><div class="text-sm">${b.purpose}</div></div>`:''}
+      ${b.reject_reason?`<div class="bg-red-50 rounded-fju p-3 border border-red-100"><div class="text-xs text-red-400 mb-1">拒絕原因</div><div class="text-sm text-red-600">${b.reject_reason}</div></div>`:''}
+    `;
+    const actEl=document.getElementById('vb-review-actions');
+    if(b.status==='pending'){
+      actEl.innerHTML=`
+        <button onclick="doVbApprove()" class="w-full py-2.5 rounded-fju bg-fju-green text-white text-sm font-bold hover:opacity-80 transition-all"><i class="fas fa-check-circle mr-2"></i>核准預約</button>
+        <div class="flex gap-2 mt-2">
+          <input id="vb-reject-reason" type="text" placeholder="拒絕原因（選填）" class="flex-1 px-3 py-2 rounded-fju border border-gray-200 text-sm">
+          <button onclick="doVbReject()" class="px-4 py-2 rounded-fju bg-red-500 text-white text-sm font-bold hover:opacity-80 transition-all"><i class="fas fa-times-circle mr-1"></i>拒絕</button>
+        </div>`;
+    } else {
+      actEl.innerHTML='<div class="text-center text-xs text-gray-400 py-2">此申請已審核完畢</div>';
+    }
+    document.getElementById('vb-review-modal').classList.remove('hidden');
+  });
+}
+
+function doVbApprove(){
+  if(!IS_ADMIN||!currentVbReviewId)return;
+  fetch(`/api/venue-bookings/${currentVbReviewId}/approve`,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({reviewer_id:1})})
+    .then(r=>r.json()).then(res=>{
+      if(res.success){alert('場地預約已核准！');closeVbReviewModal();loadVbBookings();}
+      else alert(res.error||'操作失敗');
+    });
+}
+
+function doVbReject(){
+  if(!IS_ADMIN||!currentVbReviewId)return;
+  const reason=document.getElementById('vb-reject-reason')?.value||'場地不符需求';
+  fetch(`/api/venue-bookings/${currentVbReviewId}/reject`,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({reviewer_id:1,reason})})
+    .then(r=>r.json()).then(res=>{
+      if(res.success){alert('場地預約已拒絕');closeVbReviewModal();loadVbBookings();}
+      else alert(res.error||'操作失敗');
+    });
+}
+
+function closeVbReviewModal(){document.getElementById('vb-review-modal').classList.add('hidden');currentVbReviewId=null;}
 
 // Task 3: Submit single preference — first-come-first-served
 function submitBooking(e){
