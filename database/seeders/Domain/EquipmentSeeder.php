@@ -44,8 +44,9 @@ class EquipmentSeeder extends Seeder {
         ];
 
         foreach ($equipment as $item) {
-            Equipment::create([
+            Equipment::updateOrCreate([
                 'code' => $item[0],
+            ], [
                 'name' => $item[1],
                 'category' => $item[2],
                 'status' => 'available',
