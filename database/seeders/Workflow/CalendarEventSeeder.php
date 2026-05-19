@@ -21,9 +21,10 @@ class CalendarEventSeeder extends Seeder {
         ];
 
         foreach ($calendarEvents as $event) {
-            CalendarEvent::create([
+            CalendarEvent::updateOrCreate([
                 'title' => $event[0],
                 'date' => $event[1],
+            ], [
                 'type' => $event[2],
                 'color' => $event[3],
                 'description' => $event[4],

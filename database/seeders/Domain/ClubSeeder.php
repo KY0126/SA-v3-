@@ -93,11 +93,12 @@ class ClubSeeder extends Seeder {
         ];
 
         foreach ($clubsData as $club) {
-            Club::create([
+            Club::updateOrCreate([
                 'name' => $club[0],
+                'type' => $club[3],
+            ], [
                 'category' => $club[1],
                 'category_label' => $club[2],
-                'type' => $club[3],
                 'description' => $club[0] . ' - 輔仁大學114學年度',
                 'member_count' => $club[4],
                 'is_active' => true,
@@ -195,11 +196,12 @@ class ClubSeeder extends Seeder {
         ];
 
         foreach ($associationsData as $association) {
-            Club::create([
+            Club::updateOrCreate([
                 'name' => $association[0],
+                'type' => $association[3],
+            ], [
                 'category' => $association[1],
                 'category_label' => $association[2],
-                'type' => $association[3],
                 'description' => '代號：' . $association[5] . ' - 輔仁大學114學年度',
                 'member_count' => $association[4],
                 'is_active' => true,
