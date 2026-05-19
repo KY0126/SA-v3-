@@ -25,6 +25,7 @@ yarn-error.log
 pids/
 logs/
 *.log
+*.sqlite
 
 composer-setup.php
 composer.phar
