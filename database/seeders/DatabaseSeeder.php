@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Database\Seeders\Core\UserSeeder;
 use Database\Seeders\Demo\DemoSeeder;
+use Database\Seeders\Workflow\EquipmentBorrowingSeeder;
 use Database\Seeders\Domain\ClubSeeder;
 use Database\Seeders\Domain\EquipmentSeeder;
 use Database\Seeders\Domain\VenueSeeder;
@@ -27,6 +28,8 @@ class DatabaseSeeder extends Seeder {
             ActivitySeeder::class,
             ReservationSeeder::class,
             ConflictSeeder::class,
+            // create equipment borrowings before notifications that reference them
+            EquipmentBorrowingSeeder::class,
             CreditLogSeeder::class,
             NotificationLogSeeder::class,
             CalendarEventSeeder::class,
